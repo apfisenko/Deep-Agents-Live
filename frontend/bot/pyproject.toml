@@ -1,0 +1,66 @@
+[project]
+name = "bot"
+version = "0.1.0"
+description = "Telegram adapter for Deep-Agents-Live Agent Core"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "aiogram>=3.28.2",
+    "aiohttp-socks>=0.10.1",
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.14.1",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.1.0",
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.15.16",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D107",
+    "D203",
+    "D213",
+    "COM812",
+    "ISC001",
+    "RUF001",
+    "TRY003",
+    "EM101",
+    "ANN401",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S106", "PLR2004", "ARG001", "INP001", "E501", "SLF001"]
+"main.py" = ["PLC0415"]
+"core_client.py" = ["PLR2004"]
+"telegram_session.py" = ["TC001", "TC002", "TC003", "ASYNC109", "FBT001", "FBT002", "E501"]
+"telegram_network.py" = ["ASYNC109", "SIM105"]
+"telegram_proxy.py" = ["PLC0415", "TC001", "PLW2901"]
+"scripts/**/*.py" = ["T201", "INP001", "PLC0415", "TRY300", "BLE001"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["config.py", "core_client.py", "formatters.py", "session_store.py", "handlers", "main.py", "telegram_session.py", "telegram_network.py", "telegram_proxy.py", "scripts"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["aiogram.*"]
+ignore_missing_imports = true

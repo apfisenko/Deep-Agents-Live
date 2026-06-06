@@ -1,0 +1,16 @@
+[
+  {
+    "id": "deep-agents",
+    "name": "Deep Agents",
+    "price_rub": 99000,
+    "format": "online",
+    "description": "Продвинутый курс по AI-агентам и production-архитектуре"
+  },
+  {
+    "id": "llm-start",
+    "name": "LLM Start",
+    "price_rub": 49000,
+    "format": "online",
+    "description": "Базовый курс по LLM и промпт-инжинирингу для новичков"
+  }
+]

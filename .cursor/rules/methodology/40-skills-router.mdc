@@ -1,0 +1,99 @@
+---
+description: Таблица маршрутизации skills — тип работы → обязательный skill для применения. Читать перед началом каждой Task.
+alwaysApply: true
+---
+
+# Skills Router
+
+Перед началом реализации Task — проверь таблицу и прочитай нужные skills через Read tool.
+
+## Как использовать
+
+1. Определить тип работы в Task.
+2. Найти в таблице соответствующий skill или MCP-сервер.
+3. Для skills — прочитать `SKILL.md` через `Read` tool.
+4. Для MCP — прочитать схему инструмента в `mcps/<server>/tools/` и вызвать через `CallMcpTool`.
+5. Следовать инструкциям skill / ответам MCP при реализации.
+
+**Важно:** если skill или MCP найден — его нужно прочитать и применить, а не просто упомянуть.
+
+---
+
+## Таблица: тип работы → skill
+
+### Python / Backend
+
+| Тип работы | Skill | Путь |
+|-----------|-------|------|
+| Создание FastAPI-сервиса, роутеры, DI, схемы | `fastapi-templates` | `.agents/skills/fastapi-templates/SKILL.md` |
+| Настройка Python-проекта (uv, ruff, ty) | `modern-python` | `.agents/skills/modern-python/SKILL.md` |
+| Управление пакетами через uv | `uv-package-manager` | `.agents/skills/uv-package-manager/SKILL.md` |
+| Написание pytest-тестов, фикстуры, моки | `python-testing-patterns` | `.agents/skills/python-testing-patterns/SKILL.md` |
+| Паттерны организации кода, SOLID, SoC | `python-design-patterns` | `.agents/skills/python-design-patterns/SKILL.md` |
+| Опасные API-паттерны, error-prone конфигурации | `sharp-edges` | `.agents/skills/sharp-edges/SKILL.md` |
+
+### База данных
+
+| Тип работы | Skill | Путь |
+|-----------|-------|------|
+| Проектирование PostgreSQL-схемы | `postgresql-table-design` | `.agents/skills/postgresql-table-design/SKILL.md` |
+
+### API
+
+| Тип работы | Skill | Путь |
+|-----------|-------|------|
+| Проектирование API-контрактов, REST-конвенции | `api-design-principles` | `.agents/skills/api-design-principles/SKILL.md` |
+
+### Frontend
+
+| Тип работы | Skill | Путь |
+|-----------|-------|------|
+| Next.js App Router, Server Components, SSG | `nextjs-app-router-patterns` | `.agents/skills/nextjs-app-router-patterns/SKILL.md` |
+| React/Next.js производительность, оптимизация | `vercel-react-best-practices` | `.agents/skills/vercel-react-best-practices/SKILL.md` |
+| shadcn/ui компоненты, registry | `shadcn` | `.agents/skills/shadcn/SKILL.md` |
+| UI-дизайн, визуальное качество | `frontend-design` | `.agents/skills/frontend-design/SKILL.md` |
+| Лендинги, конверсия, CTA | `landing-page-design` | `.agents/skills/landing-page-design/SKILL.md` |
+| Копирайтинг для лендингов | `landing-page-copywriter` | `.agents/skills/landing-page-copywriter/SKILL.md` |
+| Ревью UI, best practices дизайна | `web-design-guidelines` | `.agents/skills/web-design-guidelines/SKILL.md` |
+
+### Инфраструктура
+
+| Тип работы | Skill | Путь |
+|-----------|-------|------|
+| Docker, контейнеры, multi-stage, health checks | `docker-expert` | `.agents/skills/docker-expert/SKILL.md` |
+| GitHub Actions CI/CD | `github-actions-templates` | `.agents/skills/github-actions-templates/SKILL.md` |
+
+### LangChain / Langfuse (MCP)
+
+Конфигурация серверов — `.cursor/mcp.json` (источник: `mcp.json` в корне).
+
+| Тип работы | MCP-сервер | Инструменты |
+|-----------|------------|-------------|
+| LangChain: агенты, ReAct, tools, RAG, `langchain-mcp-adapters` | `langchain-docs` | `search_docs_by_lang_chain`, `query_docs_filesystem_docs_by_lang_chain` |
+| Langfuse: трейсинг, SDK, интеграция observability | `langfuse-docs` | `searchLangfuseDocs`, `getLangfuseDocsPage`, `getLangfuseOverview` |
+| Langfuse: промпты, traces, datasets в проекте (Cloud / self-hosted) | `langfuse` | инструменты Cloud MCP (`getPrompt`, `listObservations`, …) — см. [MCP Reference](https://mcp.reference.langfuse.com/) |
+
+**Порядок работы с MCP:**
+1. Перед вызовом — прочитать дескриптор инструмента в `mcps/<server>/tools/`.
+2. Для LangChain — сначала `search_docs_by_lang_chain`, затем при необходимости `query_docs_filesystem_docs_by_lang_chain` для полного текста страницы.
+3. Для Langfuse docs — сначала `searchLangfuseDocs`, затем `getLangfuseDocsPage` для конкретной страницы.
+4. Сервер `langfuse` требует `LANGFUSE_MCP_URL` и `LANGFUSE_BASIC_AUTH` в `.env`.
+
+---
+
+## Если нужного skill нет
+
+1. Проверить наличие через glob `**/*.SKILL.md` или `.agents/skills/`.
+2. Если skill не найден — явно указать это в plan.md и применять «принципы здравого смысла».
+3. Рассмотреть создание нового skill (`.cursor/skills-cursor/create-skill/SKILL.md`).
+
+---
+
+## Примечание по путям
+
+Пути к skills зависят от структуры конкретного проекта. В данном репозитории skills хранятся в:
+- `.agents/skills/<name>/SKILL.md` — основная коллекция
+- `.cursor/skills/<name>/SKILL.md` — проектные skills
+- `~/.agents/skills/<name>/SKILL.md` — глобальные skills
+
+Если skill не найден по указанному пути — проверить в `~/.agents/skills/` или `~/.codex/skills/`.

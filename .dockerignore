@@ -1,0 +1,14 @@
+.git
+.cursor
+.methodology
+Docs
+docs
+frontend/node_modules
+frontend/.next
+frontend/bot/.venv
+backend/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+*.md
+design*.png
