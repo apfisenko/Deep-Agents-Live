@@ -1,4 +1,5 @@
-.PHONY: help dev dev-backend dev-frontend dev-bot lint format typecheck test test-backend test-frontend test-bot \
+.PHONY: help dev dev-backend dev-frontend dev-bot stop-dev stop-backend stop-frontend stop-bot \
+	lint format typecheck test test-backend test-frontend test-bot \
 	up down ps status logs compose docker migrate migrate-new ci compose-dev \
 	check-health check-reindex check-chat check-chat-stream check-langfuse check-telegram check-api \
 	chat-telegram chat-stream
@@ -21,6 +22,10 @@ help:
 	@echo "  dev-backend    - Agent Core (uvicorn :8000)"
 	@echo "  dev-frontend   - Next.js widget (sprint-03)"
 	@echo "  dev-bot        - Telegram bot (sprint-04)"
+	@echo "  stop-dev       - stop backend + frontend + bot"
+	@echo "  stop-backend   - stop uvicorn on :8000"
+	@echo "  stop-frontend  - stop Next.js on :3000"
+	@echo "  stop-bot       - stop Telegram bot (main.py)"
 	@echo "  lint           - ruff + eslint"
 	@echo "  format         - ruff format backend"
 	@echo "  typecheck      - mypy + tsc"
@@ -49,13 +54,27 @@ help:
 dev:
 	@echo "Run: make dev-backend & make dev-frontend & make dev-bot (3 terminals)"
 
-dev-backend:
+stop-dev: stop-backend stop-frontend stop-bot
+
+stop-backend:
+	-@lsof -ti:8000 | xargs kill -9 2>/dev/null || true
+	-@pkill -f "uvicorn app.main:app" 2>/dev/null || true
+
+stop-frontend:
+	-@lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+	-@pkill -f "next dev" 2>/dev/null || true
+
+stop-bot:
+	-@pkill -f "$(BOT_DIR)/.venv" 2>/dev/null || true
+	-@pkill -f "uv run python main.py" 2>/dev/null || true
+
+dev-backend: stop-backend
 	cd $(BACKEND_DIR) && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-dev-frontend:
+dev-frontend: stop-frontend
 	cd $(FRONTEND_DIR) && pnpm dev
 
-dev-bot:
+dev-bot: stop-bot
 	cd $(BOT_DIR) && uv run python main.py
 
 lint:

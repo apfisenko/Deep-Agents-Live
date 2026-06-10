@@ -95,7 +95,9 @@ class DirectAiohttpSession(AiohttpSession):
         except TimeoutError as exc:
             raise TelegramNetworkError(method=method, message="Request timeout error") from exc
         except ClientError as exc:
-            raise TelegramNetworkError(method=method, message=f"{type(exc).__name__}: {exc}") from exc
+            raise TelegramNetworkError(
+                method=method, message=f"{type(exc).__name__}: {exc}"
+            ) from exc
         response = self.check_response(
             bot=bot,
             method=method,
@@ -131,10 +133,19 @@ class DirectAiohttpSession(AiohttpSession):
                 yield chunk
 
 
-def build_bot_session(settings: Settings) -> DirectAiohttpSession:
-    proxy, _source = resolve_telegram_proxy(settings)
+_AUTO_PROXY = object()
+
+
+def build_bot_session(
+    settings: Settings,
+    proxy: str | None | object = _AUTO_PROXY,
+) -> DirectAiohttpSession:
+    if proxy is _AUTO_PROXY:
+        resolved_proxy, _source = resolve_telegram_proxy(settings)
+    else:
+        resolved_proxy = cast("str | None", proxy)
     return DirectAiohttpSession(
-        proxy=proxy,
+        proxy=resolved_proxy,
         trust_env=False,
         force_ipv4=sys.platform == "win32",
     )

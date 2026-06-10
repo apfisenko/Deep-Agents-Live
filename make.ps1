@@ -29,12 +29,102 @@ function Invoke-WslDocker {
     wsl -e bash -lc "cd '$wslPath' && $Command"
 }
 
+function Stop-ProcessOnPort {
+    param([int]$Port)
+    $pids = @()
+    netstat -ano | ForEach-Object {
+        if ($_ -match ":\s*$Port\s+.*LISTENING\s+(\d+)\s*$") {
+            $pids += [int]$matches[1]
+        }
+    }
+    $pids = $pids | Select-Object -Unique
+    foreach ($procId in $pids) {
+        if ($procId -gt 0) {
+            Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+            Write-Host "Stopped PID $procId (port $Port)"
+        }
+    }
+    if ($pids.Count -eq 0) {
+        Write-Host "No process listening on port $Port"
+    }
+}
+
+function Stop-ProcessByCommandPattern {
+    param([string]$Pattern, [string]$Label)
+    $matched = $false
+    Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -and $_.CommandLine -match $Pattern } |
+        ForEach-Object {
+            $matched = $true
+            Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+            Write-Host "Stopped $Label (PID $($_.ProcessId))"
+        }
+    if (-not $matched) {
+        Write-Host "No $Label process found"
+    }
+}
+
+function Stop-BackendDev {
+    Write-Host "Stopping backend..."
+    Stop-ProcessOnPort -Port 8000
+    Stop-ProcessByCommandPattern -Pattern "uvicorn.*app\.main:app" -Label "backend (uvicorn)"
+}
+
+function Stop-FrontendDev {
+    Write-Host "Stopping frontend..."
+    Stop-ProcessOnPort -Port 3000
+    Stop-ProcessByCommandPattern -Pattern "next dev" -Label "frontend (next dev)"
+}
+
+function Stop-ProcessTree {
+    param([int]$RootPid)
+    $queue = [System.Collections.Generic.Queue[int]]::new()
+    $queue.Enqueue($RootPid)
+    $seen = @{}
+    while ($queue.Count -gt 0) {
+        $procId = $queue.Dequeue()
+        if ($seen.ContainsKey($procId)) { continue }
+        $seen[$procId] = $true
+        Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+            Where-Object { $_.ParentProcessId -eq $procId } |
+            ForEach-Object { $queue.Enqueue($_.ProcessId) }
+    }
+    foreach ($procId in $seen.Keys) {
+        Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+        Write-Host "Stopped telegram bot process tree (PID $procId)"
+    }
+}
+
+function Stop-BotDev {
+    Write-Host "Stopping telegram bot..."
+    $rootPids = @()
+    Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | ForEach-Object {
+        $cmd = $_.CommandLine
+        if (-not $cmd) { return }
+        if ($cmd -match "frontend[\\/]bot[\\/]\.venv" -or $cmd -match "uv\.exe.*run python main\.py") {
+            $rootPids += $_.ProcessId
+        }
+    }
+    $rootPids = $rootPids | Select-Object -Unique
+    if ($rootPids.Count -eq 0) {
+        Write-Host "No telegram bot process found"
+        return
+    }
+    foreach ($rootPid in $rootPids) {
+        Stop-ProcessTree -RootPid $rootPid
+    }
+}
+
 function Show-Help {
     Write-Host "Deep-Agents-Live - available targets:"
     Write-Host "  dev            - start backend + frontend + bot (3 windows)"
     Write-Host "  dev-backend    - Agent Core (uvicorn :8000)"
     Write-Host "  dev-frontend   - Next.js widget (sprint-03)"
     Write-Host "  dev-bot        - Telegram bot (sprint-04)"
+    Write-Host "  stop-dev       - stop backend + frontend + bot"
+    Write-Host "  stop-backend   - stop uvicorn on :8000"
+    Write-Host "  stop-frontend  - stop Next.js on :3000"
+    Write-Host "  stop-bot       - stop Telegram bot (main.py)"
     Write-Host "  lint           - ruff + eslint"
     Write-Host "  format         - ruff format backend"
     Write-Host "  typecheck      - mypy + tsc"
@@ -91,13 +181,23 @@ function Invoke-CheckApi {
 
 switch ($Target) {
     "help" { Show-Help }
+    "stop-dev" {
+        Stop-BackendDev
+        Stop-FrontendDev
+        Stop-BotDev
+    }
+    "stop-backend" { Stop-BackendDev }
+    "stop-frontend" { Stop-FrontendDev }
+    "stop-bot" { Stop-BotDev }
     "dev" {
+        & $PSCommandPath stop-dev
         Start-Process powershell -ArgumentList "-NoExit", "-File", $PSCommandPath, "dev-backend"
         Start-Process powershell -ArgumentList "-NoExit", "-File", $PSCommandPath, "dev-frontend"
         Start-Process powershell -ArgumentList "-NoExit", "-File", $PSCommandPath, "dev-bot"
         Write-Host "Started dev-backend, dev-frontend, dev-bot in separate windows"
     }
     "dev-backend" {
+        Stop-BackendDev
         Push-Location $BackendDir
         try {
             uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -106,6 +206,7 @@ switch ($Target) {
         }
     }
     "dev-frontend" {
+        Stop-FrontendDev
         Push-Location $FrontendDir
         try {
             pnpm dev
@@ -114,6 +215,7 @@ switch ($Target) {
         }
     }
     "dev-bot" {
+        Stop-BotDev
         Push-Location $BotDir
         try {
             uv run python main.py

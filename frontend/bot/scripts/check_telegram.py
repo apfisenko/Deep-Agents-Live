@@ -13,34 +13,42 @@ from telegram_network import (
     TELEGRAM_API_HOST,
     TELEGRAM_API_PORT,
     can_reach_telegram_direct,
+    resolve_telegram_connectivity,
 )
-from telegram_proxy import resolve_telegram_proxy
 from telegram_session import build_bot_session, configure_windows_event_loop
 
 
 async def main() -> int:
     settings = get_settings()
-    proxy, proxy_source = resolve_telegram_proxy(settings)
+    connectivity = await resolve_telegram_connectivity(settings)
 
     print(f"Host: {TELEGRAM_API_HOST}:{TELEGRAM_API_PORT}")
-    if proxy:
-        print(f"Proxy: {proxy} (source: {proxy_source})")
-    else:
-        print("Proxy: not configured")
-
-    if not proxy:
+    if connectivity.skipped_proxy:
+        print(
+            f"Proxy configured: {connectivity.skipped_proxy} "
+            f"(source: {connectivity.skipped_proxy_source})",
+        )
+        print("Proxy TCP: FAIL — using direct connection")
         direct_ok = await can_reach_telegram_direct()
         print(f"TCP direct: {'OK' if direct_ok else 'FAIL'}")
-        if not direct_ok:
-            print()
-            print(BLOCKED_HINT)
-            return 1
+    elif connectivity.proxy:
+        print(f"Proxy: {connectivity.proxy} (source: {connectivity.proxy_source})")
+        print("Proxy TCP: OK")
+    else:
+        print("Proxy: not configured")
+        direct_ok = await can_reach_telegram_direct()
+        print(f"TCP direct: {'OK' if direct_ok else 'FAIL'}")
+
+    if connectivity.error:
+        print()
+        print(connectivity.error)
+        return 1
 
     if not settings.telegram_bot_token:
         print("TELEGRAM_BOT_TOKEN: not set — skip getMe")
         return 0
 
-    session = build_bot_session(settings)
+    session = build_bot_session(settings, proxy=connectivity.proxy)
     bot = Bot(token=settings.telegram_bot_token, session=session)
     try:
         me = await bot.get_me()

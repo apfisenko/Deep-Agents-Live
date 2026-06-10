@@ -28,6 +28,17 @@ def test_build_bot_session_force_ipv4_on_windows() -> None:
     assert session._connector_init.get("family") is not None
 
 
+def test_build_bot_session_explicit_no_proxy_skips_env() -> None:
+    settings = Settings(
+        _env_file=None,
+        telegram_bot_token="test-token",
+        telegram_proxy="http://127.0.0.1:1301",
+    )
+    session = build_bot_session(settings, proxy=None)
+    assert session._request_proxy is None
+    assert session.proxy is None
+
+
 def test_build_bot_session_with_proxy() -> None:
     settings = Settings(
         _env_file=None,

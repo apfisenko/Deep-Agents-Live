@@ -12,7 +12,7 @@ from aiogram.exceptions import TelegramNetworkError
 from config import get_settings
 from core_client import CoreClient
 from handlers.chat import router
-from telegram_network import BLOCKED_HINT, can_reach_telegram_direct
+from telegram_network import resolve_telegram_connectivity
 from telegram_proxy import resolve_telegram_proxy
 from telegram_session import build_bot_session, configure_windows_event_loop
 
@@ -35,14 +35,25 @@ async def main() -> None:
             settings.backend_base_url,
         )
 
-    proxy, proxy_source = resolve_telegram_proxy(settings)
-    if proxy:
-        logger.info("Telegram API proxy: %s (source: %s)", proxy, proxy_source)
-    elif not await can_reach_telegram_direct():
-        logger.error(BLOCKED_HINT)
+    connectivity = await resolve_telegram_connectivity(settings)
+    if connectivity.error:
+        logger.error(connectivity.error)
         sys.exit(1)
 
-    session = build_bot_session(settings)
+    if connectivity.skipped_proxy:
+        logger.warning(
+            "Прокси %s (source: %s) недоступен — прямое подключение к api.telegram.org",
+            connectivity.skipped_proxy,
+            connectivity.skipped_proxy_source,
+        )
+    elif connectivity.proxy:
+        logger.info(
+            "Telegram API proxy: %s (source: %s)",
+            connectivity.proxy,
+            connectivity.proxy_source,
+        )
+
+    session = build_bot_session(settings, proxy=connectivity.proxy)
     bot = Bot(token=settings.telegram_bot_token, session=session)
     dispatcher = Dispatcher()
     dispatcher.include_router(router)
@@ -65,8 +76,16 @@ if __name__ == "__main__":
         logger.info("Bot stopped")
         sys.exit(0)
     except TelegramNetworkError:
-        logger.exception(
-            "Не удалось подключиться к api.telegram.org. "
-            "Проверьте интернет/VPN или задайте TELEGRAM_PROXY в .env",
-        )
+        proxy, _source = resolve_telegram_proxy(get_settings())
+        if proxy:
+            logger.exception(
+                "Не удалось подключиться к api.telegram.org через прокси %s. "
+                "Проверьте, что прокси/VPN запущен, или удалите TELEGRAM_PROXY из .env",
+                proxy,
+            )
+        else:
+            logger.exception(
+                "Не удалось подключиться к api.telegram.org. "
+                "Проверьте интернет/VPN или задайте TELEGRAM_PROXY в .env",
+            )
         sys.exit(1)
