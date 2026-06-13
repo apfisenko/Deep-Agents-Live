@@ -65,7 +65,7 @@ ignore = [
 "app/integrations/openrouter.py" = ["BLE001"]
 
 [tool.ruff.lint.per-file-ignores]
-"scripts/**/*.py" = ["T201", "PLR2004", "INP001"]
+"scripts/**/*.py" = ["T201", "PLR2004", "INP001", "TRY003", "EM102", "B007", "S607"]
 "tests/**/*.py" = ["S101", "PLR2004", "PLC0415", "ARG001", "ANN001", "ANN202"]
 "app/api/routers/chat.py" = ["ANN202"]
 "app/integrations/langfuse.py" = ["PLC0415", "S310"]

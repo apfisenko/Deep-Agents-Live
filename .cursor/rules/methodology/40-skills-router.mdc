@@ -63,6 +63,12 @@ alwaysApply: true
 | Docker, контейнеры, multi-stage, health checks | `docker-expert` | `.agents/skills/docker-expert/SKILL.md` |
 | GitHub Actions CI/CD | `github-actions-templates` | `.agents/skills/github-actions-templates/SKILL.md` |
 
+### Observability / Langfuse
+
+| Тип работы | Skill | Путь |
+|-----------|-------|------|
+| Langfuse: traces, SDK, datasets, промпты, eval, отладка observability | `langfuse` | `.cursor/skills/langfuse/SKILL.md` |
+
 ### LangChain / Langfuse (MCP)
 
 Конфигурация серверов — `.cursor/mcp.json` (источник: `mcp.json` в корне).
@@ -72,6 +78,11 @@ alwaysApply: true
 | LangChain: агенты, ReAct, tools, RAG, `langchain-mcp-adapters` | `langchain-docs` | `search_docs_by_lang_chain`, `query_docs_filesystem_docs_by_lang_chain` |
 | Langfuse: трейсинг, SDK, интеграция observability | `langfuse-docs` | `searchLangfuseDocs`, `getLangfuseDocsPage`, `getLangfuseOverview` |
 | Langfuse: промпты, traces, datasets в проекте (Cloud / self-hosted) | `langfuse` | инструменты Cloud MCP (`getPrompt`, `listObservations`, …) — см. [MCP Reference](https://mcp.reference.langfuse.com/) |
+
+**Порядок работы с Langfuse:**
+1. Прочитать skill `langfuse` (`.cursor/skills/langfuse/SKILL.md`).
+2. Для MCP — прочитать дескриптор инструмента в `mcps/<server>/tools/`.
+3. Docs: `searchLangfuseDocs` → `getLangfuseDocsPage`. Instance: см. skill и [MCP Reference](https://mcp.reference.langfuse.com/).
 
 **Порядок работы с MCP:**
 1. Перед вызовом — прочитать дескриптор инструмента в `mcps/<server>/tools/`.

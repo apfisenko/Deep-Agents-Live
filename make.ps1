@@ -145,6 +145,7 @@ function Show-Help {
     Write-Host "  check-chat     - POST /api/v1/chat (telegram)"
     Write-Host "  check-chat-stream - POST /api/v1/chat/stream (SSE)"
     Write-Host "  check-langfuse - Langfuse /api/public/health"
+    Write-Host "  langfuse-upload-dataset - upload/reload JSONL to Langfuse"
     Write-Host "  check-telegram - TCP/getMe to api.telegram.org (VPN/proxy)"
     Write-Host "  check-api      - all checks above"
     Write-Host "  chat-telegram  - POST /api/v1/chat (telegram JSON, raw output)"
@@ -155,6 +156,34 @@ function Show-Help {
     Write-Host "  .\make.ps1 compose logs -f langfuse-web"
     Write-Host "  .\make.ps1 docker ps -a"
     Write-Host "  .\make.ps1 check-api"
+}
+
+function Invoke-LangfuseUploadDataset {
+    $datasetJsonl = if ($env:DATASET_JSONL) { $env:DATASET_JSONL } else { "datasets/dataset-v1.jsonl" }
+    $datasetName = if ($env:DATASET_NAME) { $env:DATASET_NAME } else { "llmstart-agent-v1" }
+    $venvPython = Join-Path $BackendDir ".venv\Scripts\python.exe"
+    $python = if (Test-Path $venvPython) { $venvPython } else { (Get-Command python -ErrorAction SilentlyContinue).Source }
+    if (-not $python) {
+        Write-Error "Python not found. Run: cd backend; uv sync"
+    }
+
+    & $python -c "import httpx" 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Installing httpx for upload script..."
+        & $python -m pip install httpx
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
+
+    Push-Location $BackendDir
+    try {
+        & $python scripts/upload_langfuse_dataset.py `
+            --input (Join-Path $RepoRoot $datasetJsonl) `
+            --dataset-name $datasetName `
+            --reload
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
 }
 
 function Invoke-RequestChat {
@@ -364,6 +393,7 @@ switch ($Target) {
     "check-chat" { Invoke-CheckApi "chat" }
     "check-chat-stream" { Invoke-CheckApi "chat-stream" }
     "check-langfuse" { Invoke-CheckApi "langfuse" }
+    "langfuse-upload-dataset" { Invoke-LangfuseUploadDataset }
     "check-telegram" {
         Push-Location (Join-Path $RepoRoot "frontend\bot")
         try {

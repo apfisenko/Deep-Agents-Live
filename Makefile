@@ -2,7 +2,7 @@
 	lint format typecheck test test-backend test-frontend test-bot \
 	up down ps status logs compose docker migrate migrate-new ci compose-dev \
 	check-health check-reindex check-chat check-chat-stream check-langfuse check-telegram check-api \
-	chat-telegram chat-stream
+	chat-telegram chat-stream langfuse-upload-dataset
 
 BACKEND_DIR := backend
 FRONTEND_DIR := frontend
@@ -14,7 +14,8 @@ DOCKER_WSL = wsl -e bash -lc "cd '$(WSL_REPO)' && $(1)"
 ARGS ?=
 SVC ?=
 TAIL ?= 50
-CHAT_MESSAGE ?= Какой курс для новичка?
+DATASET_JSONL ?= datasets/dataset-v1.jsonl
+DATASET_NAME ?= llmstart-agent-v1
 
 help:
 	@echo "Deep-Agents-Live - available targets:"
@@ -46,6 +47,7 @@ help:
 	@echo "  check-chat     - POST /api/v1/chat (telegram)"
 	@echo "  check-chat-stream - POST /api/v1/chat/stream (SSE)"
 	@echo "  check-langfuse - Langfuse /api/public/health"
+	@echo "  langfuse-upload-dataset - upload/reload JSONL dataset to Langfuse (DATASET_JSONL, DATASET_NAME)"
 	@echo "  check-telegram - TCP/getMe to api.telegram.org (VPN/proxy)"
 	@echo "  check-api      - all checks above"
 	@echo "  chat-telegram  - POST /api/v1/chat (telegram JSON, raw output)"
@@ -149,6 +151,12 @@ check-chat-stream:
 
 check-langfuse:
 	cd $(BACKEND_DIR) && uv run python scripts/check_api.py langfuse
+
+langfuse-upload-dataset:
+	cd $(BACKEND_DIR) && uv run python scripts/upload_langfuse_dataset.py \
+		--input ../$(DATASET_JSONL) \
+		--dataset-name $(DATASET_NAME) \
+		--reload
 
 check-telegram:
 	cd $(BOT_DIR) && uv run python -m scripts.check_telegram
