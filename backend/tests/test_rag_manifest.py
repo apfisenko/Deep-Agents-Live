@@ -45,3 +45,19 @@ def test_rag_build_is_idempotent(rag_data_dir: Path) -> None:
 
         manifest = load_manifest(rag_data_dir / ".rag-manifest.json")
         assert len(manifest.entries) == 1
+
+
+def test_rag_reindexes_after_store_reset(rag_data_dir: Path) -> None:
+    with patch("app.rag.indexer.embed_documents", side_effect=_fake_embed_documents_batch):
+        indexer = RagIndexer()
+        first = indexer.build(force=True)
+        assert first.indexed == 1
+        assert get_store().indexed_docs_count == 1
+
+        reset_store()
+        assert get_store().indexed_docs_count == 0
+
+        restored = RagIndexer()
+        second = restored.build()
+        assert second.indexed == 1
+        assert get_store().indexed_docs_count == 1

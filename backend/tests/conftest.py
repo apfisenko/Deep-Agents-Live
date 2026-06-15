@@ -5,6 +5,7 @@ from collections.abc import Generator
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from app.agent.config_registry import reset_config_registry
 from app.agent.react_agent import AgentRunResult, StreamEvent, reset_agent_runner
 from app.config import clear_settings_cache
 from app.integrations.langfuse import reset_langfuse_callbacks
@@ -28,6 +29,7 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     reset_indexer()
     reset_session_store()
     reset_agent_runner()
+    reset_config_registry()
     reset_langfuse_callbacks()
     reset_langfuse_callbacks()
     yield
@@ -36,6 +38,7 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     reset_indexer()
     reset_session_store()
     reset_agent_runner()
+    reset_config_registry()
     reset_langfuse_callbacks()
 
 

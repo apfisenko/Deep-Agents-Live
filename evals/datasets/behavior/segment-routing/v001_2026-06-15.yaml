@@ -1,0 +1,304 @@
+dataset: segment-routing
+group: behavior
+version: v001
+created: '2026-06-15'
+description: 'Behavior layer: B2B vs B2C segment routing (G7)'
+items:
+- id: seg-route-ext-007
+  input:
+    message: Здравствуйте. Нужно обучить команду разработчиков по ИИ-агентам, около 20 человек, бюджет
+      порядка миллиона рублей. Как у вас оформляют корпоративное обучение?
+    channel: web
+  expected_output:
+    answer: 'Запрос корпоративный (B2B) — для команды ~20 человек и бюджета ~1 млн ₽ подойдёт **кастомная
+      программа** на базе наших публичных курсов (например, AI-кодинг агентов + Deep Agents): записи +
+      live, отдельный чат команды, стартовая сессия, договор.
+
+
+      Через виджет **нельзя** оформить как розничную оплату одного B2C-места — подготовим предложение
+      и документы с менеджером.
+
+
+      Уточните, пожалуйста: сроки старта, нужен ли полный трек или только Deep Agents, и контакт для КП.'
+  metadata:
+    segment: b2b
+    intent: segment-route
+    source: real_dialog
+    gt_quality: verified
+    must_not:
+    - create_payment_link
+    facts:
+    - b2b — договор и КП
+    - типично 2 курса agents + deep
+    - до ~20 мест
+    - без b2c payment link
+    source_chat: CHAT_0127
+    legacy_id: ext-007
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-ext-014
+  input:
+    message: <AUTHOR>, добрый день! Отдала внутреннему заказчику, но он был в отпуске до конца прошлой
+      неделе, поэтому ко мне никто не вернулся. Поэтому пока сама не могу к вам вернуться ни с чем
+    channel: telegram
+  expected_output:
+    answer: 'Спасибо за статус — это **корпоративное согласование** (B2B), торопить с оплатой не будем.
+
+
+      Когда будет ответ внутреннего заказчика — напишите: скорректируем **сроки старта** и состав программы
+      (agents + Deep Agents для команды) под ваши ограничения.
+
+
+      Розничную ссылку на оплату одного места здесь не пришлю — для команды оформляем **договор и КП**,
+      как в согласованном предложении.'
+  metadata:
+    segment: b2b
+    intent: segment-route
+    source: real_dialog
+    gt_quality: verified
+    must_not:
+    - create_payment_link
+    facts:
+    - b2b — ждём заказчика
+    - без b2c payment
+    - можно сдвинуть даты КП
+    source_chat: CHAT_0127
+    legacy_id: ext-014
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-syn-011
+  input:
+    message: Нам в компании нужен тренинг по LangGraph и RAG для 30 инженеров. Можно оплатить комбо на
+      сайте картой?
+    channel: web
+  expected_output:
+    answer: 'Запрос **корпоративный (B2B)** — обучение **команды 30 человек** не оформляется как розничное
+      **комбо с оплатой на сайте**.
+
+
+      Для компаний — **отдельная программа**: адаптация под стек, договор, КП, чат команды, сочетание
+      записей и live (как в наших B2B-кейсах на базе курсов Agents / Deep Agents).
+
+
+      Опишите сроки и цель (RAG, LangGraph, MCP) — передам в корпоративный канал. **create_payment_link**
+      для B2C здесь не применяем.'
+  metadata:
+    segment: b2b
+    intent: segment-route
+    source: synthetic
+    gt_quality: verified
+    must_not:
+    - create_payment_link
+    facts:
+    - b2b не b2c оплата
+    - команда 30
+    - договор КП
+    - адаптация программы
+    source_chat: null
+    legacy_id: syn-011
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-ext-0070
+  input:
+    message: Слышал, у вас в разработке комплекс бот+веб+бэк для компаний. Можем как юрлицо купить это
+      на сайте картой или только по договору?
+    channel: web
+  expected_output:
+    answer: 'Комплекс «бот + веб + бэк + API» для **корпоративных заказчиков** — это **B2B-направление**,
+      не розничная оплата на сайте.
+
+
+      Для компании готовим **индивидуальную программу/разработку** и **договор с КП**. Через виджет B2C-курса
+      такой запрос не оформляется.
+
+
+      Если нужен веб для **личного обучения** — отдельно есть B2C **AI-driven Fullstack**. Уточните: запрос
+      от компании или для себя?'
+  metadata:
+    segment: b2b
+    intent: segment-route
+    source: real_dialog
+    gt_quality: verified
+    must_not:
+    - create_payment_link
+    facts:
+    - корп web — B2B
+    - не b2c оплата
+    - договор КП
+    - fullstack для физлица отдельно
+    source_chat: CHAT_0070
+    source_kb: data/b2b/corporate-training.md
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-syn-012
+  input:
+    message: Нужно обучить 15 разработчиков по AI-driven — можем оплатить по счёту и договору?
+    channel: web
+  expected_output:
+    answer: 'Да, это **корпоративный (B2B)** запрос — для команды **15 человек** оформляем **договор и
+      КП**, адаптируем программу под ваш стек.
+
+
+      Формат: записи + live, чат команды, стартовая сессия — как в наших B2B-кейсах на базе курсов Agents
+      / Deep Agents.
+
+
+      Розничную ссылку на оплату одного B2C-места здесь не пришлю — соберём предложение с менеджером.'
+  metadata:
+    segment: b2b
+    intent: segment-route
+    source: synthetic
+    gt_quality: verified
+    must_not:
+    - create_payment_link
+    facts:
+    - b2b договор
+    - команда 15
+    - адаптация программы
+    - без b2c payment link
+    source_kb: data/b2b/corporate-training.md
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-syn-013
+  input:
+    message: Хотим воркшоп по RAG для отдела аналитики, 10 человек. Как заказать у вас корпоративно?
+    channel: telegram
+  expected_output:
+    answer: 'Запрос **B2B** — воркшоп/обучение **команды 10 человек** по RAG.
+
+
+      Оформление: **коммерческое предложение**, договор, адаптация под ваши кейсы — не покупка отдельного
+      B2C-курса на сайте.
+
+
+      Опишите сроки и цель внедрения — передам в корпоративный канал для КП.'
+  metadata:
+    segment: b2b
+    intent: segment-route
+    source: synthetic
+    gt_quality: verified
+    must_not:
+    - create_payment_link
+    facts:
+    - b2b воркшоп
+    - команда 10
+    - КП договор
+    - не b2c каталог
+    source_kb: data/b2b/corporate-training.md
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-syn-014
+  input:
+    message: Я частное лицо — хочу оплатить интенсив в Cursor картой на сайте. Это возможно?
+    channel: web
+  expected_output:
+    answer: 'Да — для **физлица (B2C)** **интенсив AI-кодинг в Cursor** можно купить **на сайте** (ai-coding-intensive-cursor,
+      14 990 ₽): оплата картой, доступ после оплаты.
+
+
+      Это не корпоративный договор — если покупаете **для себя**, идём по B2C-воронке. Могу подсказать
+      шаги оплаты или сравнить с комбо.'
+  metadata:
+    segment: b2c
+    intent: segment-route
+    source: synthetic
+    gt_quality: verified
+    must_not: []
+    facts:
+    - b2c физлицо
+    - оплата на сайте
+    - интенсив cursor
+    - не b2b договор
+    source_kb: data/b2c/programs/ai-coding-intensive-cursor.md
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-syn-015
+  input:
+    message: Покупаю комбо для себя, не для компании — как оформить?
+    channel: telegram
+  expected_output:
+    answer: 'Если покупаете **для себя (B2C)** — **комбо «ИИ-агенты»** оформляется как розничная покупка
+      на llmstart.ru/ai-agents-combo/ (59 990 ₽), оплата картой.
+
+
+      Корпоративный договор нужен только если обучаете **команду от работодателя**. Подтвердите, что это
+      личная покупка — проведу по B2C-шагам.'
+  metadata:
+    segment: b2c
+    intent: segment-route
+    source: synthetic
+    gt_quality: verified
+    must_not: []
+    facts:
+    - b2c личная покупка
+    - комбо на сайте
+    - не b2b если для себя
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-syn-016
+  input:
+    message: Мне нужен курс agents для личного развития, я solo-разработчик. Это b2c?
+    channel: web
+  expected_output:
+    answer: 'Да — **solo-разработчик для личного развития** это **B2C-сегмент**.
+
+
+      **AI-driven разработка ИИ-агентов** (39 990 ₽) покупается на сайте как физлицо, без корпоративного
+      договора.
+
+
+      B2B — когда обучаете **команду компании** по договору. Могу помочь с выбором формата live/запись.'
+  metadata:
+    segment: b2c
+    intent: segment-route
+    source: synthetic
+    gt_quality: verified
+    must_not: []
+    facts:
+    - b2c solo
+    - agents на сайте
+    - b2b только команда
+    source_kb: data/b2c/programs/ai-coding-agents-base.md
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-syn-017
+  input:
+    message: Deep Agents хочу сам, работодатель не платит — можно ссылку на оплату?
+    channel: telegram
+  expected_output:
+    answer: 'Да — **личная покупка (B2C)**, работодатель не участвует: **Deep Agents** (44 990 ₽) можно
+      оплатить через сайт/ссылку на продукт.
+
+
+      Это не корпоративный тендер — для B2C допустима розничная оплата. Проверю, что у вас есть база по
+      agents, и помогу с оплатой.'
+  metadata:
+    segment: b2c
+    intent: segment-route
+    source: synthetic
+    gt_quality: verified
+    must_not: []
+    facts:
+    - b2c личная оплата
+    - deep agents 44990
+    - не b2b
+    source_kb: data/b2c/programs/deep-agents-advanced.md
+    reviewed_by: user-approved-2026-06-15
+- id: seg-route-syn-018
+  input:
+    message: 'Уточню: покупаю сам, не от имени компании. Fullstack — как оплатить?'
+    channel: web
+  expected_output:
+    answer: 'Понял — **B2C, покупка для себя**, не от юрлица.
+
+
+      **AI-driven Fullstack** (39 990 ₽) — розничная оплата на llmstart.ru/fullstack-aidd/. Корпоративный
+      договор не нужен.
+
+
+      Если позже понадобится обучение **команды** — это отдельный B2B-канал.'
+  metadata:
+    segment: b2c
+    intent: segment-route
+    source: synthetic
+    gt_quality: verified
+    must_not: []
+    facts:
+    - b2c подтверждение
+    - fullstack розница
+    - b2b отдельно
+    source_kb: data/b2c/programs/ai-driven-fullstack.md
+    reviewed_by: user-approved-2026-06-15

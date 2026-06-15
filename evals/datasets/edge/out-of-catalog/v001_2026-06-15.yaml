@@ -1,0 +1,245 @@
+dataset: out-of-catalog
+group: edge
+version: v001
+created: '2026-06-15'
+description: 'Edge layer: off-catalog requests — honest no + nearest SKU redirect (G2)'
+items:
+- id: ooc-ext-005
+  input:
+    message: Подскажите, не планируете ли проводить курс по AI-кодингу веб-проектов (фронтенд / бэкенд)?
+      Возможно у вас есть в записях.
+    channel: web
+  expected_output:
+    answer: 'Отдельного B2C-курса «только веб front/back» в каталоге сейчас нет.
+
+
+      Ближе всего:
+
+      • **AI-driven Fullstack** — полный цикл (frontend, backend, DevOps) в AI-driven подходе.
+
+      • **AI-driven разработка ИИ-агентов** — методика применима и к веб-проектам; есть потоки и записи.
+
+
+      Комплекс «бот + веб + бэк + API» для **корпоративных заказчиков** — отдельное направление (B2B),
+      не розничная оплата на сайте. Если интересен веб для себя — могу сузить рекомендацию под ваш уровень;
+      если для компании — переведу на корпоративный формат.'
+  metadata:
+    segment: b2c
+    intent: out-of-catalog
+    source: real_dialog
+    gt_quality: verified
+    nearest_product_id: ai-driven-fullstack
+    facts:
+    - нет отдельного b2c веб-only курса
+    - fullstack покрывает веб-стек
+    - agents — методика для веб
+    - корп. веб — B2B
+    source_chat: CHAT_0070
+    legacy_id: ext-005
+    reviewed_by: user-approved-2026-06-15
+- id: ooc-ext-0070-fe
+  input:
+    message: Есть ли отдельный курс только по фронтенду — React и компоненты, без бэкенда и DevOps?
+    channel: web
+  expected_output:
+    answer: 'Отдельного B2C-курса **«только фронтенд»** в каталоге **нет**.
+
+
+      Ближе всего — **AI-driven Fullstack** (ai-driven-fullstack): frontend входит в полный цикл (бот
+      → API → БД → frontend → production), не как изолированный React-курс.
+
+
+      Если нужен быстрый старт без fullstack — **интенсив в Cursor** даёт прототипы, но это не классический
+      frontend-bootcamp. Уточните цель — подберём SKU.'
+  metadata:
+    segment: b2c
+    intent: out-of-catalog
+    source: real_dialog
+    gt_quality: verified
+    nearest_product_id: ai-driven-fullstack
+    facts:
+    - нет frontend-only SKU
+    - fullstack включает frontend
+    - интенсив — альтернатива
+    source_chat: CHAT_0070
+    source_kb: data/b2c/programs/ai-driven-fullstack.md
+    reviewed_by: user-approved-2026-06-15
+- id: ooc-syn-001
+  input:
+    message: Ищу курс только по мобильной разработке iOS/Android — есть у вас?
+    channel: telegram
+  expected_output:
+    answer: 'Отдельного курса **только mobile iOS/Android** в B2C-каталоге **нет**.
+
+
+      Ближе всего: **AI-driven Fullstack** — веб + backend + production; мобильные нативные приложения
+      не являются отдельным SKU.
+
+
+      Методика **агентов** может помочь в смежных задачах, но это не mobile-bootcamp. Честно: такого продукта
+      у нас нет — могу предложить ближайший fullstack или интенсив.'
+  metadata:
+    segment: b2c
+    intent: out-of-catalog
+    source: synthetic
+    gt_quality: verified
+    nearest_product_id: ai-driven-fullstack
+    facts:
+    - нет mobile SKU
+    - fullstack ближайший
+    - не выдумывать mobile курс
+    source_kb: data/b2c/programs/ai-driven-fullstack.md
+    reviewed_by: user-approved-2026-06-15
+- id: ooc-syn-002
+  input:
+    message: Нужен курс только prompt engineering для ChatGPT без программирования — продаёте?
+    channel: web
+  expected_output:
+    answer: 'Отдельного курса **«только prompt engineering без кода»** **нет** — мы про **AI-driven разработку**
+      с Cursor/агентами, не про чистый prompt-курс.
+
+
+      Ближе всего — **интенсив AI-кодинг в Cursor** (ai-coding-intensive-cursor): работа с LLM + практические
+      проекты, но с кодом через агента.
+
+
+      Если код не нужен вообще — наш каталог, скорее всего, не подойдёт; не буду предлагать несуществующий
+      SKU.'
+  metadata:
+    segment: b2c
+    intent: out-of-catalog
+    source: synthetic
+    gt_quality: verified
+    nearest_product_id: ai-coding-intensive-cursor
+    facts:
+    - нет prompt-only SKU
+    - интенсив ближайший
+    - честный отказ если без кода
+    source_kb: data/b2c/programs/ai-coding-intensive-cursor.md
+    reviewed_by: user-approved-2026-06-15
+- id: ooc-syn-003
+  input:
+    message: Хочу классический Python bootcamp с нуля — алгоритмы, синтаксис, без AI. Есть?
+    channel: web
+  expected_output:
+    answer: 'Классического **Python bootcamp с нуля (синтаксис/алгоритмы без AI)** в каталоге **нет**
+      — все программы в **AI-driven** парадигме (код пишет агент/Cursor).
+
+
+      Ближе для старта с нуля — **интенсив в Cursor**: не традиционный bootcamp, но вход для не-программистов.
+
+
+      Не буду обещать «обычный Python-курс» — такого продукта у нас нет.'
+  metadata:
+    segment: b2c
+    intent: out-of-catalog
+    source: synthetic
+    gt_quality: verified
+    nearest_product_id: ai-coding-intensive-cursor
+    facts:
+    - нет classic python bootcamp
+    - AI-driven only
+    - интенсив — мягкий вход
+    source_kb: data/b2c/programs/ai-coding-intensive-cursor.md
+    reviewed_by: user-approved-2026-06-15
+- id: ooc-syn-004
+  input:
+    message: Есть курс только DevOps/Kubernetes без разработки приложений?
+    channel: telegram
+  expected_output:
+    answer: 'Отдельного SKU **«только DevOps/Kubernetes»** **нет**.
+
+
+      DevOps/CI/CD входит в **AI-driven Fullstack** как часть production-цикла, но не как изолированный
+      DevOps-курс.
+
+
+      Ближайший redirect — **fullstack**; если нужен только K8s без кода — честно скажу, что в каталоге
+      такого продукта нет.'
+  metadata:
+    segment: b2c
+    intent: out-of-catalog
+    source: synthetic
+    gt_quality: verified
+    nearest_product_id: ai-driven-fullstack
+    facts:
+    - нет devops-only SKU
+    - devops в fullstack
+    - честный нет
+    source_kb: data/b2c/programs/ai-driven-fullstack.md
+    reviewed_by: user-approved-2026-06-15
+- id: ooc-syn-005
+  input:
+    message: Можно купить трёхдневный мини-курс только LangChain без полной программы по агентам?
+    channel: web
+  expected_output:
+    answer: 'Короткого **«только LangChain за 3 дня»** как отдельного продукта **нет**.
+
+
+      LangChain/LangGraph — часть полного курса **AI-driven разработка ИИ-агентов** (ai-coding-agents-base,
+      ~1,5 мес.).
+
+
+      Ближайший SKU — **agents**; мини-курс не продаём — не буду выдумывать отдельный тариф.'
+  metadata:
+    segment: b2c
+    intent: out-of-catalog
+    source: synthetic
+    gt_quality: verified
+    nearest_product_id: ai-coding-agents-base
+    facts:
+    - нет langchain mini SKU
+    - agents полный курс
+    - не выдумывать тариф
+    source_kb: data/b2c/programs/ai-coding-agents-base.md
+    reviewed_by: user-approved-2026-06-15
+- id: ooc-syn-006
+  input:
+    message: Ищу курс ML/Data Science без агентов и RAG — только sklearn и pandas.
+    channel: web
+  expected_output:
+    answer: 'Курса **классического ML/Data Science (sklearn/pandas без агентов/RAG)** в каталоге **нет**.
+
+
+      Наш фокус — **production ИИ-агенты, RAG, LangGraph**. Ближе всего — **ai-coding-agents-base**, но
+      это не традиционный DS-курс.
+
+
+      Честно: для чистого ML лучше другие школы; не предложу несуществующий DS-SKU.'
+  metadata:
+    segment: b2c
+    intent: out-of-catalog
+    source: synthetic
+    gt_quality: verified
+    nearest_product_id: ai-coding-agents-base
+    facts:
+    - нет classic ML SKU
+    - фокус agents RAG
+    - честный redirect agents
+    source_kb: data/b2c/programs/ai-coding-agents-base.md
+    reviewed_by: user-approved-2026-06-15
+- id: ooc-syn-007
+  input:
+    message: Нужен курс только UI/UX дизайна интерфейсов с Figma — без разработки.
+    channel: telegram
+  expected_output:
+    answer: 'Отдельного курса **UI/UX + Figma без разработки** **нет** — мы обучаем **разработке** с AI-driven
+      подходом, не дизайн-школа.
+
+
+      Frontend затрагивается в **Fullstack**, но как часть кода, не как дизайн-курс.
+
+
+      Ближайший SKU — **ai-driven-fullstack**; если нужен только дизайн — наш каталог не подойдёт.'
+  metadata:
+    segment: b2c
+    intent: out-of-catalog
+    source: synthetic
+    gt_quality: verified
+    nearest_product_id: ai-driven-fullstack
+    facts:
+    - нет UX-only SKU
+    - не дизайн-школа
+    - fullstack если код
+    source_kb: data/b2c/programs/ai-driven-fullstack.md
+    reviewed_by: user-approved-2026-06-15

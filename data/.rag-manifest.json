@@ -4,13 +4,55 @@
     "hash": "dcf17cb5b980f64a7c6c6041ed05e53818676fb607076e755ce5e61865b6850b",
     "audience": "b2c",
     "chunk_count": 1,
-    "indexed_at": "2026-06-06T19:01:24.012338+00:00"
+    "indexed_at": "2026-06-15T22:09:53.011349+00:00"
   },
   "b2b/corporate-training.md": {
     "path": "b2b/corporate-training.md",
-    "hash": "6908cfc038d69e39ab74f6cddf8dbd5ae58c745c7e0112b2a2daa5cd18c45de8",
+    "hash": "b324bae59754e1814b2a7471b3779dd295ea782380b0a11a75f4a59c00adec17",
     "audience": "b2b",
-    "chunk_count": 1,
-    "indexed_at": "2026-06-06T19:01:24.947392+00:00"
+    "chunk_count": 2,
+    "indexed_at": "2026-06-15T22:10:08.169207+00:00"
+  },
+  "b2c/programs/ai-agents-combo.md": {
+    "path": "b2c/programs/ai-agents-combo.md",
+    "hash": "a02a5b1eb5057dc97bedebf692bfa19c956949283a34eb850ef0b06462509536",
+    "audience": "b2c",
+    "chunk_count": 12,
+    "indexed_at": "2026-06-15T22:09:54.903759+00:00"
+  },
+  "b2c/programs/ai-coding-agents-base.md": {
+    "path": "b2c/programs/ai-coding-agents-base.md",
+    "hash": "ec4dc07edd3af9eb27cb3b3604a6315d20369099bac667e41b14fba7cc75b491",
+    "audience": "b2c",
+    "chunk_count": 35,
+    "indexed_at": "2026-06-15T22:09:57.592666+00:00"
+  },
+  "b2c/programs/ai-coding-intensive-cursor.md": {
+    "path": "b2c/programs/ai-coding-intensive-cursor.md",
+    "hash": "adad75ff88d170512f1d547282595e2f424e0d4ae0fa9a511569d06e329d689b",
+    "audience": "b2c",
+    "chunk_count": 7,
+    "indexed_at": "2026-06-15T22:09:59.419976+00:00"
+  },
+  "b2c/programs/ai-driven-fullstack.md": {
+    "path": "b2c/programs/ai-driven-fullstack.md",
+    "hash": "290f2d4fe5ef50ac5aa338288719f5c7a939d0745a2e101eae8be157f57ed59c",
+    "audience": "b2c",
+    "chunk_count": 25,
+    "indexed_at": "2026-06-15T22:10:01.800049+00:00"
+  },
+  "b2c/programs/aidd-program.md": {
+    "path": "b2c/programs/aidd-program.md",
+    "hash": "f91bd07a6532edc7d28ff947aaa867889dc15954b6a2e9901daf6df3306b40c2",
+    "audience": "b2c",
+    "chunk_count": 20,
+    "indexed_at": "2026-06-15T22:10:04.011831+00:00"
+  },
+  "b2c/programs/deep-agents-advanced.md": {
+    "path": "b2c/programs/deep-agents-advanced.md",
+    "hash": "73c032a8b0b8e8d435fc575cfd8273da1302cffa433d4c4fb566b5894aecffd7",
+    "audience": "b2c",
+    "chunk_count": 25,
+    "indexed_at": "2026-06-15T22:10:06.419275+00:00"
   }
 }

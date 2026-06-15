@@ -1,0 +1,35 @@
+# User simulation scenarios (E-23) — multi-turn, один session_id = один trace
+version: v001
+created: "2026-06-15"
+description: B2C payment funnel — scripted user turns
+
+scenarios:
+  - id: fnl-scn-full-001
+    description: Catalog → payment link → confirm → lead
+    channel: web
+    turns:
+      - message: "Какие B2C-курсы есть и сколько стоят?"
+      - message: "Хочу оплатить Deep Agents, сформируй ссылку"
+      - message: "Оплатил по ссылке, email: eval-fnl-scn-001@example.com"
+    success:
+      expected_tools_in_order:
+        - list_b2c_products
+        - create_payment_link
+        - confirm_payment
+        - save_lead
+      lead_contact: eval-fnl-scn-001@example.com
+      require_payment_link: true
+
+  - id: fnl-scn-payment-001
+    description: Direct payment intent → confirm → lead
+    channel: telegram
+    turns:
+      - message: "Хочу записаться на Deep Agents — как оплатить?"
+      - message: "Оплатил по ссылке, email: eval-fnl-scn-002@example.com"
+    success:
+      expected_tools_in_order:
+        - create_payment_link
+        - confirm_payment
+        - save_lead
+      lead_contact: eval-fnl-scn-002@example.com
+      require_payment_link: true

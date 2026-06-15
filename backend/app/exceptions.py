@@ -52,3 +52,14 @@ class ModelError(AgentCoreError):
             error_code=error_code,
             retryable=False,
         )
+
+
+class ConfigNotFoundError(AgentCoreError):
+    def __init__(self, message: str, *, config_id: str) -> None:
+        super().__init__(
+            message,
+            error_class="config_error",
+            error_code="config_not_found",
+            retryable=False,
+        )
+        self.config_id = config_id

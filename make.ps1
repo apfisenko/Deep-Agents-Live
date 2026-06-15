@@ -10,6 +10,7 @@ $RepoRoot = $PSScriptRoot
 $BackendDir = Join-Path $RepoRoot "backend"
 $FrontendDir = Join-Path $RepoRoot "frontend"
 $BotDir = Join-Path $RepoRoot "frontend\bot"
+$EvalsDir = Join-Path $RepoRoot "evals"
 
 function Get-WslRepoPath {
     if ($env:REPO_WSL_PATH) {
@@ -145,11 +146,18 @@ function Show-Help {
     Write-Host "  check-chat     - POST /api/v1/chat (telegram)"
     Write-Host "  check-chat-stream - POST /api/v1/chat/stream (SSE)"
     Write-Host "  check-langfuse - Langfuse /api/public/health"
+    Write-Host "  check-traces   - verify Langfuse traces for web+telegram chat"
     Write-Host "  langfuse-upload-dataset - upload/reload JSONL to Langfuse"
     Write-Host "  check-telegram - TCP/getMe to api.telegram.org (VPN/proxy)"
     Write-Host "  check-api      - all checks above"
     Write-Host "  chat-telegram  - POST /api/v1/chat (telegram JSON, raw output)"
     Write-Host "  chat-stream    - POST /api/v1/chat/stream (web SSE, raw output)"
+    Write-Host "  eval-help      - eval contour targets"
+    Write-Host "  eval-validate  - validate eval configs and datasets skeleton"
+    Write-Host "  eval-sync      - sync datasets to Langfuse (skeleton)"
+    Write-Host "  eval-experiment - run eval experiment (skeleton)"
+    Write-Host "  eval-analyze   - analyze eval run (skeleton)"
+    Write-Host "  eval-compare   - compare eval runs (skeleton)"
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  .\make.ps1 ps"
@@ -191,6 +199,52 @@ function Invoke-RequestChat {
     Push-Location $BackendDir
     try {
         uv run python scripts/request_chat.py $Command
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-EvalMake {
+    param([string]$EvalTarget)
+    Push-Location $EvalsDir
+    try {
+        if (Get-Command make -ErrorAction SilentlyContinue) {
+            make $EvalTarget
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            return
+        }
+        switch ($EvalTarget) {
+            "help" {
+                Write-Host "evals targets: validate, sync, experiment, analyze, compare"
+            }
+            "validate" {
+                uv sync --quiet 2>$null
+                uv run pytest tests/ -q
+                if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+                uv run python scripts/sync_datasets.py --validate-only --dataset e2e/e2e-qa --min-items 20
+            }
+            "sync" {
+                Invoke-EvalMake "validate"
+                if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+                uv run python scripts/sync_datasets.py --dataset all
+            }
+            "experiment" {
+                Invoke-EvalMake "sync"
+                if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+                uv run python scripts/run_experiment.py --config configs/baseline-react-inmemory.yaml --dataset all
+            }
+            "analyze" {
+                $run = if ($env:RUN) { $env:RUN } else { "baseline-react-inmemory--e2e-qa--5eedd7a1--20260615T191628Z" }
+                uv run python scripts/analyze_run.py --run $run --out reports/
+            }
+            "compare" {
+                Write-Error "Usage: set RUN_A and RUN_B env vars; prefer GNU make on WSL for compare"
+            }
+            default {
+                Write-Error "Unknown eval target: $EvalTarget"
+            }
+        }
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     } finally {
         Pop-Location
@@ -393,6 +447,7 @@ switch ($Target) {
     "check-chat" { Invoke-CheckApi "chat" }
     "check-chat-stream" { Invoke-CheckApi "chat-stream" }
     "check-langfuse" { Invoke-CheckApi "langfuse" }
+    "check-traces" { Invoke-CheckApi "traces" }
     "langfuse-upload-dataset" { Invoke-LangfuseUploadDataset }
     "check-telegram" {
         Push-Location (Join-Path $RepoRoot "frontend\bot")
@@ -407,6 +462,12 @@ switch ($Target) {
     "check-api" { Invoke-CheckApi "api" }
     "chat-telegram" { Invoke-RequestChat "telegram" }
     "chat-stream" { Invoke-RequestChat "stream" }
+    "eval-help" { Invoke-EvalMake "help" }
+    "eval-validate" { Invoke-EvalMake "validate" }
+    "eval-sync" { Invoke-EvalMake "sync" }
+    "eval-experiment" { Invoke-EvalMake "experiment" }
+    "eval-analyze" { Invoke-EvalMake "analyze" }
+    "eval-compare" { Invoke-EvalMake "compare" }
     default {
         Write-Error "Unknown target: $Target. Run: .\make.ps1 help"
     }

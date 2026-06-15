@@ -47,6 +47,10 @@ class RagIndexer:
             raise FileNotFoundError(msg)
 
         store = get_store()
+        if store.indexed_docs_count == 0:
+            # In-memory store is lost on process restart; manifest-only skip leaves RAG empty.
+            force = True
+
         manifest = load_manifest()
         result = IndexResult()
         seen_paths: set[str] = set()

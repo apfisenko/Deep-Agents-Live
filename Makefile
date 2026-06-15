@@ -1,12 +1,14 @@
 .PHONY: help dev dev-backend dev-frontend dev-bot stop-dev stop-backend stop-frontend stop-bot \
 	lint format typecheck test test-backend test-frontend test-bot \
 	up down ps status logs compose docker migrate migrate-new ci compose-dev \
-	check-health check-reindex check-chat check-chat-stream check-langfuse check-telegram check-api \
-	chat-telegram chat-stream langfuse-upload-dataset
+	check-health check-reindex check-chat check-chat-stream check-langfuse check-traces check-telegram check-api \
+	chat-telegram chat-stream langfuse-upload-dataset \
+	eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare
 
 BACKEND_DIR := backend
 FRONTEND_DIR := frontend
 BOT_DIR := frontend/bot
+EVALS_DIR := evals
 REPO_ROOT := $(CURDIR)
 WSL_REPO := $(shell wslpath -a '$(REPO_ROOT)' 2>/dev/null || echo '/mnt/c/FISENKO/AI/Deep-Agents-Live')
 DOCKER_WSL = wsl -e bash -lc "cd '$(WSL_REPO)' && $(1)"
@@ -52,6 +54,14 @@ help:
 	@echo "  check-api      - all checks above"
 	@echo "  chat-telegram  - POST /api/v1/chat (telegram JSON, raw output)"
 	@echo "  chat-stream    - POST /api/v1/chat/stream (web SSE, raw output)"
+	@echo "  eval-help      - eval contour targets (evals/Makefile)"
+	@echo "  eval-build     - build dataset manifest YAML from sources (DATASET=)"
+	@echo "  eval-validate  - validate eval configs and datasets skeleton"
+	@echo "  eval-sync      - sync datasets to Langfuse (DATASET=)"
+	@echo "  eval-experiment - run eval experiment (CONFIG=, DATASET=)"
+	@echo "  eval-analyze   - analyze eval run (RUN=)"
+	@echo "  eval-compare   - compare eval runs (RUN_A=, RUN_B=)"
+	@echo "  check-traces   - verify Langfuse traces for web+telegram chat"
 
 dev:
 	@echo "Run: make dev-backend & make dev-frontend & make dev-bot (3 terminals)"
@@ -152,6 +162,9 @@ check-chat-stream:
 check-langfuse:
 	cd $(BACKEND_DIR) && uv run python scripts/check_api.py langfuse
 
+check-traces:
+	cd $(BACKEND_DIR) && uv run python scripts/check_api.py traces
+
 langfuse-upload-dataset:
 	cd $(BACKEND_DIR) && uv run python scripts/upload_langfuse_dataset.py \
 		--input ../$(DATASET_JSONL) \
@@ -169,3 +182,6 @@ chat-telegram:
 
 chat-stream:
 	cd $(BACKEND_DIR) && CHAT_MESSAGE='$(CHAT_MESSAGE)' uv run python scripts/request_chat.py stream
+
+eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare:
+	$(MAKE) -C $(EVALS_DIR) $(subst eval-,,$@)

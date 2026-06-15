@@ -6,13 +6,14 @@ import json
 import logging
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from langchain_core.messages import HumanMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.prebuilt import create_react_agent
 
-from app.agent.prompts import SYSTEM_PROMPT
+from app.agent.config_registry import get_default_config_id, get_run_config
+from app.agent.prompt_resolver import resolve_prompt
 from app.agent.step_labels import (
     DEFAULT_ANALYZE_LABEL,
     DEFAULT_RESPOND_LABEL,
@@ -24,6 +25,9 @@ from app.integrations.langfuse import get_langfuse_callbacks
 from app.integrations.openrouter import create_chat_model, map_openai_exception
 from app.memory.sessions import get_session_store
 from app.tools.registry import get_agent_tools
+
+if TYPE_CHECKING:
+    from app.agent.run_config import RunConfig
 
 logger = logging.getLogger(__name__)
 
@@ -52,15 +56,24 @@ class _StreamState:
 
 
 class ReactAgentRunner:
-    def __init__(self) -> None:
+    def __init__(self, run_config: RunConfig) -> None:
         settings = get_settings()
         self._settings = settings
+        self._run_config = run_config
         self._tools = get_agent_tools()
         self._graph = create_react_agent(
-            create_chat_model(settings),
+            create_chat_model(
+                settings,
+                model=run_config.model.name,
+                temperature=run_config.model.temperature,
+            ),
             self._tools,
-            prompt=SYSTEM_PROMPT,
+            prompt=resolve_prompt(run_config.prompt),
         )
+
+    @property
+    def config_id(self) -> str:
+        return self._run_config.config_id
 
     async def run(
         self,
@@ -68,9 +81,15 @@ class ReactAgentRunner:
         message: str,
         *,
         channel: str = "web",
+        extra_metadata: dict[str, Any] | None = None,
     ) -> AgentRunResult:
         events: list[StreamEvent] = []
-        async for event in self.stream(session_id, message, channel=channel):
+        async for event in self.stream(
+            session_id,
+            message,
+            channel=channel,
+            extra_metadata=extra_metadata,
+        ):
             if event.event == "token":
                 events.append(event)
         reply = "".join(item.data.get("text", "") for item in events if item.event == "token")
@@ -84,6 +103,7 @@ class ReactAgentRunner:
         message: str,
         *,
         channel: str = "web",
+        extra_metadata: dict[str, Any] | None = None,
     ) -> AsyncIterator[StreamEvent]:
         store = get_session_store()
         history = store.get_messages(session_id)
@@ -97,12 +117,19 @@ class ReactAgentRunner:
         state.active_step_id = analyze_id
 
         messages = [*history, HumanMessage(content=message)]
+        trace_metadata = {
+            "channel": channel,
+            "session_id": session_id,
+            **self._run_config.to_metadata(),
+        }
+        if extra_metadata:
+            trace_metadata.update(extra_metadata)
         config = cast(
             "RunnableConfig",
             {
                 "callbacks": get_langfuse_callbacks(self._settings),
-                "metadata": {"channel": channel, "session_id": session_id},
-                "tags": [channel],
+                "metadata": trace_metadata,
+                "tags": [channel, self._run_config.config_id],
             },
         )
 
@@ -190,19 +217,18 @@ class ReactAgentRunner:
                 yield StreamEvent(event="token", data={"text": text})
 
 
-_runner: ReactAgentRunner | None = None
+_runners: dict[str, ReactAgentRunner] = {}
 
 
-def get_agent_runner() -> ReactAgentRunner:
-    global _runner
-    if _runner is None:
-        _runner = ReactAgentRunner()
-    return _runner
+def get_agent_runner(config_id: str | None = None) -> ReactAgentRunner:
+    cid = config_id or get_default_config_id()
+    if cid not in _runners:
+        _runners[cid] = ReactAgentRunner(get_run_config(cid))
+    return _runners[cid]
 
 
 def reset_agent_runner() -> None:
-    global _runner
-    _runner = None
+    _runners.clear()
 
 
 def format_sse(event: StreamEvent) -> str:

@@ -62,6 +62,14 @@ alwaysApply: true
 | Docker, контейнеры, multi-stage, health checks | `docker-expert` | `.agents/skills/docker-expert/SKILL.md` |
 | GitHub Actions CI/CD | `github-actions-templates` | `.agents/skills/github-actions-templates/SKILL.md` |
 
+### Eval / Метрики
+
+| Тип работы | Skill / Ресурс | Путь |
+|-----------|-------|------|
+| Работа с датасетами, прогоны экспериментов, Langfuse | `langfuse` | `.agents/skills/langfuse/SKILL.md` |
+| Выбор метрик (категории A–E, RAGAS, DeepEval, G-Eval) | — | `.methodology/eval/metrics-guide.md` |
+| Eval-трек: онбординг, принципы E-*, поток работы | — | `.methodology/eval/eval-methodology.md` |
+
 ---
 
 ## Если нужного skill нет

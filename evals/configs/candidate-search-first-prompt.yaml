@@ -1,0 +1,29 @@
+# Eval-fix loop iteration 1: search-before-answer prompt (E-7/E-22)
+config_id: candidate-search-first-prompt
+comment: "Candidate: enforce search_knowledge_base before any answer or clarification"
+benchmark_only: true
+
+agent:
+  impl: langchain-react
+  api_url: http://localhost:8000/api/v1/chat
+
+retrieval:
+  backend: in-memory
+
+model:
+  provider: openrouter
+  name: ${LLM_MODEL}
+  temperature: ${LLM_TEMPERATURE}
+
+judge:
+  provider: openrouter
+  name: ${EVAL_JUDGE_MODEL}
+  temperature: ${EVAL_JUDGE_TEMPERATURE}
+
+prompt:
+  source: file
+  path: backend/app/agent/prompts.py
+  name: SYSTEM_PROMPT_SEARCH_FIRST
+
+datasets:
+  e2e-qa: v001

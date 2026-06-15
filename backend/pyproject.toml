@@ -12,6 +12,7 @@ dependencies = [
     "langfuse>=4.7.1",
     "langgraph>=1.2.4",
     "pydantic-settings>=2.14.1",
+    "pyyaml>=6.0.2",
     "uvicorn>=0.49.0",
 ]
 
@@ -22,6 +23,7 @@ dev = [
     "pytest>=9.0.3",
     "pytest-asyncio>=1.4.0",
     "ruff>=0.15.16",
+    "types-PyYAML>=6.0.12.20250915",
 ]
 
 [tool.pytest.ini_options]
@@ -67,7 +69,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "scripts/**/*.py" = ["T201", "PLR2004", "INP001", "TRY003", "EM102", "B007", "S607"]
 "tests/**/*.py" = ["S101", "PLR2004", "PLC0415", "ARG001", "ANN001", "ANN202"]
-"app/api/routers/chat.py" = ["ANN202"]
+"app/api/routers/chat.py" = ["ANN202", "ANN001"]
 "app/integrations/langfuse.py" = ["PLC0415", "S310"]
 
 [tool.mypy]

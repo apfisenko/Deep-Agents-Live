@@ -10,6 +10,7 @@ class ChatRequest(BaseModel):
     session_id: UUID
     channel: Literal["web", "telegram"]
     message: str = Field(min_length=1, max_length=4000)
+    config_id: str | None = Field(default=None, max_length=128)
     metadata: dict[str, Any] | None = None
 
     @field_validator("message")

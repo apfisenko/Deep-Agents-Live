@@ -6,9 +6,11 @@ import argparse
 import os
 import sys
 import time
+import uuid
 from typing import Any
 
 import httpx
+from langfuse import Langfuse
 
 DEFAULT_SESSION_ID = "550e8400-e29b-41d4-a716-446655440000"
 DEFAULT_MESSAGE = "Какой курс для новичка?"
@@ -115,6 +117,72 @@ def check_chat_stream(client: httpx.Client, *, message: str) -> None:
     _ok(f"POST /api/v1/chat/stream -> events: {', '.join(events)}")
 
 
+def check_langfuse_traces(client: httpx.Client, *, message: str) -> None:
+    """Send web + telegram chat and verify Langfuse traces appear."""
+    if os.getenv("LANGFUSE_ENABLED", "false").lower() not in {"1", "true", "yes"}:
+        _fail("LANGFUSE_ENABLED must be true for trace check")
+
+    public_key = os.getenv("LANGFUSE_PUBLIC_KEY", "")
+    secret_key = os.getenv("LANGFUSE_SECRET_KEY", "")
+    host = _langfuse_url()
+    if not public_key or not secret_key:
+        _fail("LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY required for trace check")
+
+    web_session = str(uuid.uuid4())
+    tg_session = str(uuid.uuid4())
+
+    web_body = {
+        "session_id": web_session,
+        "channel": "web",
+        "message": message,
+        "metadata": {"trace_check": "web"},
+    }
+    tg_body = {
+        "session_id": tg_session,
+        "channel": "telegram",
+        "message": message,
+        "metadata": {"trace_check": "telegram"},
+    }
+
+    with client.stream(
+        "POST",
+        "/api/v1/chat/stream",
+        json=web_body,
+        timeout=STREAM_TIMEOUT_SEC,
+    ) as response:
+        if response.status_code != 200:
+            _fail(f"POST /api/v1/chat/stream -> {response.status_code}")
+
+    tg_resp = client.post("/api/v1/chat", json=tg_body)
+    if tg_resp.status_code != 200:
+        _fail(f"POST /api/v1/chat -> {tg_resp.status_code}: {tg_resp.text}")
+
+    flush_sec = float(os.getenv("LANGFUSE_FLUSH_INTERVAL_SEC", "5"))
+    time.sleep(flush_sec + 2)
+
+    langfuse = Langfuse(public_key=public_key, secret_key=secret_key, host=host)
+    langfuse.flush()
+    time.sleep(2)
+
+    traces = langfuse.api.trace.list(limit=100)
+    found_web = any(
+        (trace.metadata or {}).get("session_id") == web_session for trace in traces.data
+    )
+    found_tg = any(
+        (trace.metadata or {}).get("session_id") == tg_session for trace in traces.data
+    )
+
+    if not found_web:
+        _fail(f"Langfuse trace not found for web session_id={web_session}")
+    if not found_tg:
+        _fail(f"Langfuse trace not found for telegram session_id={tg_session}")
+
+    _ok(
+        f"Langfuse traces found for web + telegram "
+        f"(sessions {web_session[:8]}..., {tg_session[:8]}...)",
+    )
+
+
 def check_langfuse(*, wait: bool = True) -> None:
     url = f"{_langfuse_url()}/api/public/health"
     deadline = time.monotonic() + (LANGFUSE_WAIT_SEC if wait else 0)
@@ -180,7 +248,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Smoke-check Agent Core HTTP API")
     parser.add_argument(
         "command",
-        choices=["health", "reindex", "chat", "chat-stream", "langfuse", "api"],
+        choices=["health", "reindex", "chat", "chat-stream", "langfuse", "traces", "api"],
         help="check to run",
     )
     parser.add_argument(
@@ -198,6 +266,17 @@ def main() -> None:
     if args.command == "langfuse":
         check_langfuse(wait=not args.no_wait)
         _ok("langfuse check passed")
+        return
+
+    if args.command == "traces":
+        base = _backend_url()
+        print(f"Backend: {base}")
+        timeout = httpx.Timeout(CHAT_TIMEOUT_SEC, connect=10.0)
+        check_langfuse(wait=not args.no_wait)
+        with httpx.Client(base_url=base, timeout=timeout, trust_env=False) as client:
+            check_reindex(client)
+            check_langfuse_traces(client, message=args.message)
+        _ok("langfuse traces check passed")
         return
 
     if args.command == "api":

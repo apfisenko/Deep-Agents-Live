@@ -1,0 +1,35 @@
+# Baseline run config (E-7: неприкосновенен после создания)
+config_id: baseline-react-inmemory
+comment: "MVP prod: LangChain ReAct, in-memory RAG, file prompt (E-10 migration later)"
+benchmark_only: false
+
+agent:
+  impl: langchain-react
+  api_url: http://localhost:8000/api/v1/chat
+
+retrieval:
+  backend: in-memory
+
+model:
+  provider: openrouter
+  name: ${LLM_MODEL}
+  temperature: ${LLM_TEMPERATURE}
+
+judge:
+  provider: openrouter
+  name: ${EVAL_JUDGE_MODEL}
+  temperature: ${EVAL_JUDGE_TEMPERATURE}
+
+prompt:
+  source: file
+  path: backend/app/agent/prompts.py
+  name: SYSTEM_PROMPT
+
+datasets:
+  e2e-qa: v001
+  rag-format-facts: v001
+  rag-product-facts: v001
+  segment-routing: v001
+  funnel-to-lead: v001
+  out-of-catalog: v001
+  objections-trust: v001

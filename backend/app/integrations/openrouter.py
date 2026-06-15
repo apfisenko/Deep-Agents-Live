@@ -24,13 +24,18 @@ def _default_headers(settings: Settings) -> dict[str, str]:
     return headers
 
 
-def create_chat_model(settings: Settings | None = None, *, model: str | None = None) -> ChatOpenAI:
+def create_chat_model(
+    settings: Settings | None = None,
+    *,
+    model: str | None = None,
+    temperature: float | None = None,
+) -> ChatOpenAI:
     cfg = settings or get_settings()
     return ChatOpenAI(  # type: ignore[call-arg]
         model=model or cfg.llm_model,
         api_key=cfg.openrouter_api_key,
         base_url=cfg.openrouter_base_url,
-        temperature=cfg.llm_temperature,
+        temperature=cfg.llm_temperature if temperature is None else temperature,
         max_tokens=cfg.llm_max_tokens,
         timeout=cfg.llm_timeout_sec,
         max_retries=0,
@@ -143,11 +148,7 @@ def invoke_with_fallback(
         return runner(create_chat_model(settings, model=primary_model))
     except (APIStatusError, APITimeoutError, APIConnectionError, httpx.HTTPError) as exc:
         mapped = map_openai_exception(exc)
-        if (
-            isinstance(mapped, ModelError)
-            and fallback_model
-            and fallback_model != primary_model
-        ):
+        if isinstance(mapped, ModelError) and fallback_model and fallback_model != primary_model:
             logger.warning(
                 "LLM fallback",
                 extra={"operation": operation, "from": primary_model, "to": fallback_model},

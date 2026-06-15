@@ -1,0 +1,461 @@
+dataset: rag-product-facts
+group: rag
+version: v001
+created: '2026-06-15'
+description: 'RAG layer: product composition, price, combo vs SKU (G2)'
+items:
+- id: rag-prod-ext-005
+  input:
+    message: Подскажите, не планируете ли проводить курс по AI-кодингу веб-проектов (фронтенд / бэкенд)?
+      Возможно у вас есть в записях.
+    channel: web
+  expected_output:
+    answer: 'Отдельного B2C-курса «только веб front/back» в каталоге сейчас нет.
+
+
+      Ближе всего:
+
+      • **AI-driven Fullstack** — полный цикл (frontend, backend, DevOps) в AI-driven подходе.
+
+      • **AI-driven разработка ИИ-агентов** — методика применима и к веб-проектам; есть потоки и записи.
+
+
+      Комплекс «бот + веб + бэк + API» для **корпоративных заказчиков** — отдельное направление (B2B),
+      не розничная оплата на сайте. Если интересен веб для себя — могу сузить рекомендацию под ваш уровень;
+      если для компании — переведу на корпоративный формат.'
+  metadata:
+    segment: b2c
+    intent: compare
+    source: real_dialog
+    gt_quality: verified
+    product_id: ai-driven-fullstack
+    facts:
+    - нет отдельного b2c веб-only курса
+    - fullstack покрывает веб-стек
+    - agents — методика для веб
+    - корп. веб — B2B
+    source_chat: CHAT_0070
+    legacy_id: ext-005
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-ext-006
+  input:
+    message: ИТ разработка, в основном в области ИИ. Но код сам не пишу. Ближе к CPO. В целом руку набить
+      на инструменте хочу, чтото сам прототипировать.
+    channel: telegram
+  expected_output:
+    answer: 'Профиль CPO без ежедневного кодинга — как раз целевая аудитория наших программ: в AI-driven
+      подходе **пишет в основном Cursor/агент**, а не вы вручную.
+
+
+      Логичный маршрут — **комбо «ИИ-агенты»** (ai-agents-combo): от интенсива в Cursor → Fullstack →
+      агенты → Deep Agents одной траекторией, можно в записи и в потоке.
+
+
+      Если нужен быстрый старт без длинной траектории — только **интенсив в Cursor** (ai-coding-intensive-cursor).
+      Могу кратко сравнить комбо и интенсив по времени и цене.'
+  metadata:
+    segment: b2c
+    intent: combo
+    source: real_dialog
+    gt_quality: verified
+    product_id: ai-agents-combo
+    facts:
+    - CPO/не пишет код — ЦА
+    - комбо — полная траектория
+    - альтернатива — интенсив cursor
+    source_chat: CHAT_0014
+    legacy_id: ext-006
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-ext-009
+  input:
+    message: "Понял. Я бы купил курс, но именно эта неделя (до 15 сентября) очень загруженная. У вас следующий\
+      \ поток когда? \nБудет ли ещё в сентябре набор?"
+    channel: web
+  expected_output:
+    answer: 'Для **AI-driven разработка ИИ-агентов** (ai-coding-agents-base) можно зайти в **текущий поток**
+      (если ещё открыт набор) или дождаться **следующего набора** — в переписке ориентировали на **сентябрь**,
+      точные даты публикуются на llmstart.ru/agents/.
+
+
+      Курс также доступен **в записи** — можно начать позже в своём темпе, если live сейчас неудобен.
+
+
+      Напишите, интересен полный курс агентов или короткий **интенсив в Cursor** — подскажу ближайшие
+      даты именно для вашего варианта.'
+  metadata:
+    segment: b2c
+    intent: product-fit
+    source: real_dialog
+    gt_quality: approximate
+    product_id: ai-coding-agents-base
+    facts:
+    - набор/поток — смотреть на сайте agents
+    - есть формат в записи
+    - сентябрьский набор упоминался
+    source_chat: CHAT_0070
+    legacy_id: ext-009
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-ext-010
+  input:
+    message: Привет. Ну я давно хотел попробовать курсор. Я много чего делаю с ИИ, но вообще не программист.
+      Но мне не подходит по формату затрат времени — я не смогу потратить рабочую пятницу на звонок.
+    channel: telegram
+  expected_output:
+    answer: 'Вам подходит **интенсив AI-кодинг в Cursor** (ai-coding-intensive-cursor) по содержанию —
+      он как раз для не-программистов, которые работают с ИИ.
+
+
+      Текущий поток с созвоном в **рабочую пятницу 10:00 МСК** вам не подойдёт для live. Варианты:
+
+      • дождаться **следующего потока** (в анонсах — **суббота или вечер**);
+
+      • если готовы к асинхрону — **запись** созвона + чат недели (но только если реально будете смотреть
+      запись).
+
+
+      Альтернатива с гибким темпом без жёсткой пятницы — **комбо** или курс агентов **в записи**. Что
+      важнее: именно Cursor за 1–2 недели или длинная траектория?'
+  metadata:
+    segment: b2c
+    intent: compare
+    source: real_dialog
+    gt_quality: verified
+    product_id: ai-coding-intensive-cursor
+    facts:
+    - интенсив для не-программистов
+    - пятница 10:00 — текущий поток
+    - след. поток — суббота/вечер
+    - запись + чат
+    source_chat: CHAT_0020
+    legacy_id: ext-010
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-ext-011
+  input:
+    message: можете показать  какие то отрывки материалов прошлого курса? пока не понимаю что за предмет
+      вы преподаете. интересуют именно отрывки материалов прошлого курса, стоит ли платить такие большие
+      деньги
+    channel: web
+  expected_output:
+    answer: 'Понимаю запрос: хотите **увидеть урок**, а не только описание.
+
+
+      При покупке **комбо «ИИ-агенты»** (ai-agents-combo) сразу открывается доступ к **курсу 2025 в записи**
+      — можно оценить стиль и глубину до полного прохождения live-части 2026. Действует **гарантия возврата
+      14 дней** (за вычетом комиссий платёжки, если применимо).
+
+
+      Чтобы предложить релевантный фрагмент: уточните, что ближе — **интенсив Cursor**, **Fullstack**,
+      **агенты** или **Deep Agents**? Публичные демо-ссылки на все курсы сразу мы не выдаём — подберём
+      программу под ваш уровень.'
+  metadata:
+    segment: b2c
+    intent: product-fit
+    source: real_dialog
+    gt_quality: approximate
+    product_id: ai-agents-combo
+    facts:
+    - комбо даёт доступ к записи 2025
+    - возврат 14 дней
+    - нужно уточнить какой курс для демо
+    source_chat: CHAT_0110
+    legacy_id: ext-011
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-ext-012
+  input:
+    message: 'мне очень много лет и я в этом бизнесе очень давно. меня не привлекают картинки и отзывы.
+
+      вам проще показать какой то материал, что бы я мог сделать вывод о том стоит ли мне платить или
+      нет'
+    channel: web
+  expected_output:
+    answer: 'Понимаю: нужен **фрагмент урока**, а не отзывы.
+
+
+      Сначала сузим программу — у нас несколько курсов (интенсив, Fullstack, агенты, Deep Agents, комбо).
+      Напишите, что хотите получить от обучения (например, «агенты под продукт» или «прототипы») — предложу
+      **один** SKU и как посмотреть материал.
+
+
+      С **комбо** сразу доступна **запись 2025** для оценки качества; есть **возврат 14 дней**. Без понимания
+      цели не буду навязывать оплату.'
+  metadata:
+    segment: b2c
+    intent: product-fit
+    source: real_dialog
+    gt_quality: approximate
+    product_id: ai-agents-combo
+    facts:
+    - нужен фрагмент урока не отзывы
+    - уточнить цель и один SKU
+    - комбо — запись 2025
+    - возврат 14 дней
+    source_chat: CHAT_0110
+    legacy_id: ext-012
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-ext-015
+  input:
+    message: 'Добрый день!
+
+      Спасибо за предложение. Я уже разобрался но думаю что многие заинтересуются модулем по веб-разработке.'
+    channel: web
+  expected_output:
+    answer: 'Рад, что удалось разобраться.
+
+
+      Модуль **веб / Fullstack** как раз входит в **комбо 2026** (ступень AI-driven Fullstack) — для тех,
+      кому нужен полный цикл frontend+backend в AI-driven подходе.
+
+
+      Если будете рекомендовать коллегам — ориентир: **ai-agents-combo** на llmstart.ru/ai-agents-combo/
+      или отдельно **ai-driven-fullstack** для фокуса только на веб-стеке. Нужна короткая сравнительная
+      памятка — пришлю.'
+  metadata:
+    segment: b2c
+    intent: combo
+    source: real_dialog
+    gt_quality: verified
+    product_id: ai-agents-combo
+    facts:
+    - веб в комбо 2026
+    - отдельный SKU fullstack
+    - клиент уже купил/разобрался
+    source_chat: CHAT_0070
+    legacy_id: ext-015
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-syn-005
+  input:
+    message: Deep Agents — это продолжение базового курса по агентам или можно сразу? В чём суть программы?
+    channel: telegram
+  expected_output:
+    answer: '**deep-agents-advanced** — **продвинутый** курс (ступень 4 комбо). Нужна база LLM/RAG/агентов;
+      с нуля — сначала **agents** или комбо.
+
+
+      **Суть:** прототип → **MVP/production**: датасет-менеджмент, **GraphRAG**, Deep Agents (planning,
+      subagents), **evals & red teaming**, prompt management, **A2A/A2UI**.
+
+
+      12 live × 2 ч, ~2 мес. · 44 990 ₽ · llmstart.ru/deep-agents/'
+  metadata:
+    segment: b2c
+    intent: product-fit
+    source: synthetic
+    gt_quality: verified
+    product_id: deep-agents-advanced
+    facts:
+    - продвинутый
+    - база agents
+    - GraphRAG evals A2A
+    - 12 занятий
+    source_chat: null
+    legacy_id: syn-005
+    source_kb: data/b2c/programs/deep-agents-advanced.md
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-syn-009
+  input:
+    message: Что входит в комбо «ИИ-агенты» — это один курс или несколько? Зачем брать комбо, а не по
+      отдельности?
+    channel: web
+  expected_output:
+    answer: "**ai-agents-combo** — **4 последовательные ступени**, не разрозненные курсы:\n\n1. Интенсив\
+      \ **Cursor**  \n2. **Fullstack**  \n3. **ИИ-агенты** (RAG, LangGraph, MCP…)  \n4. **Deep Agents**\
+      \  \n\n**Зачем комбо:** единая траектория 0→expert, скидка **~56%** (59 990 ₽ vs ~140 000 ₽ по отдельности),\
+      \ портфолио по всему стеку.\n\nСразу доступ к **записям 2025** + онлайн-потоки 2026. llmstart.ru/ai-agents-combo/"
+  metadata:
+    segment: b2c
+    intent: combo
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-agents-combo
+    facts:
+    - 4 ступени
+    - 59990 vs 140k
+    - скидка 56%
+    - траектория 0 to expert
+    source_chat: null
+    legacy_id: syn-009
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-syn-012
+  input:
+    message: Ищу курс для физлица — хочу только Deep Agents без всего комбо. Есть такая опция?
+    channel: telegram
+  expected_output:
+    answer: 'Да — **deep-agents-advanced** продаётся **отдельно** (44 990 ₽), не только в комбо.
+
+
+      Условие: нужна **база** по LLM, RAG и агентам (обычно после **ai-coding-agents-base** или опыта
+      в проекте). С нуля рекомендую хотя бы **интенсив** или сразу **комбо** со скидкой.
+
+
+      Формат: 12 live-занятий по 2 ч. Оплата B2C — через сайт/ссылку на продукт. llmstart.ru/deep-agents/'
+  metadata:
+    segment: b2c
+    intent: product-fit
+    source: synthetic
+    gt_quality: verified
+    product_id: deep-agents-advanced
+    facts:
+    - deep отдельно 44990
+    - нужна база agents
+    - b2c оплата
+    - 12 live
+    source_chat: null
+    legacy_id: syn-012
+    source_kb: data/b2c/programs/deep-agents-advanced.md
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-syn-013
+  input:
+    message: Сколько стоит интенсив в Cursor отдельно и что входит в цену?
+    channel: web
+  expected_output:
+    answer: '**Интенсив AI-кодинг в Cursor** (ai-coding-intensive-cursor) — **14 990 ₽**.
+
+
+      В цену: 4 модуля, 3 проекта в портфолио, видеоуроки, чат поддержки, гайды (AIDD, локальные/облачные
+      LLM). Доступ **1 год**, возврат **14 дней**.
+
+
+      llmstart.ru/vibe-coding/'
+  metadata:
+    segment: b2c
+    intent: product-fit
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-coding-intensive-cursor
+    facts:
+    - '14990'
+    - 4 модуля
+    - 3 проекта
+    - доступ 1 год
+    - возврат 14 дней
+    source_kb: data/b2c/programs/ai-coding-intensive-cursor.md
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-syn-014
+  input:
+    message: AI-driven Fullstack — какая цена и что получу за эти деньги?
+    channel: telegram
+  expected_output:
+    answer: '**AI-driven Fullstack** (ai-driven-fullstack) — **39 990 ₽**.
+
+
+      Полный цикл: Telegram-бот → backend API → БД → frontend → DevOps/CI/CD → production. 10 занятий
+      ~1,5 мес., запись + чат, доступ 1 год.
+
+
+      llmstart.ru/fullstack-aidd/'
+  metadata:
+    segment: b2c
+    intent: product-fit
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-driven-fullstack
+    facts:
+    - '39990'
+    - 10 занятий
+    - full cycle
+    - доступ 1 год
+    source_kb: data/b2c/programs/ai-driven-fullstack.md
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-syn-015
+  input:
+    message: Чем отличается интенсив в Cursor от полного курса по агентам — кому что брать?
+    channel: web
+  expected_output:
+    answer: '**Интенсив Cursor** (14 990 ₽) — быстрый старт за ~2 недели, 3 LLM-проекта, для не-программистов
+      и быстрого портфолио.
+
+
+      **Курс агентов** (ai-coding-agents-base, 39 990 ₽) — ~1,5 мес., production RAG/LangGraph/MCP, нужна
+      база в ИТ.
+
+
+      Не заменяют друг друга: интенсив → вход; agents → специализация. Комбо даёт обе ступени со скидкой.'
+  metadata:
+    segment: b2c
+    intent: compare
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-coding-agents-base
+    facts:
+    - интенсив 14990
+    - agents 39990
+    - разная ЦА
+    - комбо объединяет
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-syn-016
+  input:
+    message: Курс по агентам — цена и можно ли купить без комбо?
+    channel: web
+  expected_output:
+    answer: '**AI-driven разработка ИИ-агентов** (ai-coding-agents-base) — **39 990 ₽** отдельно.
+
+
+      11 занятий (~1,5 мес.), гибрид 8 live + 3 в записи, чат, доступ 1 год. Покупка B2C на сайте без
+      комбо — возможна.
+
+
+      llmstart.ru/agents/'
+  metadata:
+    segment: b2c
+    intent: product-fit
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-coding-agents-base
+    facts:
+    - '39990'
+    - отдельно от комбо
+    - 11 занятий
+    - b2c на сайте
+    source_kb: data/b2c/programs/ai-coding-agents-base.md
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-syn-017
+  input:
+    message: Если куплю только Fullstack и Agents без интенсива и Deep — сколько выйдет?
+    channel: telegram
+  expected_output:
+    answer: 'Отдельно: **Fullstack** 39 990 ₽ + **Agents** 39 990 ₽ = **79 980 ₽** (без интенсива 14 990
+      ₽ и Deep Agents 44 990 ₽).
+
+
+      Комбо все 4 ступени — **59 990 ₽** (~56% скидка vs ~140 000 ₽ по отдельности). Если нужны только
+      2 курса — комбо может быть не выгоднее пары SKU; считайте под свой маршрут.'
+  metadata:
+    segment: b2c
+    intent: compare
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-agents-combo
+    facts:
+    - fullstack+agents 79980
+    - комбо 59990
+    - скидка 56%
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: rag-prod-syn-018
+  input:
+    message: Deep Agents отдельно — цена и что входит?
+    channel: web
+  expected_output:
+    answer: '**Deep Agents** (deep-agents-advanced) — **44 990 ₽** отдельно (ступень 4 комбо).
+
+
+      12 live × 2 ч, GraphRAG, Deep Agents patterns, evals/red team, A2A/A2UI. Нужна база agents/RAG.
+      Доступ 1 год, чат.
+
+
+      llmstart.ru/deep-agents/'
+  metadata:
+    segment: b2c
+    intent: product-fit
+    source: synthetic
+    gt_quality: verified
+    product_id: deep-agents-advanced
+    facts:
+    - '44990'
+    - 12 live
+    - нужна база agents
+    - отдельная покупка
+    source_kb: data/b2c/programs/deep-agents-advanced.md
+    reviewed_by: user-approved-2026-06-15

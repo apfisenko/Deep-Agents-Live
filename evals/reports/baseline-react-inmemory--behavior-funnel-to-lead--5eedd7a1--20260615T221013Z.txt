@@ -1,0 +1,24 @@
+Individual Results: Hidden (2 items)
+💡 Set include_item_results=True to view them
+
+──────────────────────────────────────────────────
+🧪 Experiment: baseline-behavior/funnel-to-lead/v001
+📋 Run name: baseline-react-inmemory--behavior-funnel-to-lead--5eedd7a1--20260615T221013Z - MVP prod: LangChain ReAct, in-memory RAG, file prompt (E-10 migration later)
+2 items
+Evaluations:
+  • tool_correctness
+  • state_check_lead
+  • task_error
+  • task_completion
+
+Average Scores:
+  • tool_correctness: 0.375
+  • state_check_lead: 0.000
+  • task_error: 0.500
+  • task_completion: 0.188
+
+Run Evaluations:
+  • error_rate: 0.500
+  • avg_tool_correctness: 0.375
+  • avg_state_check_lead: 0.000
+  • avg_task_completion: 0.188

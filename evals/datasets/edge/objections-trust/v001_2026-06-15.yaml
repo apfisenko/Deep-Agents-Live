@@ -1,0 +1,325 @@
+dataset: objections-trust
+group: edge
+version: v001
+created: '2026-06-15'
+description: 'Edge layer: objections, trust, format-mismatch (G4/G5)'
+items:
+- id: obj-ext-010
+  input:
+    message: Привет. Ну я давно хотел попробовать курсор. Я много чего делаю с ИИ, но вообще не программист.
+      Но мне не подходит по формату затрат времени — я не смогу потратить рабочую пятницу на звонок.
+    channel: telegram
+  expected_output:
+    answer: 'Вам подходит **интенсив AI-кодинг в Cursor** (ai-coding-intensive-cursor) по содержанию —
+      он как раз для не-программистов, которые работают с ИИ.
+
+
+      Текущий поток с созвоном в **рабочую пятницу 10:00 МСК** вам не подойдёт для live. Варианты:
+
+      • дождаться **следующего потока** (в анонсах — **суббота или вечер**);
+
+      • если готовы к асинхрону — **запись** созвона + чат недели (но только если реально будете смотреть
+      запись).
+
+
+      Альтернатива с гибким темпом без жёсткой пятницы — **комбо** или курс агентов **в записи**. Что
+      важнее: именно Cursor за 1–2 недели или длинная траектория?'
+  metadata:
+    segment: b2c
+    intent: format-mismatch
+    source: real_dialog
+    gt_quality: verified
+    product_id: ai-coding-intensive-cursor
+    facts:
+    - интенсив для не-программистов
+    - пятница 10:00 — текущий поток
+    - след. поток — суббота/вечер
+    - запись + чат
+    source_chat: CHAT_0020
+    legacy_id: ext-010
+    reviewed_by: user-approved-2026-06-15
+- id: obj-ext-011
+  input:
+    message: можете показать  какие то отрывки материалов прошлого курса? пока не понимаю что за предмет
+      вы преподаете. интересуют именно отрывки материалов прошлого курса, стоит ли платить такие большие
+      деньги
+    channel: web
+  expected_output:
+    answer: 'Понимаю запрос: хотите **увидеть урок**, а не только описание.
+
+
+      При покупке **комбо «ИИ-агенты»** (ai-agents-combo) сразу открывается доступ к **курсу 2025 в записи**
+      — можно оценить стиль и глубину до полного прохождения live-части 2026. Действует **гарантия возврата
+      14 дней** (за вычетом комиссий платёжки, если применимо).
+
+
+      Чтобы предложить релевантный фрагмент: уточните, что ближе — **интенсив Cursor**, **Fullstack**,
+      **агенты** или **Deep Agents**? Публичные демо-ссылки на все курсы сразу мы не выдаём — подберём
+      программу под ваш уровень.'
+  metadata:
+    segment: b2c
+    intent: objection
+    source: real_dialog
+    gt_quality: approximate
+    product_id: ai-agents-combo
+    facts:
+    - комбо даёт доступ к записи 2025
+    - возврат 14 дней
+    - нужно уточнить какой курс для демо
+    source_chat: CHAT_0110
+    legacy_id: ext-011
+    reviewed_by: user-approved-2026-06-15
+- id: obj-ext-012
+  input:
+    message: 'мне очень много лет и я в этом бизнесе очень давно. меня не привлекают картинки и отзывы.
+
+      вам проще показать какой то материал, что бы я мог сделать вывод о том стоит ли мне платить или
+      нет'
+    channel: web
+  expected_output:
+    answer: 'Понимаю: нужен **фрагмент урока**, а не отзывы.
+
+
+      Сначала сузим программу — у нас несколько курсов (интенсив, Fullstack, агенты, Deep Agents, комбо).
+      Напишите, что хотите получить от обучения (например, «агенты под продукт» или «прототипы») — предложу
+      **один** SKU и как посмотреть материал.
+
+
+      С **комбо** сразу доступна **запись 2025** для оценки качества; есть **возврат 14 дней**. Без понимания
+      цели не буду навязывать оплату.'
+  metadata:
+    segment: b2c
+    intent: objection
+    source: real_dialog
+    gt_quality: approximate
+    product_id: ai-agents-combo
+    facts:
+    - нужен фрагмент урока не отзывы
+    - уточнить цель и один SKU
+    - комбо — запись 2025
+    - возврат 14 дней
+    source_chat: CHAT_0110
+    legacy_id: ext-012
+    reviewed_by: user-approved-2026-06-15
+- id: obj-ext-0110-goal
+  input:
+    message: Зачем вам моя цель? Вам надо привлечь меня, чтобы я заплатил порядочную сумму, а не анкетировать.
+    channel: web
+  expected_output:
+    answer: 'Цель и опыт нужны не «ради анкеты», а чтобы **не продать неподходящий продукт** — мы отказываем,
+      если уровень не match (например, agents без базы).
+
+
+      При этом понимаю запрос на **доказательство качества**: с **комбо** после покупки сразу доступ к
+      **записи 2025** для оценки; **возврат 14 дней** (минус комиссии платёжки, если применимо).
+
+
+      Публичные демо-ссылки на все курсы сразу не выдаём — подберём **один** SKU под вашу цель.'
+  metadata:
+    segment: b2c
+    intent: objection
+    source: real_dialog
+    gt_quality: verified
+    product_id: ai-agents-combo
+    facts:
+    - fit-check не нажива
+    - запись 2025 после покупки
+    - возврат 14 дней
+    - нет публичных демо всех курсов
+    source_chat: CHAT_0110
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: obj-ext-0110-pre
+  input:
+    message: Хочу посмотреть часть уроков до оплаты, а не покупать вслепую и потом просить возврат. Если
+      материал сильный — поделиться фрагментом вам на пользу.
+    channel: web
+  expected_output:
+    answer: 'Согласен: **лучше увидеть стиль до оплаты**, чем полагаться только на возврат.
+
+
+      Политика: **публичные демо-ссылки на все курсы сразу не выдаём**; с **комбо** после покупки открывается
+      **запись 2025** — можно оценить качество в первые **14 дней** и вернуть деньги (за вычетом комиссий,
+      если применимо).
+
+
+      Сначала сузим программу (интенсив / Fullstack / agents / Deep) — предложу **один** SKU и путь к
+      материалу.'
+  metadata:
+    segment: b2c
+    intent: objection
+    source: real_dialog
+    gt_quality: verified
+    product_id: ai-agents-combo
+    facts:
+    - демо до оплаты через запись 2025
+    - возврат 14 дней
+    - нет публичных демо всех курсов
+    - один SKU
+    source_chat: CHAT_0110
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: obj-syn-001
+  input:
+    message: 59 990 за комбо — очень дорого. Почему не дешевле, как на других платформах?
+    channel: web
+  expected_output:
+    answer: 'Комбо — **4 полные ступени** (интенсив → Fullstack → agents → Deep), скидка **~56%** vs ~140
+      000 ₽ по отдельности.
+
+
+      Не буду обещать «как на других платформах» — у нас production-фокус и live/запись + чат. Если бюджет
+      ограничен — можно начать с **интенсива** (14 990 ₽) или одного SKU, не навязывая комбо.
+
+
+      Есть **возврат 14 дней** на B2C-программы — можно оценить запись 2025 в комбо.'
+  metadata:
+    segment: b2c
+    intent: objection
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-agents-combo
+    facts:
+    - 59990 vs 140k
+    - скидка 56%
+    - альтернатива интенсив
+    - возврат 14 дней
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: obj-syn-002
+  input:
+    message: А вы вообще не мошенники? Боюсь переводить такие суммы незнакомой школе.
+    channel: telegram
+  expected_output:
+    answer: 'Понимаю осторожность на **крупной сумме**.
+
+
+      Факты без маркетинга: публичные программы на **llmstart.ru**, оплата через **платёжную систему**,
+      **возврат 14 дней** на B2C-курсы (минус комиссии, если применимо).
+
+
+      С **комбо** — доступ к **записи 2025** сразу после оплаты, можно оценить до полного прохождения.
+      Не буду давить оплатой — уточню цель и предложу один подходящий SKU.'
+  metadata:
+    segment: b2c
+    intent: objection
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-agents-combo
+    facts:
+    - llmstart.ru
+    - возврат 14 дней
+    - запись 2025
+    - без давления
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: obj-syn-003
+  input:
+    message: Как именно работает возврат 14 дней — полная сумма или с удержаниями?
+    channel: web
+  expected_output:
+    answer: 'На B2C-программах действует **гарантия возврата 14 дней** с момента покупки.
+
+
+      По практике — **за вычетом комиссий платёжных посредников**, если они применимы (точные условия
+      зависят от способа оплаты).
+
+
+      Это не «пробный период без оплаты» — доступ открывается после покупки; в комбо можно оценить **запись
+      2025** в эти 14 дней.'
+  metadata:
+    segment: b2c
+    intent: objection
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-agents-combo
+    facts:
+    - возврат 14 дней
+    - минус комиссии платёжки
+    - доступ после оплаты
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15
+- id: obj-syn-004
+  input:
+    message: Курс agents интересен, но live только днём в будни — я не смогу. Запись не подойдёт, мне
+      нужен именно live вечером.
+    channel: telegram
+  expected_output:
+    answer: 'Понимаю: если **live обязателен** и **дневные слоты не подходят**, насильно предлагать «просто
+      запись» не буду.
+
+
+      **Agents** — гибрид (часть live + часть в записи); точное расписание на llmstart.ru/agents/. Если
+      текущий поток не fit — можно **дождаться следующего набора** или рассмотреть **интенсив/комбо в
+      записи** с гибким темпом.
+
+
+      Честно: если вам нужен только вечерний live и вы не смотрите записи — лучше дождаться подходящего
+      потока, чем покупать неудобный формат.'
+  metadata:
+    segment: b2c
+    intent: format-mismatch
+    source: synthetic
+    gt_quality: approximate
+    product_id: ai-coding-agents-base
+    facts:
+    - не навязывать запись
+    - расписание на сайте
+    - следующий поток
+    - честный отказ
+    source_kb: data/b2c/programs/ai-coding-agents-base.md
+    reviewed_by: user-approved-2026-06-15
+- id: obj-syn-005
+  input:
+    message: Я senior, LangChain уже знаю — зачем мне ваш курс agents за 40k?
+    channel: web
+  expected_output:
+    answer: 'Если **LangChain/RAG уже в production** и нужен только **Deep Agents / evals / GraphRAG**
+      — возможно, достаточно **deep-agents-advanced** (44 990 ₽), не базового agents.
+
+
+      **Agents** — про **production-практики** (RAG, LangGraph, MCP, деплой), не intro в LangChain. Не
+      буду обещать «точно нужен» — опишите gap (MCP, evals, деплой) и сузим SKU.
+
+
+      Если курс не подойдёт — **возврат 14 дней** на B2C.'
+  metadata:
+    segment: b2c
+    intent: objection
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-coding-agents-base
+    facts:
+    - senior может deep agents
+    - agents production не intro
+    - возврат 14 дней
+    - сузить SKU
+    source_kb: data/b2c/programs/ai-coding-agents-base.md
+    reviewed_by: user-approved-2026-06-15
+- id: obj-syn-006
+  input:
+    message: Дайте бесплатную ссылку на полный первый урок agents — иначе не куплю.
+    channel: web
+  expected_output:
+    answer: '**Публичные демо-ссылки на полные уроки всех курсов сразу не выдаём** — это политика школы
+      (не скрываем качество, но и не выкладываем весь контент открыто).
+
+
+      Путь оценки: с **комбо** — **запись 2025** сразу после покупки + **возврат 14 дней**; для одного
+      **agents** — оплата на сайте с тем же возвратом.
+
+
+      Не буду обещать «полный первый урок бесплатно по ссылке» — такого в каталоге нет.'
+  metadata:
+    segment: b2c
+    intent: objection
+    source: synthetic
+    gt_quality: verified
+    product_id: ai-coding-agents-base
+    facts:
+    - нет публичных полных уроков
+    - запись 2025 в комбо
+    - возврат 14 дней
+    - не обещать бесплатный full lesson
+    source_kb: data/b2c/programs/ai-agents-combo.md
+    reviewed_by: user-approved-2026-06-15

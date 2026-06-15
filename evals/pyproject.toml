@@ -1,0 +1,42 @@
+[project]
+name = "evals"
+version = "0.1.0"
+description = "Eval contour for Deep-Agents-Live"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "langchain-openai>=1.3.2",
+    "langfuse>=4.7.1",
+    "pydantic>=2.10",
+    "pyyaml>=6.0.2",
+    "ragas==0.4.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["../backend", "scripts"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["scripts", "tests"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D100",
+    "D103",
+    "D104",
+    "INP001",
+    "T201",
+    "PLC0415",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/**/*.py" = ["PLR0913", "PLR0915", "C901", "ARG001", "E402", "D101", "D102", "S310", "PLW2901", "SIM102", "T201", "ANN401", "A002", "BLE001", "S607", "RET504", "E501", "I001", "TC002", "PERF401", "RUF001", "PLR2004", "PLR0911"]
+"tests/**/*.py" = ["S101", "PLR2004", "E501", "I001", "TC002", "RUF001", "TC003"]

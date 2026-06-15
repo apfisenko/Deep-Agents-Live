@@ -1,0 +1,26 @@
+Individual Results: Hidden (2 items)
+💡 Set include_item_results=True to view them
+
+──────────────────────────────────────────────────
+🧪 Experiment: baseline-rag/rag-format-facts/v001
+📋 Run name: baseline-react-inmemory--rag-rag-format-facts----20260615T210610Z - MVP prod: LangChain ReAct, in-memory RAG, file prompt (E-10 migration later)
+2 items
+Evaluations:
+  • fact_coverage
+  • task_error
+  • answer_correctness
+  • faithfulness
+
+Average Scores:
+  • fact_coverage: 0.575
+  • task_error: 0.000
+  • answer_correctness: 0.630
+  • faithfulness: 1.000
+
+Run Evaluations:
+  • error_rate: 0.000
+  • avg_answer_correctness: 0.630
+  • avg_faithfulness: 1.000
+  • avg_fact_coverage: 0.575
+  • avg_context_recall: 0.000
+    💭 no scores

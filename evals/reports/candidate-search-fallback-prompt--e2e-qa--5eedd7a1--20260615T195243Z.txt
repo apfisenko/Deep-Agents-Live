@@ -1,0 +1,24 @@
+Individual Results: Hidden (24 items)
+💡 Set include_item_results=True to view them
+
+──────────────────────────────────────────────────
+🧪 Experiment: baseline-e2e/e2e-qa/v001
+📋 Run name: candidate-search-fallback-prompt--e2e-qa--5eedd7a1--20260615T195243Z - Candidate: search_knowledge_base first, list_b2c_products fallback if empty
+24 items
+Evaluations:
+  • task_error
+  • answer_correctness
+  • faithfulness
+  • answer_relevancy
+
+Average Scores:
+  • task_error: 0.000
+  • answer_correctness: 0.321
+  • faithfulness: 0.771
+  • answer_relevancy: 0.441
+
+Run Evaluations:
+  • error_rate: 0.000
+  • avg_answer_correctness: 0.321
+  • avg_faithfulness: 0.771
+  • avg_answer_relevancy: 0.441
