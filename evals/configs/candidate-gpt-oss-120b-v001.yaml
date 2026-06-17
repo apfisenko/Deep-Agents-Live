@@ -1,0 +1,33 @@
+# Eval-fix loop: OSS model benchmark (E-7/E-8)
+config_id: candidate-gpt-oss-120b-v001
+comment: "Candidate: openai/gpt-oss-120b:free vs gpt-4o-mini — OSS tool-calling check"
+benchmark_only: true
+
+agent:
+  impl: langchain-react
+  api_url: http://127.0.0.1:8001/api/v1/chat
+
+retrieval:
+  backend: in-memory
+
+model:
+  provider: openrouter
+  name: openai/gpt-oss-120b:free
+  temperature: ${LLM_TEMPERATURE}
+
+judge:
+  provider: openrouter
+  name: ${EVAL_JUDGE_MODEL}
+  temperature: ${EVAL_JUDGE_TEMPERATURE}
+
+prompt:
+  source: file
+  path: ${SYSTEM_PROMPT_PATH}
+  name: SYSTEM_PROMPT_SEARCH_FALLBACK
+
+datasets:
+  e2e-qa: v001
+
+# metrics-guide §C: behavior-layer diagnostic for OSS tool-calling benchmark
+extra_evaluators:
+  - executed_tools_count

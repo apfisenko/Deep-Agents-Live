@@ -27,6 +27,7 @@ Judge для всех RAGAS/DeepEval LLM-метрик: **`google/gemini-2.5-flas
 | Guard | `avg_answer_relevancy` | `e2e/e2e-qa` | Ловит «правильные, но не на вопрос» ответы |
 | Guard | `error_rate` | все датасеты | Run-level; упавший item — метрика, не исключение (E-19) |
 | Guard | `task_error` | все датасеты | Item-level BOOLEAN; обязательна на каждом item |
+| Guard (benchmark_only) | `avg_executed_tools_count` | e2e/e2e-qa + `extra_evaluators` | Behavior §C: tool calling жив; near-zero = несовместимость модели |
 
 ---
 
@@ -46,8 +47,10 @@ Judge для всех RAGAS/DeepEval LLM-метрик: **`google/gemini-2.5-flas
 | `avg_faithfulness` | — | агрегат run | E-19 | run | NUMERIC | **≥ 0.85** | Guard run-level |
 | `avg_answer_relevancy` | — | агрегат run | E-19 | run | NUMERIC | **≥ 0.80** | Guard run-level |
 | `error_rate` | а | `failed_items / total` | metrics-guide §A | run | NUMERIC 0–1 | **≤ 0.05** / &gt; 0.10 | Guard run-level |
+| `executed_tools_count` | а | свой код: `len(tools_called)` из SSE | [metrics-guide §C](../../.methodology/eval/metrics-guide.md) | item: trace | NUMERIC 0–n | **≥ 1** / **&lt; 0.3** | Опционально через `extra_evaluators`; OSS/benchmark guard |
+| `avg_executed_tools_count` | а | агрегат run | E-19 | run | NUMERIC | **≥ 0.5** / **&lt; 0.3** | `benchmark_only`: ранний отсев сломанного tool calling |
 
-**Особые режимы:** generation-метрики — score на trace (end-to-end). Reasoning judge — в Langfuse score comment.
+**Особые режимы:** generation-метрики — score на trace (end-to-end). Reasoning judge — в Langfuse score comment. `executed_tools_count` — не в дефолтном профиле slug; включается `extra_evaluators` в YAML конфига (E-7).
 
 ---
 
@@ -85,8 +88,10 @@ Judge для всех RAGAS/DeepEval LLM-метрик: **`google/gemini-2.5-flas
 | `tool_correctness` | б | DeepEval `ToolCorrectnessMetric` | [Tool Correctness](https://deepeval.com/docs/metrics-tool-correctness) | item: trace | NUMERIC 0–1 | **≥ 0.90** / &lt; 0.70 | `must_not`: no `create_payment_link` for b2b |
 | `answer_correctness` | б | RAGAS `AnswerCorrectness` | см. e2e-qa | item: trace | NUMERIC 0–1 | **≥ 0.70** / &lt; 0.55 | B2B тон + содержание |
 | `task_error` | а | свой код | §A | item: trace | BOOLEAN | = 0 | E-19 |
+| `executed_tools_count` | а | свой код: `len(tools_called)` из SSE | [metrics-guide §C](../../.methodology/eval/metrics-guide.md) | item: trace | NUMERIC 0–n | **≥ 1** / **&lt; 0.3** | Диагностика OSS; через `extra_evaluators` |
+| `avg_executed_tools_count` | а | агрегат run | E-19 | run | NUMERIC | **≥ 0.5** / **&lt; 0.3** | benchmark_only guard |
 
-**Особые режимы:** ToolCorrectness — **IN_ORDER** (E-21). Expected tools в `expected_output` (eval-02 manifest). `executed_tools_count` — диагностика OSS (metrics-guide §C).
+**Особые режимы:** ToolCorrectness — **IN_ORDER** (E-21). Expected tools в `expected_output` (eval-02 manifest).
 
 ---
 
@@ -151,6 +156,7 @@ Run-level ключи — только в `run_metadata`, не в metadata items 
 | Дата | Метрика | Было → стало | Основание |
 |------|---------|--------------|-----------|
 | 2026-06-15 | все пороги в таблицах выше | — (initial) | plan задачи 03; стартовые ориентиры llmstart eval MVP |
+| 2026-06-17 | `executed_tools_count` / `avg_executed_tools_count` | — (initial) | P0 behavior-evaluator; пороги для benchmark_only (metrics-guide §C) |
 
 *Примечание:* пороги на `approximate` gt (E-14) валидны для **относительного** compare конфигов, не для абсолютных SLA.
 

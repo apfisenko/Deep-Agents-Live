@@ -22,7 +22,7 @@ judge:
 
 prompt:
   source: file
-  path: backend/app/agent/prompts.py
+  path: ${SYSTEM_PROMPT_PATH}
   name: SYSTEM_PROMPT
 
 datasets:

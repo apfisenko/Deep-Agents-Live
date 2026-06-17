@@ -59,6 +59,8 @@ class RunConfig(BaseModel):
     judge: JudgeSection
     prompt: PromptSection
     datasets: dict[str, str] = Field(default_factory=dict)
+    # metrics-guide §C: optional behavior-layer evaluators (e.g. executed_tools_count)
+    extra_evaluators: list[str] = Field(default_factory=list)
 
     @classmethod
     def from_yaml_path(cls, path: Path, *, resolve_env: bool = True) -> RunConfig:

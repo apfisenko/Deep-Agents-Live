@@ -1,0 +1,29 @@
+# Eval-fix loop iteration 3: stronger agent model (E-7/E-22)
+config_id: candidate-gpt4o-v001
+comment: "Candidate: openai/gpt-4o vs gpt-4o-mini — generation layer fix"
+benchmark_only: true
+
+agent:
+  impl: langchain-react
+  api_url: http://127.0.0.1:8001/api/v1/chat
+
+retrieval:
+  backend: in-memory
+
+model:
+  provider: openrouter
+  name: openai/gpt-4o
+  temperature: ${LLM_TEMPERATURE}
+
+judge:
+  provider: openrouter
+  name: ${EVAL_JUDGE_MODEL}
+  temperature: ${EVAL_JUDGE_TEMPERATURE}
+
+prompt:
+  source: file
+  path: backend/app/agent/prompts/SYSTEM_PROMPT.txt
+  name: SYSTEM_PROMPT
+
+datasets:
+  e2e-qa: v001

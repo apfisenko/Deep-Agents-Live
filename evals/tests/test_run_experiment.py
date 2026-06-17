@@ -5,8 +5,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from app.agent.run_config import RunConfig
-from dataset_registry import resolve_dataset_target, slug_to_run_suffix
+from dataset_registry import resolve_dataset_target
 from run_experiment import (
     AgentCallResult,
     build_run_metadata,
@@ -22,6 +24,18 @@ CONFIG = EVALS_ROOT / "configs" / "baseline-react-inmemory.yaml"
 MANIFEST = EVALS_ROOT / "datasets" / "e2e" / "e2e-qa" / "v001_2026-06-15.yaml"
 
 
+@pytest.fixture(autouse=True)
+def _eval_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LLM_MODEL", "openai/gpt-4o-mini")
+    monkeypatch.setenv("LLM_TEMPERATURE", "0.2")
+    monkeypatch.setenv("EVAL_JUDGE_MODEL", "google/gemini-2.5-flash-lite")
+    monkeypatch.setenv("EVAL_JUDGE_TEMPERATURE", "0.0")
+    monkeypatch.setenv(
+        "SYSTEM_PROMPT_PATH",
+        "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
+    )
+
+
 def test_run_name_format() -> None:
     config = RunConfig.from_yaml_path(CONFIG)
     name = run_name(config, "e2e-qa")
@@ -30,7 +44,9 @@ def test_run_name_format() -> None:
     assert len(parts) == 4
 
 
-def test_resolve_dataset_target() -> None:
+def test_resolve_dataset_target(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("EVAL_DATASET_PREFIX", raising=False)
+    monkeypatch.delenv("EVAL_DATASET_NAME", raising=False)
     config = RunConfig.from_yaml_path(CONFIG)
     target = resolve_dataset_target(config, "e2e/e2e-qa")
     assert target.full_name == "e2e/e2e-qa/v001"
@@ -38,7 +54,9 @@ def test_resolve_dataset_target() -> None:
     assert target.manifest_path == MANIFEST
 
 
-def test_run_metadata_contains_config_id() -> None:
+def test_run_metadata_contains_config_id(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("EVAL_DATASET_PREFIX", raising=False)
+    monkeypatch.delenv("EVAL_DATASET_NAME", raising=False)
     config = RunConfig.from_yaml_path(CONFIG)
     target = resolve_dataset_target(config, "e2e/e2e-qa")
     metadata = build_run_metadata(
@@ -50,12 +68,14 @@ def test_run_metadata_contains_config_id() -> None:
     assert metadata["dataset_slug"] == "e2e/e2e-qa"
     assert "judge_model" in metadata
     assert "evaluator_profile" in metadata
+    assert "executed_tools_count" in metadata["evaluator_profile"]
+    assert metadata["extra_evaluators"] == "executed_tools_count"
 
 
 def test_resolve_eval_stream_url() -> None:
     assert resolve_eval_stream_url("http://localhost:8000/api/v1/chat").endswith("/chat/stream")
     assert resolve_eval_stream_url("http://localhost:8000/api/v1/chat/stream").endswith(
-        "/chat/stream"
+        "/chat/stream",
     )
 
 
@@ -90,7 +110,9 @@ def test_parse_sse_event_token_and_tool_result() -> None:
 
 
 def test_parse_sse_event_tool_call() -> None:
-    tool = parse_sse_event("tool_call", {"name": "create_payment_link", "args": {"product_id": "x"}})
+    tool = parse_sse_event(
+        "tool_call", {"name": "create_payment_link", "args": {"product_id": "x"}}
+    )
     assert tool == AgentCallResult(tools_called=["create_payment_link"])
 
 
@@ -100,7 +122,7 @@ def test_merge_agent_call_results_tools() -> None:
             AgentCallResult(tools_called=["list_b2c_products"]),
             AgentCallResult(answer="Pay here", contexts=["KB"]),
             AgentCallResult(tools_called=["create_payment_link"]),
-        ]
+        ],
     )
     assert merged.tools_called == ["list_b2c_products", "create_payment_link"]
     assert merged.contexts == ["KB"]

@@ -54,13 +54,13 @@ help:
 	@echo "  check-api      - all checks above"
 	@echo "  chat-telegram  - POST /api/v1/chat (telegram JSON, raw output)"
 	@echo "  chat-stream    - POST /api/v1/chat/stream (web SSE, raw output)"
-	@echo "  eval-help      - eval contour targets (evals/Makefile)"
-	@echo "  eval-build     - build dataset manifest YAML from sources (DATASET=)"
-	@echo "  eval-validate  - validate eval configs and datasets skeleton"
+	@echo "  eval-help      - eval contour help (see evals/README.md)"
+	@echo "  eval-build     - build dataset manifest YAML (DATASET=)"
+	@echo "  eval-validate  - pytest + dry-run all configs/datasets"
 	@echo "  eval-sync      - sync datasets to Langfuse (DATASET=)"
 	@echo "  eval-experiment - run eval experiment (CONFIG=, DATASET=)"
-	@echo "  eval-analyze   - analyze eval run (RUN=)"
-	@echo "  eval-compare   - compare eval runs (RUN_A=, RUN_B=)"
+	@echo "  eval-analyze   - error analysis (RUN=, EMIT_ITEMS=1)"
+	@echo "  eval-compare   - compare runs (RUN_A=, RUN_B=)"
 	@echo "  check-traces   - verify Langfuse traces for web+telegram chat"
 
 dev:

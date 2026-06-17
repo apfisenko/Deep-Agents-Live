@@ -55,6 +55,7 @@ def main() -> None:
                 "facts": meta.get("facts", []),
                 "source_chat": meta.get("source_chat"),
                 "legacy_id": legacy_id,
+                "reviewed_by": "user-approved-2026-06-15",
             },
         }
         items.append(item)

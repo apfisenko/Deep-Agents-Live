@@ -5,7 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from models import DATASETS_DIR, RunConfig, load_manifest, validate_manifest
+from models import (
+    DATASETS_DIR,
+    RunConfig,
+    langfuse_dataset_name,
+    load_manifest,
+    validate_manifest,
+)
 
 DATASET_MIN_ITEMS: dict[str, int] = {
     "e2e/e2e-qa": 20,
@@ -32,7 +38,7 @@ class DatasetTarget:
 
 
 def config_key_for_slug(slug: str) -> str:
-    return slug.split("/")[-1]
+    return slug.rsplit("/", maxsplit=1)[-1]
 
 
 def manifest_path_for_slug(slug: str, version: str) -> Path:
@@ -44,7 +50,12 @@ def manifest_path_for_slug(slug: str, version: str) -> Path:
     return candidates[0]
 
 
-def resolve_dataset_target(config: RunConfig, dataset_arg: str) -> DatasetTarget:
+def resolve_dataset_target(
+    config: RunConfig,
+    dataset_arg: str,
+    *,
+    apply_name_override: bool = False,
+) -> DatasetTarget:
     slug = dataset_arg.strip().strip("/")
     if slug == "e2e-qa":
         slug = "e2e/e2e-qa"
@@ -64,7 +75,7 @@ def resolve_dataset_target(config: RunConfig, dataset_arg: str) -> DatasetTarget
         require_reviewed_by=True,
         min_items=min_items,
     )
-    full_name = f"{manifest.group}/{manifest.dataset}/{manifest.version}"
+    full_name = langfuse_dataset_name(manifest, apply_name_override=apply_name_override)
     return DatasetTarget(
         slug=slug,
         full_name=full_name,

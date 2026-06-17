@@ -1,0 +1,32 @@
+Individual Results: Hidden (24 items)
+💡 Set include_item_results=True to view them
+
+──────────────────────────────────────────────────
+🧪 Experiment: baseline-deep_agents_live_v001
+📋 Run name: baseline-react-inmemory--e2e-e2e-qa--aa4dbe86--20260617T192740Z - MVP prod: ReAct + in-memory RAG; prompt from SYSTEM_PROMPT_PATH (.txt)
+24 items
+Evaluations:
+  • answer_correctness
+  • task_error
+  • faithfulness
+  • executed_tools_count
+  • answer_relevancy
+
+Average Scores:
+  • answer_correctness: 0.337
+  • task_error: 0.000
+  • faithfulness: 0.602
+  • executed_tools_count: 0.833
+  • answer_relevancy: 0.445
+
+Run Evaluations:
+  • error_rate: 0.000
+  • avg_answer_correctness: 0.337
+  • avg_faithfulness: 0.602
+  • avg_answer_relevancy: 0.445
+  • avg_executed_tools_count: 0.833
+
+🔗 Dataset Run:
+   http://localhost:3001/project/default/datasets/cmqibll2e000ks607y228t39v/runs/28939d77-02b8-495a-9baa-7fe146ec5a74
+
+dataset_run_url: http://localhost:3001/project/default/datasets/cmqibll2e000ks607y228t39v/runs/28939d77-02b8-495a-9baa-7fe146ec5a74

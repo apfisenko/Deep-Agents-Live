@@ -150,8 +150,26 @@ def manifest_to_langfuse_item(manifest: DatasetManifest, item: DatasetItem) -> d
     }
 
 
-def langfuse_dataset_name(manifest: DatasetManifest) -> str:
-    base = f"{manifest.group}/{manifest.dataset}/{manifest.version}"
+def langfuse_dataset_base_name(
+    manifest: DatasetManifest,
+    *,
+    apply_name_override: bool = False,
+) -> str:
+    """Return base Langfuse dataset name before optional prefix."""
+    if apply_name_override:
+        explicit = os.environ.get("EVAL_DATASET_NAME", "").strip().strip("/")
+        if explicit:
+            return explicit
+    return f"{manifest.group}/{manifest.dataset}/{manifest.version}"
+
+
+def langfuse_dataset_name(
+    manifest: DatasetManifest,
+    *,
+    apply_name_override: bool = False,
+) -> str:
+    """Full Langfuse dataset name: optional prefix + base (env or manifest path)."""
+    base = langfuse_dataset_base_name(manifest, apply_name_override=apply_name_override)
     prefix = os.environ.get("EVAL_DATASET_PREFIX", "").strip().strip("/")
     if prefix:
         return f"{prefix}/{base}"
@@ -164,6 +182,7 @@ __all__ = [
     "ManifestValidationError",
     "RunConfig",
     "discover_manifests",
+    "langfuse_dataset_base_name",
     "langfuse_dataset_name",
     "load_manifest",
     "manifest_to_langfuse_item",

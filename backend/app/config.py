@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     embedding_timeout_sec: int = Field(default=30, validation_alias="EMBEDDING_TIMEOUT_SEC")
     llm_max_tokens: int = Field(default=2048, validation_alias="LLM_MAX_TOKENS")
     llm_temperature: float = Field(default=0.2, validation_alias="LLM_TEMPERATURE")
+    system_prompt_path: str = Field(
+        default="backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
+        validation_alias="SYSTEM_PROMPT_PATH",
+    )
     openrouter_http_referer: str = Field(default="", validation_alias="OPENROUTER_HTTP_REFERER")
     openrouter_app_title: str = Field(
         default="Deep-Agents-Live",

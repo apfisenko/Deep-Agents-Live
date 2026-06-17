@@ -21,14 +21,18 @@ def test_all_dataset_slugs_count() -> None:
     assert len(ALL_DATASET_SLUGS) == 8
 
 
-def test_resolve_rag_format_facts() -> None:
+def test_resolve_rag_format_facts(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("EVAL_DATASET_PREFIX", raising=False)
+    monkeypatch.delenv("EVAL_DATASET_NAME", raising=False)
     config = RunConfig.from_yaml_path(CONFIG)
     target = resolve_dataset_target(config, "rag/rag-format-facts")
     assert target.full_name == "rag/rag-format-facts/v001"
     assert target.manifest_path.name.startswith("v001_")
 
 
-def test_resolve_all_targets() -> None:
+def test_resolve_all_targets(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("EVAL_DATASET_PREFIX", raising=False)
+    monkeypatch.delenv("EVAL_DATASET_NAME", raising=False)
     config = RunConfig.from_yaml_path(CONFIG)
     targets = resolve_all_dataset_targets(config)
     assert len(targets) == 8

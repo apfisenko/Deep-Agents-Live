@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 import urllib.error
 import urllib.request
@@ -84,6 +83,7 @@ def sync_manifest(
     validate_only: bool,
     require_reviewed_by: bool,
     min_items: int,
+    apply_name_override: bool,
 ) -> int:
     manifest = load_manifest(path)
     validate_manifest(
@@ -96,7 +96,7 @@ def sync_manifest(
         print(f"validate ok: {path} ({len(manifest.items)} items)")
         return 0
 
-    dataset_name = langfuse_dataset_name(manifest)
+    dataset_name = langfuse_dataset_name(manifest, apply_name_override=apply_name_override)
     ensure_dataset(host, headers, dataset_name, manifest.description)
     for item in manifest.items:
         payload = manifest_to_langfuse_item(manifest, item)
@@ -123,6 +123,7 @@ def main() -> int:
         return 0
 
     require_reviewed_by = not args.allow_unreviewed
+    apply_name_override = args.dataset != "all"
     for path in paths:
         min_items = args.min_items if "e2e-qa" in str(path) else 1
         if args.validate_only:
@@ -133,6 +134,7 @@ def main() -> int:
                 validate_only=True,
                 require_reviewed_by=require_reviewed_by,
                 min_items=min_items,
+                apply_name_override=apply_name_override,
             )
             continue
 
@@ -151,6 +153,7 @@ def main() -> int:
             validate_only=False,
             require_reviewed_by=require_reviewed_by,
             min_items=min_items,
+            apply_name_override=apply_name_override,
         )
     return 0
 

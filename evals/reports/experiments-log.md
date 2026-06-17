@@ -11,3 +11,6 @@
 | 2026-06-15 | [exp-loop-02-prompt](exp-loop-02-kb-search-fallback-v001.md) | search-fallback после KB | e2e/e2e-qa@v001 | 0.339 → 0.328 (vs iter1) | faithfulness **0.837** | **reject** (trade-off) |
 | 2026-06-15 | funnel simulation baseline (task 03) | первый multi-turn E-23 | behavior/funnel-to-lead@v001 | — → **tool_corr 0.375** | error_rate **0.50**, state_check **0.00** | **baseline infra** (422 telegram routing; agent order/session) |
 | 2026-06-15 | [error-analysis-e2e](error-analysis-baseline-e2e-qa-v001.md) | K-3 taxonomy + K-4 emit | e2e/e2e-qa@v001 | 22/24 failed items | 5 categories measured | **act** → 10 regression items |
+| 2026-06-17 | [exp-loop-03-gpt4o](exp-loop-03-gpt4o-v001.md) | gpt-4o vs mini — generation | e2e/e2e-qa@v001 | 0.339 → **0.399** | faithfulness **0.604** | **iterate** (+0.060; 173842Z annulled) |
+| 2026-06-17 | [exp-loop-03-oss](exp-loop-03-gpt-oss-120b-v001.md) | gpt-oss-120b:free OSS benchmark | e2e/e2e-qa@v001 | 0.339 → **0.312** | faithfulness 0.716 | **reject** (−0.027; generation 17) |
+| 2026-06-17 | [exp-behavior-evaluator](exp-report-behavior-evaluator-20260617.md) | `executed_tools_count` §C + baseline vs OSS | e2e/e2e-qa@v001 | 0.337 → **0.317** | faithfulness 0.676, **tools 0.917** | **reject OSS** (−0.020); evaluator **accept** |

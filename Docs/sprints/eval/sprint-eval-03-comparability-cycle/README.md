@@ -29,6 +29,22 @@
 
 ## Операционный цикл (v0.2)
 
+> **Подробная документация по каждой команде:** [evals/README.md](../../../../evals/README.md)
+
+### Быстрый старт
+
+| # | Команда | Назначение |
+|---|---------|------------|
+| — | `eval-help` | Справка по целям и параметрам |
+| 1 | `eval-build` | Сборка YAML-манifest из builders |
+| 2 | `eval-validate` | pytest + dry-run (без агента) |
+| 3 | `eval-sync` | Загрузка датасетов в Langfuse |
+| 4 | `eval-experiment` | Прогон experiment + evaluators |
+| 5 | `eval-analyze` | Error analysis; `EMIT_ITEMS=1` → K-4 YAML |
+| 6 | `eval-compare` | Baseline vs candidate (E-16/E-18) |
+
+**Windows:** `.\make.ps1 eval-<target>` · **Linux/WSL:** `make eval-<target>`
+
 ```bash
 # 0. Предусловия
 make up
@@ -49,8 +65,9 @@ make eval-sync DATASET=e2e/e2e-qa
 # 4. Эксперимент (agent + judge evaluators в Langfuse)
 make eval-experiment CONFIG=configs/baseline-react-inmemory.yaml DATASET=e2e/e2e-qa
 
-# 5. Анализ прогона
+# 5. Анализ прогона (+ опционально emit regression items)
 make eval-analyze RUN=baseline-react-inmemory--e2e-qa--<sha>--<ts>
+make eval-analyze RUN=baseline-react-inmemory--e2e-qa--<sha>--<ts> EMIT_ITEMS=1
 
 # 6. Сравнение baseline vs candidate (E-16: версия датасета должна совпадать)
 make eval-compare RUN_A=<baseline-run> RUN_B=<candidate-run>

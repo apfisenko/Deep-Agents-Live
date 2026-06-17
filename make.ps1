@@ -152,12 +152,13 @@ function Show-Help {
     Write-Host "  check-api      - all checks above"
     Write-Host "  chat-telegram  - POST /api/v1/chat (telegram JSON, raw output)"
     Write-Host "  chat-stream    - POST /api/v1/chat/stream (web SSE, raw output)"
-    Write-Host "  eval-help      - eval contour targets"
-    Write-Host "  eval-validate  - validate eval configs and datasets skeleton"
-    Write-Host "  eval-sync      - sync datasets to Langfuse (skeleton)"
-    Write-Host "  eval-experiment - run eval experiment (skeleton)"
-    Write-Host "  eval-analyze   - analyze eval run (skeleton)"
-    Write-Host "  eval-compare   - compare eval runs (skeleton)"
+    Write-Host "  eval-help      - eval contour help (see evals/README.md)"
+    Write-Host "  eval-build     - build dataset manifest (env DATASET=)"
+    Write-Host "  eval-validate  - pytest + dry-run all configs/datasets"
+    Write-Host "  eval-sync      - sync datasets to Langfuse (env DATASET=)"
+    Write-Host "  eval-experiment - run experiment (env CONFIG=, DATASET=)"
+    Write-Host "  eval-analyze   - error analysis (env RUN=, EMIT_ITEMS=1)"
+    Write-Host "  eval-compare   - compare runs (env RUN_A=, RUN_B=)"
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  .\make.ps1 ps"
@@ -205,41 +206,90 @@ function Invoke-RequestChat {
     }
 }
 
+function Get-GnuMakePath {
+    foreach ($name in @("make.exe", "gmake.exe")) {
+        $cmd = Get-Command $name -ErrorAction SilentlyContinue
+        if ($cmd -and $cmd.Source -and (Test-Path -LiteralPath $cmd.Source)) {
+            return $cmd.Source
+        }
+    }
+    return $null
+}
+
+function Set-MakeEnvFromArgs {
+    param([string[]]$ArgList)
+    $known = @("CONFIG", "DATASET", "RUN", "RUN_A", "RUN_B", "EMIT_ITEMS")
+    foreach ($arg in $ArgList) {
+        if ($arg -match "^([^=]+)=(.*)$") {
+            $key = $matches[1]
+            $value = $matches[2]
+            if ($known -contains $key) {
+                Set-Item -Path "env:$key" -Value $value
+            }
+        }
+    }
+}
+
 function Invoke-EvalMake {
-    param([string]$EvalTarget)
+    param(
+        [string]$EvalTarget,
+        [string[]]$ExtraArgs = @()
+    )
+    Set-MakeEnvFromArgs -ArgList $ExtraArgs
     Push-Location $EvalsDir
     try {
-        if (Get-Command make -ErrorAction SilentlyContinue) {
-            make $EvalTarget
+        $makePath = Get-GnuMakePath
+        if ($makePath) {
+            & $makePath $EvalTarget
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             return
         }
+
+        $config = if ($env:CONFIG) { $env:CONFIG } else { "configs/baseline-react-inmemory.yaml" }
+        $dataset = if ($env:DATASET) { $env:DATASET } else { "e2e/e2e-qa" }
+
         switch ($EvalTarget) {
             "help" {
-                Write-Host "evals targets: validate, sync, experiment, analyze, compare"
+                Write-Host "Eval contour (native Windows path, no GNU make):"
+                Write-Host "  validate, build, sync, experiment, analyze, compare"
+                Write-Host "Env or args: CONFIG=, DATASET=, RUN=, RUN_A=, RUN_B=, EMIT_ITEMS=1"
             }
             "validate" {
                 uv sync --quiet 2>$null
                 uv run pytest tests/ -q
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                uv run python scripts/sync_datasets.py --validate-only --dataset e2e/e2e-qa --min-items 20
+                uv run python scripts/run_experiment.py --config $config --dataset all --dry-run
+            }
+            "build" {
+                uv run python scripts/build_dataset.py --dataset $dataset
             }
             "sync" {
                 Invoke-EvalMake "validate"
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                uv run python scripts/sync_datasets.py --dataset all
+                uv run python scripts/sync_datasets.py --dataset $dataset
             }
             "experiment" {
                 Invoke-EvalMake "sync"
                 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                uv run python scripts/run_experiment.py --config configs/baseline-react-inmemory.yaml --dataset all
+                uv run python scripts/run_experiment.py --config $config --dataset $dataset
             }
             "analyze" {
                 $run = if ($env:RUN) { $env:RUN } else { "baseline-react-inmemory--e2e-qa--5eedd7a1--20260615T191628Z" }
-                uv run python scripts/analyze_run.py --run $run --out reports/
+                $analyzeArgs = @(
+                    "scripts/analyze_run.py",
+                    "--run", $run,
+                    "--out", "reports/"
+                )
+                if ($env:EMIT_ITEMS -eq "1") {
+                    $analyzeArgs += "--emit-items"
+                }
+                uv run python @analyzeArgs
             }
             "compare" {
-                Write-Error "Usage: set RUN_A and RUN_B env vars; prefer GNU make on WSL for compare"
+                if (-not $env:RUN_A -or -not $env:RUN_B) {
+                    Write-Error "Set RUN_A and RUN_B environment variables"
+                }
+                uv run python scripts/compare_runs.py --a $env:RUN_A --b $env:RUN_B --out reports/
             }
             default {
                 Write-Error "Unknown eval target: $EvalTarget"
@@ -462,12 +512,13 @@ switch ($Target) {
     "check-api" { Invoke-CheckApi "api" }
     "chat-telegram" { Invoke-RequestChat "telegram" }
     "chat-stream" { Invoke-RequestChat "stream" }
-    "eval-help" { Invoke-EvalMake "help" }
-    "eval-validate" { Invoke-EvalMake "validate" }
-    "eval-sync" { Invoke-EvalMake "sync" }
-    "eval-experiment" { Invoke-EvalMake "experiment" }
-    "eval-analyze" { Invoke-EvalMake "analyze" }
-    "eval-compare" { Invoke-EvalMake "compare" }
+    "eval-help" { Invoke-EvalMake "help" -ExtraArgs $DockerArgs }
+    "eval-build" { Invoke-EvalMake "build" -ExtraArgs $DockerArgs }
+    "eval-validate" { Invoke-EvalMake "validate" -ExtraArgs $DockerArgs }
+    "eval-sync" { Invoke-EvalMake "sync" -ExtraArgs $DockerArgs }
+    "eval-experiment" { Invoke-EvalMake "experiment" -ExtraArgs $DockerArgs }
+    "eval-analyze" { Invoke-EvalMake "analyze" -ExtraArgs $DockerArgs }
+    "eval-compare" { Invoke-EvalMake "compare" -ExtraArgs $DockerArgs }
     default {
         Write-Error "Unknown target: $Target. Run: .\make.ps1 help"
     }

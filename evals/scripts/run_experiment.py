@@ -35,10 +35,10 @@ from dataset_registry import (
 from env_loader import load_repo_env, resolve_langfuse_keys
 from evaluators import (
     build_judge_runtime,
-    evaluator_names_for_slug,
     judge_metadata,
     make_item_evaluators,
     make_run_evaluators,
+    resolve_evaluator_names,
 )
 from models import load_manifest
 
@@ -141,6 +141,10 @@ def run_name(config: RunConfig, dataset_slug: str) -> str:
     return f"{config.config_id}--{suffix}--{git_sha8()}--{iso_ts()}"
 
 
+def _extra_evaluators(config: RunConfig) -> tuple[str, ...]:
+    return tuple(config.extra_evaluators)
+
+
 def build_run_metadata(
     config: RunConfig,
     *,
@@ -149,6 +153,7 @@ def build_run_metadata(
     simulation_mode: str = "isolated",
 ) -> dict[str, str]:
     prompt_text = resolve_prompt(config.prompt)
+    extra = _extra_evaluators(config)
     return {
         "config_id": config.config_id,
         "config_path": str(config_path.relative_to(REPO_ROOT)),
@@ -159,11 +164,13 @@ def build_run_metadata(
         "manifest_path": str(target.manifest_path.relative_to(REPO_ROOT)),
         "simulation_mode": simulation_mode,
         "evaluator_profile": ",".join(
-            evaluator_names_for_slug(
+            resolve_evaluator_names(
                 target.slug,
                 simulation=simulation_mode == "multi_turn",
+                extra=extra,
             ),
         ),
+        "extra_evaluators": ",".join(extra),
         "prompt_source": config.prompt.source,
         "prompt_name": config.prompt.name,
         "prompt_path": config.prompt.path or "",
@@ -241,10 +248,13 @@ def make_task(config: RunConfig) -> Any:
         item_id = None
         if isinstance(item, dict):
             meta = item.get("metadata") or {}
-            item_id = meta.get("item_id")
-        elif hasattr(item, "metadata"):
-            meta = item.metadata or {}
-            item_id = meta.get("item_id") if isinstance(meta, dict) else getattr(item, "id", None)
+            item_id = meta.get("item_id") or item.get("id")
+        else:
+            item_id = getattr(item, "id", None)
+            if item_id is None and hasattr(item, "metadata"):
+                meta = item.metadata or {}
+                if isinstance(meta, dict):
+                    item_id = meta.get("item_id")
 
         payload = {
             "session_id": session_id,
@@ -384,9 +394,10 @@ def dry_run(config_path: Path, dataset_arg: str, *, isolated: bool = False) -> i
                 simulation_mode=mode,
             )
             name = run_name(config, target.slug)
-            evaluators = evaluator_names_for_slug(
+            evaluators = resolve_evaluator_names(
                 target.slug,
                 simulation=mode == "multi_turn",
+                extra=_extra_evaluators(config),
             )
             print(f"dry-run ok: run_name={name}")
             print(f"dataset={target.full_name}")
@@ -395,7 +406,11 @@ def dry_run(config_path: Path, dataset_arg: str, *, isolated: bool = False) -> i
             print(f"metadata keys={sorted(metadata.keys())}")
         return 0
 
-    target = resolve_dataset_target(config, dataset_arg)
+    target = resolve_dataset_target(
+        config,
+        dataset_arg,
+        apply_name_override=dataset_arg != "all",
+    )
     items, mode = resolve_experiment_items(target, limit=0, isolated=isolated)
     metadata = build_run_metadata(
         config,
@@ -404,7 +419,11 @@ def dry_run(config_path: Path, dataset_arg: str, *, isolated: bool = False) -> i
         simulation_mode=mode,
     )
     name = run_name(config, target.slug)
-    evaluators = evaluator_names_for_slug(target.slug, simulation=mode == "multi_turn")
+    evaluators = resolve_evaluator_names(
+        target.slug,
+        simulation=mode == "multi_turn",
+        extra=_extra_evaluators(config),
+    )
     print(f"dry-run ok: run_name={name}")
     print(f"dataset={target.full_name}")
     print(f"items={len(items)} mode={mode}")
@@ -438,29 +457,56 @@ def run_experiment_for_target(
         if use_simulation
         else make_task(config)
     )
-
-    print(f"starting experiment: {experiment_run_name} ({len(items)} items, mode={mode})")
-    result = langfuse.run_experiment(
-        name=f"baseline-{target.full_name}",
-        run_name=experiment_run_name,
-        description=config.comment,
-        data=items,
-        task=task,
-        evaluators=make_item_evaluators(
+    extra = _extra_evaluators(config)
+    experiment_kwargs: dict[str, Any] = {
+        "name": f"baseline-{target.full_name}",
+        "run_name": experiment_run_name,
+        "description": config.comment,
+        "task": task,
+        "evaluators": make_item_evaluators(
             judge,
             dataset_slug=target.slug,
             simulation=use_simulation,
+            extra_evaluators=extra,
         ),
-        run_evaluators=make_run_evaluators(
+        "run_evaluators": make_run_evaluators(
             dataset_slug=target.slug,
             simulation=use_simulation,
+            extra_evaluators=extra,
         ),
-        max_concurrency=1 if use_simulation else 2,
-        metadata=metadata,
+        "max_concurrency": 1 if use_simulation else 2,
+        "metadata": metadata,
+    }
+
+    use_langfuse_dataset = not use_simulation and limit <= 0
+    print(
+        f"starting experiment: {experiment_run_name} "
+        f"({len(items)} items, mode={mode}, "
+        f"source={'langfuse-dataset' if use_langfuse_dataset else 'local-items'})",
     )
+    if use_langfuse_dataset:
+        dataset_client = langfuse.get_dataset(target.full_name)
+        lf_items = getattr(dataset_client, "items", None) or []
+        if not lf_items:
+            msg = (
+                f"Langfuse dataset {target.full_name!r} has no items; "
+                "run eval-sync before eval-experiment"
+            )
+            raise RuntimeError(msg)
+        result = dataset_client.run_experiment(**experiment_kwargs)
+    else:
+        if limit > 0:
+            print(
+                f"warn: --limit={limit} uses local items; dataset run is not linked in Langfuse UI",
+            )
+        result = langfuse.run_experiment(data=items, **experiment_kwargs)
 
     report_path = EVALS_ROOT / "reports" / f"{experiment_run_name}.txt"
-    report_path.write_text(result.format(), encoding="utf-8")
+    report_lines = [result.format()]
+    if getattr(result, "dataset_run_url", None):
+        report_lines.append(f"\ndataset_run_url: {result.dataset_run_url}")
+        print(f"dataset_run_url: {result.dataset_run_url}")
+    report_path.write_text("\n".join(report_lines), encoding="utf-8")
     print(f"experiment complete: {experiment_run_name}")
     print(f"report: {report_path}")
     return report_path
@@ -523,7 +569,7 @@ def main() -> int:
                 isolated=args.isolated,
             )
     else:
-        target = resolve_dataset_target(config, args.dataset)
+        target = resolve_dataset_target(config, args.dataset, apply_name_override=True)
         run_experiment_for_target(
             config=config,
             config_path=config_path,

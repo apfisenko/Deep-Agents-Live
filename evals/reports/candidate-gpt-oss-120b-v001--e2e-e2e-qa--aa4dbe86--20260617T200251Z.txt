@@ -1,0 +1,32 @@
+Individual Results: Hidden (24 items)
+💡 Set include_item_results=True to view them
+
+──────────────────────────────────────────────────
+🧪 Experiment: baseline-deep_agents_live_v001
+📋 Run name: candidate-gpt-oss-120b-v001--e2e-e2e-qa--aa4dbe86--20260617T200251Z - Candidate: openai/gpt-oss-120b:free vs gpt-4o-mini — OSS tool-calling check
+24 items
+Evaluations:
+  • task_error
+  • answer_correctness
+  • answer_relevancy
+  • faithfulness
+  • executed_tools_count
+
+Average Scores:
+  • task_error: 0.000
+  • answer_correctness: 0.305
+  • answer_relevancy: 0.441
+  • faithfulness: 0.647
+  • executed_tools_count: 0.833
+
+Run Evaluations:
+  • error_rate: 0.000
+  • avg_answer_correctness: 0.305
+  • avg_faithfulness: 0.647
+  • avg_answer_relevancy: 0.441
+  • avg_executed_tools_count: 0.833
+
+🔗 Dataset Run:
+   http://localhost:3001/project/default/datasets/cmqibll2e000ks607y228t39v/runs/0ce6197f-fed2-43d9-a8e8-4f48ba9ecd03
+
+dataset_run_url: http://localhost:3001/project/default/datasets/cmqibll2e000ks607y228t39v/runs/0ce6197f-fed2-43d9-a8e8-4f48ba9ecd03

@@ -17,7 +17,12 @@ ensure_ragas_imports()
 
 from ragas.embeddings import embedding_factory
 from ragas.llms import llm_factory
-from ragas.metrics.collections import AnswerCorrectness, AnswerRelevancy, ContextRecall, Faithfulness
+from ragas.metrics.collections import (
+    AnswerCorrectness,
+    AnswerRelevancy,
+    ContextRecall,
+    Faithfulness,
+)
 
 B2B_HINTS = ("b2b", "корпорат", "договор", "кп", "команд", "юрлиц")
 
@@ -170,6 +175,22 @@ def detect_segment(answer: str, tools_called: list[str]) -> str:
     return "b2c"
 
 
+def resolve_evaluator_names(
+    dataset_slug: str,
+    *,
+    simulation: bool = False,
+    extra: tuple[str, ...] = (),
+) -> tuple[str, ...]:
+    base = evaluator_names_for_slug(dataset_slug, simulation=simulation)
+    if not extra:
+        return base
+    merged = list(base)
+    for name in extra:
+        if name not in merged:
+            merged.append(name)
+    return tuple(merged)
+
+
 def evaluator_names_for_slug(
     dataset_slug: str,
     *,
@@ -212,6 +233,11 @@ def evaluator_names_for_slug(
             "answer_correctness",
             "faithfulness",
             "fact_coverage",
+        ),
+        "edge/error-analysis-hits": (
+            "task_error",
+            "answer_correctness",
+            "faithfulness",
         ),
     }
     if slug not in mapping:
@@ -274,13 +300,24 @@ def evaluate_task_completion(*, output: Any, expected_output: Any) -> Evaluation
     )
 
 
+def executed_tools_count_value(tools_called: list[str]) -> float:
+    return float(len(tools_called))
+
+
 def make_item_evaluators(
     judge: JudgeRuntime,
     *,
     dataset_slug: str,
     simulation: bool = False,
+    extra_evaluators: tuple[str, ...] = (),
 ) -> list[Any]:
-    names = set(evaluator_names_for_slug(dataset_slug, simulation=simulation))
+    names = set(
+        resolve_evaluator_names(
+            dataset_slug,
+            simulation=simulation,
+            extra=extra_evaluators,
+        ),
+    )
     evaluators: list[Any] = []
 
     def task_error(*, output: Any, **_kw: Any) -> Evaluation:
@@ -296,6 +333,7 @@ def make_item_evaluators(
     evaluators.append(task_error)
 
     if "answer_correctness" in names:
+
         async def answer_correctness(
             *,
             input: Any,
@@ -312,11 +350,14 @@ def make_item_evaluators(
                 _expected_answer(expected_output),
             )
             value = float(result.value)
-            return Evaluation(name="answer_correctness", value=value, comment=f"ragas score={value:.3f}")
+            return Evaluation(
+                name="answer_correctness", value=value, comment=f"ragas score={value:.3f}"
+            )
 
         evaluators.append(answer_correctness)
 
     if "faithfulness" in names:
+
         async def faithfulness(*, input: Any, output: Any, **_kw: Any) -> Evaluation:
             answer, contexts, _, err = _unwrap_output(output)
             if err:
@@ -335,17 +376,21 @@ def make_item_evaluators(
         evaluators.append(faithfulness)
 
     if "answer_relevancy" in names:
+
         async def answer_relevancy(*, input: Any, output: Any, **_kw: Any) -> Evaluation:
             answer, _, _, err = _unwrap_output(output)
             if err:
                 return Evaluation(name="answer_relevancy", value=0.0, comment=err)
             result = await judge.answer_relevancy.ascore(_user_input(input), answer or "")
             value = float(result.value)
-            return Evaluation(name="answer_relevancy", value=value, comment=f"ragas score={value:.3f}")
+            return Evaluation(
+                name="answer_relevancy", value=value, comment=f"ragas score={value:.3f}"
+            )
 
         evaluators.append(answer_relevancy)
 
     if "fact_coverage" in names:
+
         def fact_coverage(
             *,
             output: Any,
@@ -367,6 +412,7 @@ def make_item_evaluators(
         evaluators.append(fact_coverage)
 
     if "context_recall" in names:
+
         async def context_recall(
             *,
             input: Any,
@@ -392,6 +438,7 @@ def make_item_evaluators(
         evaluators.append(context_recall)
 
     if "tool_correctness" in names:
+
         def tool_correctness(*, output: Any, expected_output: Any, **_kw: Any) -> Evaluation:
             _, _, called, err = _unwrap_output(output)
             if err:
@@ -407,6 +454,7 @@ def make_item_evaluators(
         evaluators.append(tool_correctness)
 
     if "segment_match" in names:
+
         def segment_match(*, output: Any, metadata: Any = None, **_kw: Any) -> Evaluation:
             answer, _, called, err = _unwrap_output(output)
             if err:
@@ -424,13 +472,18 @@ def make_item_evaluators(
         evaluators.append(segment_match)
 
     if "must_not_compliance" in names:
+
         def must_not_compliance(*, output: Any, metadata: Any = None, **_kw: Any) -> Evaluation:
             _, _, called, err = _unwrap_output(output)
             must_not = [str(t) for t in (_metadata_dict(metadata).get("must_not") or [])]
             if not must_not:
-                return Evaluation(name="must_not_compliance", value=1.0, comment="n/a", data_type="BOOLEAN")
+                return Evaluation(
+                    name="must_not_compliance", value=1.0, comment="n/a", data_type="BOOLEAN"
+                )
             if err:
-                return Evaluation(name="must_not_compliance", value=0.0, comment=err, data_type="BOOLEAN")
+                return Evaluation(
+                    name="must_not_compliance", value=0.0, comment=err, data_type="BOOLEAN"
+                )
             violated = [tool for tool in must_not if tool in called]
             ok = not violated
             return Evaluation(
@@ -456,6 +509,25 @@ def make_item_evaluators(
 
         evaluators.append(task_completion)
 
+    if "executed_tools_count" in names:
+
+        def executed_tools_count(*, output: Any, **_kw: Any) -> Evaluation:
+            _, _, called, err = _unwrap_output(output)
+            if err:
+                return Evaluation(
+                    name="executed_tools_count",
+                    value=0.0,
+                    comment=err,
+                )
+            count = executed_tools_count_value(called)
+            return Evaluation(
+                name="executed_tools_count",
+                value=count,
+                comment=f"called={called}",
+            )
+
+        evaluators.append(executed_tools_count)
+
     return evaluators
 
 
@@ -468,13 +540,21 @@ def _metric_values(item_results: list[Any], metric_name: str) -> list[float]:
     return values
 
 
-def make_run_evaluators(*, dataset_slug: str, simulation: bool = False) -> list[Any]:
-    item_names = evaluator_names_for_slug(dataset_slug, simulation=simulation)
+def make_run_evaluators(
+    *,
+    dataset_slug: str,
+    simulation: bool = False,
+    extra_evaluators: tuple[str, ...] = (),
+) -> list[Any]:
+    item_names = resolve_evaluator_names(
+        dataset_slug,
+        simulation=simulation,
+        extra=extra_evaluators,
+    )
     avg_candidates = [
         name
         for name in item_names
-        if name
-        not in {"task_error", "segment_match", "must_not_compliance"}
+        if name not in {"task_error", "segment_match", "must_not_compliance"}
     ]
 
     evaluators: list[Any] = []

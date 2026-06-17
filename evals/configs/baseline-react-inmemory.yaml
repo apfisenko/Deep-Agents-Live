@@ -1,6 +1,6 @@
 # Baseline run config (E-7: неприкосновенен после создания)
 config_id: baseline-react-inmemory
-comment: "MVP prod: LangChain ReAct, in-memory RAG, file prompt (E-10 migration later)"
+comment: "MVP prod: ReAct + in-memory RAG; prompt from SYSTEM_PROMPT_PATH (.txt)"
 benchmark_only: false
 
 agent:
@@ -22,8 +22,8 @@ judge:
 
 prompt:
   source: file
-  path: backend/app/agent/prompts.py
-  name: SYSTEM_PROMPT
+  path: ${SYSTEM_PROMPT_PATH}
+  name: SYSTEM_PROMPT_SEARCH_FALLBACK
 
 datasets:
   e2e-qa: v001
@@ -33,3 +33,8 @@ datasets:
   funnel-to-lead: v001
   out-of-catalog: v001
   objections-trust: v001
+  error-analysis-hits: v001
+
+# metrics-guide §C: behavior-layer diagnostic (OSS tool-calling)
+extra_evaluators:
+  - executed_tools_count

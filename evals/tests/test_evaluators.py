@@ -5,7 +5,9 @@ from __future__ import annotations
 from evaluators import (
     detect_segment,
     evaluator_names_for_slug,
+    executed_tools_count_value,
     fact_coverage_score,
+    resolve_evaluator_names,
     tool_correctness_in_order,
 )
 
@@ -53,3 +55,26 @@ def test_evaluator_profile_funnel_simulation() -> None:
     names = evaluator_names_for_slug("behavior/funnel-to-lead", simulation=True)
     assert "state_check_lead" in names
     assert "task_completion" in names
+
+
+def test_executed_tools_count_value() -> None:
+    assert executed_tools_count_value([]) == 0.0
+    assert executed_tools_count_value(["search_knowledge_base_tool", "list_b2c_products"]) == 2.0
+
+
+def test_resolve_evaluator_names_merges_extra() -> None:
+    names = resolve_evaluator_names(
+        "e2e/e2e-qa",
+        extra=("executed_tools_count",),
+    )
+    assert "executed_tools_count" in names
+    assert names.index("task_error") < names.index("executed_tools_count")
+
+
+def test_resolve_evaluator_names_dedupes_extra() -> None:
+    names = resolve_evaluator_names(
+        "behavior/funnel-to-lead",
+        extra=("tool_correctness", "executed_tools_count"),
+    )
+    assert names.count("tool_correctness") == 1
+    assert "executed_tools_count" in names
