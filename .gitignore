@@ -40,6 +40,6 @@ evals/.env
 frontend/node_modules
 frontend/.next
 
-comparison/.venv
-comparison/embeddings_cache
-
+comparison/.venv/
+comparison/embeddings_cache/
+comparison/.ipynb_checkpoints/
