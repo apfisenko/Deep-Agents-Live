@@ -25,7 +25,7 @@ def rag_data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-def _fake_embed_documents_batch(texts: list[str]) -> list[list[float]]:
+def _fake_embed_documents_batch(texts: list[str], _settings: object = None) -> list[list[float]]:
     return [[1.0, float(index), 0.0] for index, _ in enumerate(texts)]
 
 
@@ -34,6 +34,7 @@ def test_rag_build_is_idempotent(rag_data_dir: Path) -> None:
         indexer = RagIndexer()
         first = indexer.build(force=True)
         assert first.indexed == 1
+        assert first.chunks >= 1
         store = get_store()
         assert store.indexed_docs_count == 1
 
@@ -41,6 +42,7 @@ def test_rag_build_is_idempotent(rag_data_dir: Path) -> None:
         second = second_indexer.build()
         assert second.skipped == 1
         assert second.indexed == 0
+        assert second.chunks == 0
         assert store.indexed_docs_count == 1
 
         manifest = load_manifest(rag_data_dir / ".rag-manifest.json")

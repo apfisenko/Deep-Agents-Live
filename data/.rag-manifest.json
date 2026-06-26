@@ -4,55 +4,237 @@
     "hash": "dcf17cb5b980f64a7c6c6041ed05e53818676fb607076e755ce5e61865b6850b",
     "audience": "b2c",
     "chunk_count": 1,
-    "indexed_at": "2026-06-17T20:02:38.222963+00:00"
+    "indexed_at": "2026-06-26T17:02:01.868124+00:00"
   },
   "b2b/corporate-training.md": {
     "path": "b2b/corporate-training.md",
     "hash": "b324bae59754e1814b2a7471b3779dd295ea782380b0a11a75f4a59c00adec17",
     "audience": "b2b",
-    "chunk_count": 2,
-    "indexed_at": "2026-06-17T20:02:48.269247+00:00"
+    "chunk_count": 4,
+    "indexed_at": "2026-06-26T17:03:04.715178+00:00"
   },
   "b2c/programs/ai-agents-combo.md": {
     "path": "b2c/programs/ai-agents-combo.md",
     "hash": "a02a5b1eb5057dc97bedebf692bfa19c956949283a34eb850ef0b06462509536",
     "audience": "b2c",
-    "chunk_count": 12,
-    "indexed_at": "2026-06-17T20:02:39.602869+00:00"
+    "chunk_count": 26,
+    "indexed_at": "2026-06-26T17:02:05.036366+00:00"
   },
   "b2c/programs/ai-coding-agents-base.md": {
     "path": "b2c/programs/ai-coding-agents-base.md",
     "hash": "ec4dc07edd3af9eb27cb3b3604a6315d20369099bac667e41b14fba7cc75b491",
     "audience": "b2c",
-    "chunk_count": 35,
-    "indexed_at": "2026-06-17T20:02:41.375709+00:00"
+    "chunk_count": 40,
+    "indexed_at": "2026-06-26T17:02:08.441584+00:00"
   },
   "b2c/programs/ai-coding-intensive-cursor.md": {
     "path": "b2c/programs/ai-coding-intensive-cursor.md",
     "hash": "adad75ff88d170512f1d547282595e2f424e0d4ae0fa9a511569d06e329d689b",
     "audience": "b2c",
-    "chunk_count": 7,
-    "indexed_at": "2026-06-17T20:02:42.502276+00:00"
+    "chunk_count": 17,
+    "indexed_at": "2026-06-26T17:02:11.579923+00:00"
   },
   "b2c/programs/ai-driven-fullstack.md": {
     "path": "b2c/programs/ai-driven-fullstack.md",
     "hash": "290f2d4fe5ef50ac5aa338288719f5c7a939d0745a2e101eae8be157f57ed59c",
     "audience": "b2c",
-    "chunk_count": 25,
-    "indexed_at": "2026-06-17T20:02:43.913624+00:00"
+    "chunk_count": 31,
+    "indexed_at": "2026-06-26T17:02:15.062457+00:00"
   },
   "b2c/programs/aidd-program.md": {
     "path": "b2c/programs/aidd-program.md",
     "hash": "f91bd07a6532edc7d28ff947aaa867889dc15954b6a2e9901daf6df3306b40c2",
     "audience": "b2c",
-    "chunk_count": 20,
-    "indexed_at": "2026-06-17T20:02:45.322598+00:00"
+    "chunk_count": 26,
+    "indexed_at": "2026-06-26T17:02:18.305172+00:00"
   },
   "b2c/programs/deep-agents-advanced.md": {
     "path": "b2c/programs/deep-agents-advanced.md",
     "hash": "73c032a8b0b8e8d435fc575cfd8273da1302cffa433d4c4fb566b5894aecffd7",
     "audience": "b2c",
-    "chunk_count": 25,
-    "indexed_at": "2026-06-17T20:02:47.042843+00:00"
+    "chunk_count": 32,
+    "indexed_at": "2026-06-26T17:02:21.757418+00:00"
+  },
+  "b2b/llmstart.ru_каталог-услуг.pdf": {
+    "path": "b2b/llmstart.ru_каталог-услуг.pdf",
+    "hash": "8ec42ed0da3258055af64185e77399e2722cb3665b4111b4d3fca6083efebd99",
+    "audience": "b2b",
+    "chunk_count": 27,
+    "indexed_at": "2026-06-26T17:03:08.699677+00:00"
+  },
+  "b2b/PORTFOLIO.pdf": {
+    "path": "b2b/PORTFOLIO.pdf",
+    "hash": "82db33ed58a52a2d46e353dbdd7be1ca6b1e8719b923229993210cb327a65dac",
+    "audience": "b2b",
+    "chunk_count": 39,
+    "indexed_at": "2026-06-26T17:03:12.931572+00:00"
+  },
+  "b2b/Tune_it_AI-driven-внедрение.pdf": {
+    "path": "b2b/Tune_it_AI-driven-внедрение.pdf",
+    "hash": "6a20a9b991d2607e5875de49c18f9cc91b640da5c9979c53bd25478e35d0e2f5",
+    "audience": "b2b",
+    "chunk_count": 10,
+    "indexed_at": "2026-06-26T17:03:15.931735+00:00"
+  },
+  "b2b/АЙТОН_корпоративное_обучение_AI-Driven_разработка.pdf": {
+    "path": "b2b/АЙТОН_корпоративное_обучение_AI-Driven_разработка.pdf",
+    "hash": "c4b6005f685fe233adb61aa4a20958c7e0db3c31b64b977d9a294941329f9a40",
+    "audience": "b2b",
+    "chunk_count": 10,
+    "indexed_at": "2026-06-26T17:03:19.375672+00:00"
+  },
+  "b2b/АЙТОН_персональное_обучение_руководства_ИИ.pdf": {
+    "path": "b2b/АЙТОН_персональное_обучение_руководства_ИИ.pdf",
+    "hash": "3a576aaa8577d37fa2f568464cf933efb23db106257d6c10d364982aa1fc6cf3",
+    "audience": "b2b",
+    "chunk_count": 8,
+    "indexed_at": "2026-06-26T17:03:22.389140+00:00"
+  },
+  "b2b/АЙТОН_разработка_ИИ_чат-бота_поддержки.pdf": {
+    "path": "b2b/АЙТОН_разработка_ИИ_чат-бота_поддержки.pdf",
+    "hash": "a33cc7a9c7e0c25097452a5a4be76e0d470f9d3797b92e6dfa13b871064b3bfa",
+    "audience": "b2b",
+    "chunk_count": 7,
+    "indexed_at": "2026-06-26T17:03:25.307237+00:00"
+  },
+  "b2b/Живаго_Банк_PoC_диалоговый_ИИ-ассистент.pdf": {
+    "path": "b2b/Живаго_Банк_PoC_диалоговый_ИИ-ассистент.pdf",
+    "hash": "37a340f498087e1037c7fd96bec21931809f625bc58bf0883af00943bc4d0634",
+    "audience": "b2b",
+    "chunk_count": 7,
+    "indexed_at": "2026-06-26T17:03:28.398868+00:00"
+  },
+  "b2b/Живаго_Банк_кейс-интенсив_LLM_закрытый_контур.pdf": {
+    "path": "b2b/Живаго_Банк_кейс-интенсив_LLM_закрытый_контур.pdf",
+    "hash": "366fc1f26bb2a361354335524b0bf2e3a2cd83b0526843b599621fa21b704503",
+    "audience": "b2b",
+    "chunk_count": 5,
+    "indexed_at": "2026-06-26T17:03:31.275633+00:00"
+  },
+  "b2b/Живаго_Банк_серия_тренингов_AI-driven.pdf": {
+    "path": "b2b/Живаго_Банк_серия_тренингов_AI-driven.pdf",
+    "hash": "0e61ec6dfed28830b710015737f1331d0bb3e10d3587ffd3237c0519b8192e43",
+    "audience": "b2b",
+    "chunk_count": 9,
+    "indexed_at": "2026-06-26T17:03:34.129920+00:00"
+  },
+  "b2b/МОНОЛИТ-ИНФО_ИИ_консалтинг.pdf": {
+    "path": "b2b/МОНОЛИТ-ИНФО_ИИ_консалтинг.pdf",
+    "hash": "5952edbb42c8924b64a984e004711a4bb0cb83128dd2d9a22c02b8664b155520",
+    "audience": "b2b",
+    "chunk_count": 6,
+    "indexed_at": "2026-06-26T17:03:37.351556+00:00"
+  },
+  "b2b/Полимерные_технологии_AI-first-интенсив.pdf": {
+    "path": "b2b/Полимерные_технологии_AI-first-интенсив.pdf",
+    "hash": "a601a66aa198ca3980f118985b2548ee419faf600e2ebbf8b2ff5884428b2e3e",
+    "audience": "b2b",
+    "chunk_count": 7,
+    "indexed_at": "2026-06-26T17:03:40.368741+00:00"
+  },
+  "b2b/СИЛАРТ_AI-First_и_RAG_тренинги.pdf": {
+    "path": "b2b/СИЛАРТ_AI-First_и_RAG_тренинги.pdf",
+    "hash": "7d3fb39bf40dcae7a725f13c3307ba0f830e92f6b5fd56c4abc0e61b8c1fc423",
+    "audience": "b2b",
+    "chunk_count": 8,
+    "indexed_at": "2026-06-26T17:03:43.268343+00:00"
+  },
+  "b2b/Системные_Технологии_AI_driven_тренинг.pdf": {
+    "path": "b2b/Системные_Технологии_AI_driven_тренинг.pdf",
+    "hash": "10d76727d23c4e56bb1b50262a36c5cda79f2a797c1841bc478ac3489a1c82f7",
+    "audience": "b2b",
+    "chunk_count": 11,
+    "indexed_at": "2026-06-26T17:03:46.264141+00:00"
+  },
+  "b2b/.pdf-text-cache/0e61ec6dfed28830b710015737f1331d0bb3e10d3587ffd3237c0519b8192e43.txt": {
+    "path": "b2b/.pdf-text-cache/0e61ec6dfed28830b710015737f1331d0bb3e10d3587ffd3237c0519b8192e43.txt",
+    "hash": "c9e8f767bb8bc5358969adb1bbfbc92e145538972c98fc150277140c39accb28",
+    "audience": "b2b",
+    "chunk_count": 9,
+    "indexed_at": "2026-06-26T17:02:24.669862+00:00"
+  },
+  "b2b/.pdf-text-cache/10d76727d23c4e56bb1b50262a36c5cda79f2a797c1841bc478ac3489a1c82f7.txt": {
+    "path": "b2b/.pdf-text-cache/10d76727d23c4e56bb1b50262a36c5cda79f2a797c1841bc478ac3489a1c82f7.txt",
+    "hash": "e4aef3d9b9a6891c0ab333db8229d1c07189dc7dcd061c4503f85f1c09e9fbe9",
+    "audience": "b2b",
+    "chunk_count": 11,
+    "indexed_at": "2026-06-26T17:02:27.912146+00:00"
+  },
+  "b2b/.pdf-text-cache/366fc1f26bb2a361354335524b0bf2e3a2cd83b0526843b599621fa21b704503.txt": {
+    "path": "b2b/.pdf-text-cache/366fc1f26bb2a361354335524b0bf2e3a2cd83b0526843b599621fa21b704503.txt",
+    "hash": "88d999dcfdf54ea953b77a39c8e7ac40724e691ad2ddbc653b25550f8738446c",
+    "audience": "b2b",
+    "chunk_count": 5,
+    "indexed_at": "2026-06-26T17:02:30.776750+00:00"
+  },
+  "b2b/.pdf-text-cache/37a340f498087e1037c7fd96bec21931809f625bc58bf0883af00943bc4d0634.txt": {
+    "path": "b2b/.pdf-text-cache/37a340f498087e1037c7fd96bec21931809f625bc58bf0883af00943bc4d0634.txt",
+    "hash": "40df96a751f6813d95d85dcbb62fecb4a760605d402348e5ae9648533e85273f",
+    "audience": "b2b",
+    "chunk_count": 7,
+    "indexed_at": "2026-06-26T17:02:33.675451+00:00"
+  },
+  "b2b/.pdf-text-cache/3a576aaa8577d37fa2f568464cf933efb23db106257d6c10d364982aa1fc6cf3.txt": {
+    "path": "b2b/.pdf-text-cache/3a576aaa8577d37fa2f568464cf933efb23db106257d6c10d364982aa1fc6cf3.txt",
+    "hash": "f6bd809fa4842cdf597a11a88faee03c89f91af3404aa63b80ca8dece89d042f",
+    "audience": "b2b",
+    "chunk_count": 8,
+    "indexed_at": "2026-06-26T17:02:36.679640+00:00"
+  },
+  "b2b/.pdf-text-cache/5952edbb42c8924b64a984e004711a4bb0cb83128dd2d9a22c02b8664b155520.txt": {
+    "path": "b2b/.pdf-text-cache/5952edbb42c8924b64a984e004711a4bb0cb83128dd2d9a22c02b8664b155520.txt",
+    "hash": "6f21fb764453d9b236df9b80d52438337268087cfbb62a750661f5fb4c779098",
+    "audience": "b2b",
+    "chunk_count": 6,
+    "indexed_at": "2026-06-26T17:02:39.486858+00:00"
+  },
+  "b2b/.pdf-text-cache/6a20a9b991d2607e5875de49c18f9cc91b640da5c9979c53bd25478e35d0e2f5.txt": {
+    "path": "b2b/.pdf-text-cache/6a20a9b991d2607e5875de49c18f9cc91b640da5c9979c53bd25478e35d0e2f5.txt",
+    "hash": "d2604cfda0231d249b32a30aaa1c0c9123ca0903fccf5d4d1e598635019b403b",
+    "audience": "b2b",
+    "chunk_count": 10,
+    "indexed_at": "2026-06-26T17:02:42.513037+00:00"
+  },
+  "b2b/.pdf-text-cache/7d3fb39bf40dcae7a725f13c3307ba0f830e92f6b5fd56c4abc0e61b8c1fc423.txt": {
+    "path": "b2b/.pdf-text-cache/7d3fb39bf40dcae7a725f13c3307ba0f830e92f6b5fd56c4abc0e61b8c1fc423.txt",
+    "hash": "a161ef80c1e6a7fb7230e1ec9d1f84832746ec0064f5599444e91198a279c22d",
+    "audience": "b2b",
+    "chunk_count": 8,
+    "indexed_at": "2026-06-26T17:02:45.405596+00:00"
+  },
+  "b2b/.pdf-text-cache/82db33ed58a52a2d46e353dbdd7be1ca6b1e8719b923229993210cb327a65dac.txt": {
+    "path": "b2b/.pdf-text-cache/82db33ed58a52a2d46e353dbdd7be1ca6b1e8719b923229993210cb327a65dac.txt",
+    "hash": "76df88169d1b5dc96a463467508b2c011f7c49092bdf9eeea518be4854136784",
+    "audience": "b2b",
+    "chunk_count": 39,
+    "indexed_at": "2026-06-26T17:02:49.912397+00:00"
+  },
+  "b2b/.pdf-text-cache/8ec42ed0da3258055af64185e77399e2722cb3665b4111b4d3fca6083efebd99.txt": {
+    "path": "b2b/.pdf-text-cache/8ec42ed0da3258055af64185e77399e2722cb3665b4111b4d3fca6083efebd99.txt",
+    "hash": "f85e9d9fa7ed0096f9d0ae91135d9c8ccfbe92f0423bd884628d89593f40d518",
+    "audience": "b2b",
+    "chunk_count": 27,
+    "indexed_at": "2026-06-26T17:02:53.189496+00:00"
+  },
+  "b2b/.pdf-text-cache/a33cc7a9c7e0c25097452a5a4be76e0d470f9d3797b92e6dfa13b871064b3bfa.txt": {
+    "path": "b2b/.pdf-text-cache/a33cc7a9c7e0c25097452a5a4be76e0d470f9d3797b92e6dfa13b871064b3bfa.txt",
+    "hash": "ebb66e97d07d04ac2d7f6174f6779b0cb3cb304e71fc66811210300d875d014f",
+    "audience": "b2b",
+    "chunk_count": 7,
+    "indexed_at": "2026-06-26T17:02:56.001558+00:00"
+  },
+  "b2b/.pdf-text-cache/a601a66aa198ca3980f118985b2548ee419faf600e2ebbf8b2ff5884428b2e3e.txt": {
+    "path": "b2b/.pdf-text-cache/a601a66aa198ca3980f118985b2548ee419faf600e2ebbf8b2ff5884428b2e3e.txt",
+    "hash": "b0f6204fb17c5b5e41274e2f90877c2a3fa52767ff166f3fe9f8301f1d9ecbae",
+    "audience": "b2b",
+    "chunk_count": 7,
+    "indexed_at": "2026-06-26T17:02:58.976304+00:00"
+  },
+  "b2b/.pdf-text-cache/c4b6005f685fe233adb61aa4a20958c7e0db3c31b64b977d9a294941329f9a40.txt": {
+    "path": "b2b/.pdf-text-cache/c4b6005f685fe233adb61aa4a20958c7e0db3c31b64b977d9a294941329f9a40.txt",
+    "hash": "0cc84f4a809556bee3604682ccf04d04fda81a0ea9667398ad24eec0c067065e",
+    "audience": "b2b",
+    "chunk_count": 10,
+    "indexed_at": "2026-06-26T17:03:01.876405+00:00"
   }
 }

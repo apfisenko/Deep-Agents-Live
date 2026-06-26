@@ -43,6 +43,26 @@ class Settings(BaseSettings):
         default="openai/text-embedding-3-small",
         validation_alias="EMBEDDING_FALLBACK_MODEL",
     )
+    chunk_size: int = Field(default=600, validation_alias="CHUNK_SIZE")
+    chunk_overlap: int = Field(default=80, validation_alias="CHUNK_OVERLAP")
+    chunk_markdown_by_headers: bool = Field(
+        default=True,
+        validation_alias="CHUNK_MARKDOWN_BY_HEADERS",
+    )
+    hybrid_search_enabled: bool = Field(default=True, validation_alias="HYBRID_SEARCH_ENABLED")
+    hybrid_prefetch_limit: int = Field(default=20, validation_alias="HYBRID_PREFETCH_LIMIT")
+    pdf_ocr_enabled: bool = Field(default=True, validation_alias="PDF_OCR_ENABLED")
+    pdf_ocr_min_chars: int = Field(default=50, validation_alias="PDF_OCR_MIN_CHARS")
+    pdf_ocr_dpi: int = Field(default=150, validation_alias="PDF_OCR_DPI")
+    pdf_ocr_language: str = Field(default="rus+eng", validation_alias="PDF_OCR_LANGUAGE")
+    pdf_ocr_llm_fallback: bool = Field(default=True, validation_alias="PDF_OCR_LLM_FALLBACK")
+    pdf_ocr_llm_model: str = Field(
+        default="openai/gpt-4o-mini", validation_alias="PDF_OCR_LLM_MODEL"
+    )
+    vector_db_backend: str = Field(default="qdrant", validation_alias="VECTOR_DB_BACKEND")
+    qdrant_url: str = Field(default="http://localhost:6333", validation_alias="QDRANT_URL")
+    qdrant_collection: str = Field(default="knowledge_base", validation_alias="QDRANT_COLLECTION")
+    qdrant_api_key: str = Field(default="", validation_alias="QDRANT_API_KEY")
     llm_timeout_sec: int = Field(default=60, validation_alias="LLM_TIMEOUT_SEC")
     embedding_timeout_sec: int = Field(default=30, validation_alias="EMBEDDING_TIMEOUT_SEC")
     llm_max_tokens: int = Field(default=2048, validation_alias="LLM_MAX_TOKENS")

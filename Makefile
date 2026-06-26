@@ -1,7 +1,8 @@
 .PHONY: help dev dev-backend dev-frontend dev-bot stop-dev stop-backend stop-frontend stop-bot \
-	lint format typecheck test test-backend test-frontend test-bot \
+	lint format typecheck test test-backend test-frontend test-bot index \
 	up down ps status logs compose docker migrate migrate-new ci compose-dev \
 	check-health check-reindex check-chat check-chat-stream check-langfuse check-traces check-telegram check-api \
+	check-rag-search-e2e check-rag-audience-filter \
 	chat-telegram chat-stream langfuse-upload-dataset \
 	eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare
 
@@ -36,6 +37,7 @@ help:
 	@echo "  test-backend   - pytest backend"
 	@echo "  test-frontend  - vitest frontend"
 	@echo "  test-bot       - pytest bot"
+	@echo "  index          - index data/ into vector DB (Qdrant); ARGS=\"--force\" to reindex all"
 	@echo "  up             - docker compose up -d (WSL)"
 	@echo "  down           - docker compose down (WSL)"
 	@echo "  ps / status    - docker compose ps (WSL)"
@@ -52,6 +54,8 @@ help:
 	@echo "  langfuse-upload-dataset - upload/reload JSONL dataset to Langfuse (DATASET_JSONL, DATASET_NAME)"
 	@echo "  check-telegram - TCP/getMe to api.telegram.org (VPN/proxy)"
 	@echo "  check-api      - all checks above"
+	@echo "  check-rag-search-e2e - RAG search smoke (Qdrant up + make index; task 04 p.3)"
+	@echo "  check-rag-audience-filter - b2b/b2c filter smoke (task 04 p.4)"
 	@echo "  chat-telegram  - POST /api/v1/chat (telegram JSON, raw output)"
 	@echo "  chat-stream    - POST /api/v1/chat/stream (web SSE, raw output)"
 	@echo "  eval-help      - eval contour help (see evals/README.md)"
@@ -112,6 +116,9 @@ test-frontend:
 
 test-bot:
 	cd $(BOT_DIR) && uv run pytest
+
+index:
+	cd $(BACKEND_DIR) && uv run python -m app.rag.index_cli $(ARGS)
 
 up:
 	$(call DOCKER_WSL,docker compose up -d)
@@ -176,6 +183,12 @@ check-telegram:
 
 check-api:
 	cd $(BACKEND_DIR) && uv run python scripts/check_api.py api
+
+check-rag-search-e2e:
+	cd $(BACKEND_DIR) && uv run python scripts/check_rag_search.py e2e
+
+check-rag-audience-filter:
+	cd $(BACKEND_DIR) && uv run python scripts/check_rag_search.py audience-filter
 
 chat-telegram:
 	cd $(BACKEND_DIR) && CHAT_MESSAGE='$(CHAT_MESSAGE)' uv run python scripts/request_chat.py telegram

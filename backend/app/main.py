@@ -16,7 +16,7 @@ from app.api.routers.chat import router as chat_router
 from app.api.routers.health import router as health_router
 from app.config import get_settings
 from app.exceptions import AgentCoreError
-from app.rag.indexer import get_indexer
+from app.rag.startup import verify_rag_backend_on_startup
 
 logger = logging.getLogger(__name__)
 
@@ -29,18 +29,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         "Starting Agent Core",
         extra={"service": "backend", "version": settings.app_version, "env": settings.env},
     )
-    try:
-        result = await asyncio.to_thread(get_indexer().build)
-        logger.info(
-            "RAG index ready",
-            extra={
-                "indexed": result.indexed,
-                "skipped": result.skipped,
-                "removed": result.removed,
-            },
-        )
-    except Exception:
-        logger.exception("RAG indexing failed on startup; continuing degraded")
+    await asyncio.to_thread(verify_rag_backend_on_startup, settings)
     yield
     logger.info("Shutting down Agent Core", extra={"service": "backend"})
 

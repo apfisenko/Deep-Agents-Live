@@ -1,0 +1,32 @@
+Individual Results: Hidden (24 items)
+💡 Set include_item_results=True to view them
+
+──────────────────────────────────────────────────
+🧪 Experiment: baseline-deep_agents_live_v001
+📋 Run name: vector-db-baseline--e2e-e2e-qa--9cf4d395--20260626T170352Z - Sprint-05: ReAct + Qdrant vector DB; same model/judge/prompt as baseline-react-inmemory
+24 items
+Evaluations:
+  • faithfulness
+  • executed_tools_count
+  • answer_correctness
+  • answer_relevancy
+  • task_error
+
+Average Scores:
+  • faithfulness: 0.187
+  • executed_tools_count: 0.375
+  • answer_correctness: 0.122
+  • answer_relevancy: 0.135
+  • task_error: 0.750
+
+Run Evaluations:
+  • error_rate: 0.750
+  • avg_answer_correctness: 0.122
+  • avg_faithfulness: 0.187
+  • avg_answer_relevancy: 0.135
+  • avg_executed_tools_count: 0.375
+
+🔗 Dataset Run:
+   http://localhost:3001/project/default/datasets/cmqibll2e000ks607y228t39v/runs/ba529905-ec0e-4f62-84fb-a8bbb732fa89
+
+dataset_run_url: http://localhost:3001/project/default/datasets/cmqibll2e000ks607y228t39v/runs/ba529905-ec0e-4f62-84fb-a8bbb732fa89

@@ -1,5 +1,6 @@
 # Langfuse self-hosted stack for local observability (sprint-01).
 # UI: http://localhost:3001
+# Qdrant vector DB (sprint-05): http://localhost:6333
 # Full app stack (backend/frontend/bot) — sprint-04 compose-dev.
 #
 # Start: make up  /  .\make.ps1 up  (via WSL2 on Windows)
@@ -146,6 +147,25 @@ services:
       retries: 5
       start_period: 10s
 
+  qdrant:
+    image: qdrant/qdrant:v1.18.1
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333 && printf \"GET /healthz HTTP/1.0\\r\\n\\r\\n\" >&3 && read -r line <&3 && [[ \"$$line\" == *\"200\"* ]]'",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
   backend:
     profiles: [full]
     build:
@@ -209,3 +229,4 @@ volumes:
   langfuse_postgres_data:
   langfuse_clickhouse_data:
   langfuse_minio_data:
+  qdrant_storage:

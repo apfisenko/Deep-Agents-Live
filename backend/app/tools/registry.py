@@ -9,6 +9,7 @@ from typing import Any
 from langchain_core.tools import tool
 
 from app.config import get_settings
+from app.exceptions import ProviderUnavailableError
 from app.paths import B2C_DIR
 from app.rag.search import search_knowledge_base
 
@@ -20,7 +21,10 @@ def search_knowledge_base_tool(query: str, audience: str) -> str:
     """Search llmstart knowledge base. audience must be 'b2c' or 'b2b'."""
     if audience not in {"b2c", "b2b"}:
         return json.dumps({"error": "audience must be b2c or b2b"}, ensure_ascii=False)
-    results = search_knowledge_base(query, audience)
+    try:
+        results = search_knowledge_base(query, audience)
+    except ProviderUnavailableError as exc:
+        return json.dumps({"error": exc.message}, ensure_ascii=False)
     return json.dumps(results, ensure_ascii=False)
 
 

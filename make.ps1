@@ -30,6 +30,36 @@ function Invoke-WslDocker {
     wsl -e bash -lc "cd '$wslPath' && $Command"
 }
 
+function Test-QdrantHealth {
+    param([string]$BaseUrl)
+    try {
+        $uri = "$($BaseUrl.TrimEnd('/'))/healthz"
+        $response = Invoke-WebRequest -Uri $uri -UseBasicParsing -TimeoutSec 3
+        return $response.StatusCode -eq 200
+    } catch {
+        return $false
+    }
+}
+
+function Resolve-QdrantUrlForWindows {
+    $configured = if ($env:QDRANT_URL) { $env:QDRANT_URL } else { "http://localhost:6333" }
+    if ($configured -notmatch 'localhost|127\.0\.0\.1') {
+        return $configured
+    }
+
+    if (Test-QdrantHealth "http://127.0.0.1:6333") {
+        return "http://127.0.0.1:6333"
+    }
+
+    $wslIp = (wsl hostname -I).Split()[0].Trim()
+    if ($wslIp -and (Test-QdrantHealth "http://${wslIp}:6333")) {
+        Write-Host "Qdrant: using WSL host http://${wslIp}:6333 (localhost unreachable from Windows)"
+        return "http://${wslIp}:6333"
+    }
+
+    return $configured
+}
+
 function Stop-ProcessOnPort {
     param([int]$Port)
     $pids = @()
@@ -133,6 +163,7 @@ function Show-Help {
     Write-Host "  test-backend   - pytest backend"
     Write-Host "  test-frontend  - vitest frontend"
     Write-Host "  test-bot       - pytest bot"
+    Write-Host "  index          - index data/ into vector DB (Qdrant); --force to reindex all"
     Write-Host "  up             - docker compose up -d (WSL)"
     Write-Host "  down           - docker compose down (WSL)"
     Write-Host "  ps / status    - docker compose ps (WSL)"
@@ -150,6 +181,8 @@ function Show-Help {
     Write-Host "  langfuse-upload-dataset - upload/reload JSONL to Langfuse"
     Write-Host "  check-telegram - TCP/getMe to api.telegram.org (VPN/proxy)"
     Write-Host "  check-api      - all checks above"
+    Write-Host "  check-rag-search-e2e - RAG search smoke (Qdrant up + index; task 04 p.3)"
+    Write-Host "  check-rag-audience-filter - b2b/b2c filter smoke (task 04 p.4)"
     Write-Host "  chat-telegram  - POST /api/v1/chat (telegram JSON, raw output)"
     Write-Host "  chat-stream    - POST /api/v1/chat/stream (web SSE, raw output)"
     Write-Host "  eval-help      - eval contour help (see evals/README.md)"
@@ -312,6 +345,18 @@ function Invoke-CheckApi {
     }
 }
 
+function Invoke-CheckRagSearch {
+    param([string]$Command)
+    Push-Location $BackendDir
+    try {
+        $env:QDRANT_URL = Resolve-QdrantUrlForWindows
+        uv run python scripts/check_rag_search.py $Command
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
 switch ($Target) {
     "help" { Show-Help }
     "stop-dev" {
@@ -439,6 +484,16 @@ switch ($Target) {
             Pop-Location
         }
     }
+    "index" {
+        Push-Location $BackendDir
+        try {
+            $env:QDRANT_URL = Resolve-QdrantUrlForWindows
+            uv run python -m app.rag.index_cli @DockerArgs
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        } finally {
+            Pop-Location
+        }
+    }
     "up" {
         Invoke-WslDocker "docker compose up -d"
     }
@@ -510,6 +565,8 @@ switch ($Target) {
         }
     }
     "check-api" { Invoke-CheckApi "api" }
+    "check-rag-search-e2e" { Invoke-CheckRagSearch "e2e" }
+    "check-rag-audience-filter" { Invoke-CheckRagSearch "audience-filter" }
     "chat-telegram" { Invoke-RequestChat "telegram" }
     "chat-stream" { Invoke-RequestChat "stream" }
     "eval-help" { Invoke-EvalMake "help" -ExtraArgs $DockerArgs }

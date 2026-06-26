@@ -10,7 +10,7 @@ from app.agent.react_agent import AgentRunResult, StreamEvent, reset_agent_runne
 from app.config import clear_settings_cache
 from app.integrations.langfuse import reset_langfuse_callbacks
 from app.memory.sessions import reset_session_store
-from app.rag.indexer import IndexResult, reset_indexer
+from app.rag.indexer import reset_indexer
 from app.rag.store import reset_store
 from fastapi.testclient import TestClient
 
@@ -23,6 +23,9 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     monkeypatch.setenv("BACKEND_PORT", "8000")
     monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3000")
     monkeypatch.setenv("LANGFUSE_ENABLED", "false")
+    monkeypatch.setenv("VECTOR_DB_BACKEND", "in-memory")
+    monkeypatch.setenv("HYBRID_SEARCH_ENABLED", "false")
+    monkeypatch.setenv("PDF_OCR_LLM_FALLBACK", "false")
     monkeypatch.delenv("DOTENV_CONFIG", raising=False)
     clear_settings_cache()
     reset_store()
@@ -40,15 +43,6 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     reset_agent_runner()
     reset_config_registry()
     reset_langfuse_callbacks()
-
-
-@pytest.fixture(autouse=True)
-def mock_rag_build() -> Generator[MagicMock, None, None]:
-    with patch("app.main.get_indexer") as mock_get_indexer:
-        indexer = MagicMock()
-        indexer.build.return_value = IndexResult(indexed=2, skipped=0, removed=0)
-        mock_get_indexer.return_value = indexer
-        yield indexer
 
 
 @pytest.fixture
@@ -71,7 +65,13 @@ def mock_agent_runner() -> Generator[MagicMock, None, None]:
         yield StreamEvent(event="token", data={"text": "Привет"})
         yield StreamEvent(event="done", data={"session_id": _session_id})
 
-    async def stream_impl(session_id: str, message: str, *, channel: str = "web"):
+    async def stream_impl(
+        session_id: str,
+        message: str,
+        *,
+        channel: str = "web",
+        **_: object,
+    ):
         async for item in fake_stream(session_id, message):
             yield item
 

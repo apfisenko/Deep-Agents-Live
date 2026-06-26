@@ -37,6 +37,8 @@ copy .env.example .env
 | Виджет | http://localhost:3000 |
 | Embed | http://localhost:3000/embed |
 | Langfuse | http://localhost:3001 |
+| Qdrant (REST) | http://localhost:6333 |
+| Qdrant Dashboard | http://localhost:6333/dashboard |
 
 Telegram-бот: `TELEGRAM_BOT_TOKEN` в `.env`, затем `.\make.ps1 dev-bot`
 
@@ -99,6 +101,45 @@ Traces из Agent Core появятся после **sprint-02** (SDK в backend
 
 ---
 
+## Qdrant (vector DB)
+
+Qdrant — персистентное хранилище RAG-эмбеддингов (sprint-05, [ADR-0005](docs/decisions/0005-vector-db.md)). Поднимается вместе с Langfuse через `make up` / `.\make.ps1 up`.
+
+| | |
+|---|---|
+| **REST API** | http://localhost:6333 |
+| **Dashboard** | http://localhost:6333/dashboard |
+| **Health** | http://localhost:6333/healthz |
+| **Readiness** | http://localhost:6333/readyz |
+| **gRPC** | localhost:6334 |
+| **Коллекция (dev)** | `knowledge_base` (`QDRANT_COLLECTION` в `.env`) |
+
+### Проверка, что сервис поднялся
+
+```powershell
+.\make.ps1 up
+.\make.ps1 ps
+# qdrant — State: running, Health: healthy
+
+# HTTP health (PowerShell)
+Invoke-WebRequest -Uri http://localhost:6333/healthz -UseBasicParsing
+# Ожидается: 200, тело "healthz check passed"
+
+# Readiness (готов принимать запросы)
+Invoke-WebRequest -Uri http://localhost:6333/readyz -UseBasicParsing
+
+# Список коллекций (пусто до make index)
+Invoke-WebRequest -Uri http://localhost:6333/collections -UseBasicParsing
+```
+
+На Linux/macOS/WSL: `curl -sf http://localhost:6333/healthz` и `make ps`.
+
+Переменные подключения — в `.env.example` (`VECTOR_DB_BACKEND`, `QDRANT_URL`, `QDRANT_PORT`, `QDRANT_COLLECTION`). Данные сохраняются в named volume `qdrant_storage` между `down`/`up` (без `-v`).
+
+После `make index` / `.\make.ps1 index`: smoke search — `check-rag-search-e2e`, `check-rag-audience-filter`.
+
+---
+
 ## Make-цели
 
 | Цель | Описание |
@@ -108,6 +149,9 @@ Traces из Agent Core появятся после **sprint-02** (SDK в backend
 | `dev-bot` | Telegram bot (sprint-04) |
 | `lint` / `format` / `typecheck` | Качество backend |
 | `test-backend` | pytest |
+| `index` | Index `data/` into Qdrant |
+| `check-rag-search-e2e` | Smoke: semantic search b2c после `index` (sprint-05) |
+| `check-rag-audience-filter` | Smoke: фильтр b2b/b2c (sprint-05) |
 | `ci` | lint + typecheck + test |
 | `up` / `down` / `ps` / `logs` | Docker / Langfuse |
 
