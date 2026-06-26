@@ -6,6 +6,7 @@ import logging
 import uuid
 from typing import TYPE_CHECKING
 
+from langfuse import get_client, observe
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import UnexpectedResponse
 from qdrant_client.models import (
@@ -25,6 +26,7 @@ from qdrant_client.models import (
 )
 
 from app.exceptions import ProviderUnavailableError
+from app.integrations.langfuse import ensure_langfuse_client
 from app.integrations.qdrant_url import ensure_qdrant_url, resolve_qdrant_url
 from app.rag.search_hit import SearchHit
 from app.rag.sparse_embed import EncodedSparseVector, to_qdrant_sparse
@@ -41,6 +43,53 @@ SPARSE_VECTOR_NAME = "sparse"
 
 def _point_id(chunk_id: str) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, chunk_id))
+
+
+def _record_qdrant_search_span(
+    *,
+    collection: str,
+    top_k: int,
+    segment_filter: str | None,
+    hybrid: bool,
+    embedding_dim: int,
+    hits: list[SearchHit] | None = None,
+    error: str | None = None,
+) -> None:
+    """Best-effort Langfuse span I/O for qdrant-search. Fail-open."""
+    try:
+        client = get_client()
+        span_input = {
+            "collection": collection,
+            "top_k": top_k,
+            "segment_filter": segment_filter,
+            "hybrid": hybrid,
+            "embedding_dim": embedding_dim,
+        }
+        if error is not None:
+            client.update_current_span(
+                input=span_input,
+                level="ERROR",
+                status_message=error,
+                metadata={"backend": "qdrant"},
+            )
+            return
+        client.update_current_span(
+            input=span_input,
+            output={
+                "hits_count": len(hits or []),
+                "hits": [
+                    {
+                        "source": hit.source_path,
+                        "audience": hit.audience,
+                        "score": round(hit.score, 4),
+                    }
+                    for hit in hits or []
+                ],
+            },
+            metadata={"backend": "qdrant"},
+        )
+    except Exception:  # noqa: BLE001
+        logger.debug("Langfuse span update for qdrant-search skipped", exc_info=True)
 
 
 class QdrantVectorIndexStore:
@@ -211,6 +260,7 @@ class QdrantVectorIndexStore:
             return True
         return client.count(collection_name=self._collection, exact=True).count == 0
 
+    @observe(name="qdrant-search", as_type="span", capture_input=False, capture_output=False)
     def search(
         self,
         query_embedding: list[float],
@@ -220,18 +270,34 @@ class QdrantVectorIndexStore:
         query_sparse: EncodedSparseVector | None = None,
     ) -> list[SearchHit]:
         """Semantic or hybrid search with optional audience filter."""
+        ensure_langfuse_client(self._settings)
+        hybrid = self._settings.hybrid_search_enabled and query_sparse is not None
+        span_kwargs = {
+            "collection": self._collection,
+            "top_k": top_k,
+            "segment_filter": segment_filter,
+            "hybrid": hybrid,
+            "embedding_dim": len(query_embedding),
+        }
+
+        def finish(*, hits: list[SearchHit] | None = None, error: str | None = None) -> None:
+            _record_qdrant_search_span(**span_kwargs, hits=hits, error=error)
+
         try:
             client = self._connect(fail_fast=True)
-        except ProviderUnavailableError:
+        except ProviderUnavailableError as exc:
+            finish(error=exc.message)
             raise
         except Exception as exc:
-            raise _qdrant_search_unavailable(exc) from exc
+            err = _qdrant_search_unavailable(exc)
+            finish(error=err.message)
+            raise err from exc
 
         if not client.collection_exists(self._collection):
+            finish(hits=[])
             return []
 
         query_filter = _audience_filter(segment_filter)
-        hybrid = self._settings.hybrid_search_enabled and query_sparse is not None
 
         try:
             if hybrid:
@@ -264,10 +330,13 @@ class QdrantVectorIndexStore:
                     limit=top_k,
                     with_payload=True,
                 )
-        except ProviderUnavailableError:
+        except ProviderUnavailableError as exc:
+            finish(error=exc.message)
             raise
         except Exception as exc:
-            raise _qdrant_search_unavailable(exc) from exc
+            err = _qdrant_search_unavailable(exc)
+            finish(error=err.message)
+            raise err from exc
 
         hits: list[SearchHit] = []
         for point in response.points:
@@ -280,6 +349,7 @@ class QdrantVectorIndexStore:
                     score=float(point.score or 0.0),
                 ),
             )
+        finish(hits=hits)
         return hits
 
 

@@ -126,3 +126,44 @@ def test_qdrant_store_search_maps_hits() -> None:
     ]
     mock_client.query_points.assert_called_once()
     assert mock_client.query_points.call_args.kwargs["limit"] == 3
+
+
+def test_qdrant_store_search_records_langfuse_span() -> None:
+    from app.rag.qdrant_store import QdrantVectorIndexStore
+
+    mock_client = MagicMock()
+    mock_client.collection_exists.return_value = True
+    mock_point = MagicMock()
+    mock_point.score = 0.75
+    mock_point.payload = {
+        "text": "chunk text",
+        "source_path": "b2c/guide.md",
+        "audience": "b2c",
+    }
+    mock_client.query_points.return_value.points = [mock_point]
+    mock_langfuse_client = MagicMock()
+
+    settings = MagicMock(
+        qdrant_url="http://localhost:6333",
+        qdrant_api_key="",
+        qdrant_collection="knowledge_base",
+        hybrid_search_enabled=False,
+        langfuse_enabled=True,
+    )
+    store = QdrantVectorIndexStore(settings)
+    store._connect = MagicMock(return_value=mock_client)  # noqa: SLF001
+
+    with (
+        patch("app.rag.qdrant_store.ensure_langfuse_client", return_value=True),
+        patch("app.rag.qdrant_store.get_client", return_value=mock_langfuse_client),
+    ):
+        hits = store.search([1.0, 0.0, 0.0], top_k=5, segment_filter="b2c")
+
+    assert len(hits) == 1
+    mock_langfuse_client.update_current_span.assert_called_once()
+    call_kwargs = mock_langfuse_client.update_current_span.call_args.kwargs
+    assert call_kwargs["input"]["collection"] == "knowledge_base"
+    assert call_kwargs["input"]["segment_filter"] == "b2c"
+    assert call_kwargs["output"]["hits_count"] == 1
+    assert call_kwargs["output"]["hits"][0]["source"] == "b2c/guide.md"
+    assert call_kwargs["metadata"]["backend"] == "qdrant"

@@ -2,8 +2,8 @@
 
 > **Версия roadmap:** v0.1
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
-> **Статус:** 🚧 In Progress
-> **Открыт:** 2026-06-26
+> **Статус:** ✅ Done
+> **Открыт:** 2026-06-26 · **Закрыт:** 2026-06-26
 
 ---
 
@@ -21,13 +21,13 @@
 
 ## Задачи
 
-| # | Задача | Статус | Plan | Summary |
-|---|--------|--------|------|---------|
-| 01 | Выбор векторной БД и ADR | ✅ | sprint README, задача 01 | [summary](tasks/01-vector-db-adr/summary.md) |
-| 02 | Инфраструктурный слой | ✅ | sprint README, задача 02 | — |
-| 03 | Механизм индексации | ✅ | sprint README, задача 03 | — |
-| 04 | Семантический поиск (retriever) | ✅ | sprint README, задача 04 | [summary](tasks/04-semantic-search-retriever/summary.md) |
-| 05 | Baseline-замеры | 📋 | sprint README, задача 05 | — |
+| # | Задача | Статус | Артефакты |
+|---|--------|--------|-----------|
+| 01 | Выбор векторной БД и ADR | ✅ | [ADR-0005](../../decisions/0005-vector-db.md), [summary](tasks/01-vector-db-adr/summary.md) |
+| 02 | Инфраструктурный слой | ✅ | [`docker-compose.yml`](../../../docker-compose.yml), [`.env.example`](../../../.env.example) |
+| 03 | Механизм индексации | ✅ | [`backend/app/rag/index_cli.py`](../../../backend/app/rag/index_cli.py), [`backend/scripts/index_knowledge_base.py`](../../../backend/scripts/index_knowledge_base.py), [`Makefile`](../../../Makefile) / [`make.ps1`](../../../make.ps1) |
+| 04 | Семантический поиск (retriever) | ✅ | [`backend/app/rag/vector_store.py`](../../../backend/app/rag/vector_store.py), [`qdrant_store.py`](../../../backend/app/rag/qdrant_store.py), [summary](tasks/04-semantic-search-retriever/summary.md) |
+| 05 | Baseline-замеры | ✅ | [`evals/configs/vector-db-baseline.yaml`](../../../evals/configs/vector-db-baseline.yaml), [отчёт](../../../evals/reports/vector-db-baseline.md), [analysis](../../../evals/reports/analysis-vector-db-baseline--e2e-e2e-qa--db18d394--20260626T184758Z.md), [run txt](../../../evals/reports/vector-db-baseline--e2e-e2e-qa--db18d394--20260626T184758Z.txt) |
 
 ---
 
@@ -154,7 +154,7 @@ Docs/sprints/sprint-05-vector-db/
 
 ### Артефакты
 
-- `Docs/decisions/0005-vector-db.md`
+- [`Docs/decisions/0005-vector-db.md`](../../decisions/0005-vector-db.md)
 
 ### Документы
 
@@ -191,9 +191,9 @@ Docs/sprints/sprint-05-vector-db/
 
 ### Артефакты
 
-- `docker-compose.yml` (или overlay)
-- `.env.example`
-- При необходимости — правки `Makefile` / `make.ps1`, `Docs/concept/architecture.md`
+- [`docker-compose.yml`](../../../docker-compose.yml) — сервис `qdrant`, volume `qdrant_storage`, healthcheck
+- [`.env.example`](../../../.env.example) — `VECTOR_DB_BACKEND`, `QDRANT_*`
+- [`backend/tests/test_qdrant_url.py`](../../../backend/tests/test_qdrant_url.py)
 
 ### Документы
 
@@ -235,10 +235,10 @@ Docs/sprints/sprint-05-vector-db/
 
 ### Артефакты
 
-- `backend/scripts/index_knowledge_base.py` (или эквивалент)
-- Правки `backend/app/rag/indexer.py` / новый модуль upsert
-- `Makefile`, `make.ps1` — target `index` (+ строка в `help`)
-- `backend/tests/test_index_pipeline.py` (smoke)
+- [`backend/app/rag/index_cli.py`](../../../backend/app/rag/index_cli.py), [`backend/scripts/index_knowledge_base.py`](../../../backend/scripts/index_knowledge_base.py)
+- [`backend/app/rag/indexer.py`](../../../backend/app/rag/indexer.py), [`backend/app/rag/qdrant_store.py`](../../../backend/app/rag/qdrant_store.py)
+- [`Makefile`](../../../Makefile) / [`make.ps1`](../../../make.ps1) — target `index`
+- [`backend/tests/test_index_pipeline.py`](../../../backend/tests/test_index_pipeline.py), [`test_index_cli.py`](../../../backend/tests/test_index_cli.py), [`test_rag_manifest.py`](../../../backend/tests/test_rag_manifest.py)
 
 ### Документы
 
@@ -280,14 +280,14 @@ Docs/sprints/sprint-05-vector-db/
 
 ### Артефакты
 
-- `backend/app/rag/qdrant_store.py` — `search()` + upsert
-- `backend/app/rag/vector_store.py` — protocol + `get_vector_index_store()`
-- `backend/app/rag/search_hit.py`, `backend/app/rag/search.py`
-- `backend/app/tools/registry.py` — `search_knowledge_base_tool` (+ catch `ProviderUnavailableError`)
-- `backend/app/api/routers/health.py` — `rag_indexed_docs` из manifest
-- `backend/app/rag/startup.py`
-- `backend/scripts/check_rag_search.py`
-- `backend/tests/test_search_knowledge_base.py`, `backend/tests/test_rag_startup.py`
+- [`backend/app/rag/qdrant_store.py`](../../../backend/app/rag/qdrant_store.py) — `search()` + upsert
+- [`backend/app/rag/vector_store.py`](../../../backend/app/rag/vector_store.py) — protocol + `get_vector_index_store()`
+- [`backend/app/rag/search_hit.py`](../../../backend/app/rag/search_hit.py), [`backend/app/rag/search.py`](../../../backend/app/rag/search.py)
+- [`backend/app/tools/registry.py`](../../../backend/app/tools/registry.py) — `search_knowledge_base_tool`
+- [`backend/app/api/routers/health.py`](../../../backend/app/api/routers/health.py) — `rag_indexed_docs`
+- [`backend/app/rag/startup.py`](../../../backend/app/rag/startup.py)
+- [`backend/scripts/check_rag_search.py`](../../../backend/scripts/check_rag_search.py)
+- [`backend/tests/test_search_knowledge_base.py`](../../../backend/tests/test_search_knowledge_base.py), [`test_rag_startup.py`](../../../backend/tests/test_rag_startup.py)
 
 ### Проверки DoD (выполнены)
 
@@ -303,7 +303,7 @@ Docs/sprints/sprint-05-vector-db/
 
 ---
 
-## Задача 05: Baseline-замеры 📋
+## Задача 05: Baseline-замеры ✅
 
 ### Цель
 
@@ -313,33 +313,33 @@ Docs/sprints/sprint-05-vector-db/
 
 ### Состав работ
 
-- [ ] Создать `evals/configs/vector-db-baseline.yaml`: `config_id`, `retrieval.backend` = выбранная БД, те же datasets/model/judge что у baseline (или явно задокументированные отличия)
-- [ ] Поднять стек: vector DB + backend + Langfuse; выполнить `make index` или `.\make.ps1 index`
-- [ ] Прогон эксперимента: RAG-релевантные датасеты минимум `rag-format-facts`, `rag-product-facts`; рекомендуется полный набор из baseline
-- [ ] Сохранить run report в `evals/reports/` (txt + опционально analysis md)
-- [ ] Задокументировать команды воспроизведения в plan/summary задачи
-- [ ] Краткое сравнение с `baseline-react-inmemory` (таблица метрик или ссылка на `eval-compare`)
+- [x] Создать `evals/configs/vector-db-baseline.yaml`: `config_id`, `retrieval.backend` = `qdrant`, те же datasets/model/judge что у baseline
+- [x] Поднять стек: vector DB + backend + Langfuse; выполнить `make index` / `.\make.ps1 index`
+- [x] Прогон эксперимента: полный набор датасетов из baseline (канонический run — `e2e/e2e-qa` v001, 24 items)
+- [x] Сохранить run report в `evals/reports/` (txt + analysis md + сводный `vector-db-baseline.md`)
+- [x] Задокументировать команды воспроизведения в [`evals/reports/vector-db-baseline.md`](../../../evals/reports/vector-db-baseline.md)
+- [x] Сравнение с `baseline-react-inmemory` — таблица метрик в том же отчёте
 
 ### Критерии готовности (DoD)
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | `vector-db-baseline.yaml` валидируется | `make eval-validate CONFIG=...` |
-| 2 | Experiment run завершён без ошибок | Langfuse run id + report file |
-| 3 | Report сохранён в `evals/reports/` с предсказуемым именем | файл на диске |
-| 4 | RAG-метрики (context recall/precision или project evaluators) зафиксированы | report / Langfuse UI |
-| 5 | В summary есть команды воспроизведения (index + eval на Windows и WSL) | plan.md / summary.md задачи 05 |
+| # | Критерий | Способ проверки | Статус |
+|---|----------|-----------------|--------|
+| 1 | `vector-db-baseline.yaml` валидируется | `make eval-validate CONFIG=...` | ✅ |
+| 2 | Experiment run завершён без ошибок | Langfuse run + report file | ✅ |
+| 3 | Report сохранён в `evals/reports/` с предсказуемым именем | файл на диске | ✅ |
+| 4 | RAG-метрики зафиксированы | report / Langfuse UI | ✅ |
+| 5 | Команды воспроизведения (index + eval на Windows и WSL) | `vector-db-baseline.md` | ✅ |
 
 ### Артефакты
 
-- `evals/configs/vector-db-baseline.yaml`
-- `evals/reports/vector-db-baseline--*.txt`
-- `evals/reports/analysis-vector-db-baseline--*.md` (опционально)
-- `Docs/sprints/sprint-05-vector-db/tasks/05-baseline-eval/summary.md`
+- [`evals/configs/vector-db-baseline.yaml`](../../../evals/configs/vector-db-baseline.yaml)
+- [`evals/reports/vector-db-baseline--e2e-e2e-qa--db18d394--20260626T184758Z.txt`](../../../evals/reports/vector-db-baseline--e2e-e2e-qa--db18d394--20260626T184758Z.txt) — канонический run
+- [`evals/reports/analysis-vector-db-baseline--e2e-e2e-qa--db18d394--20260626T184758Z.md`](../../../evals/reports/analysis-vector-db-baseline--e2e-e2e-qa--db18d394--20260626T184758Z.md)
+- [`evals/reports/vector-db-baseline.md`](../../../evals/reports/vector-db-baseline.md) — сводка, сравнение с in-memory, команды воспроизведения
 
 ### Документы
 
-- Scope и DoD — sprint README, задача 05 (отдельный `plan.md` не создавался)
+- Scope и DoD — sprint README, задача 05 (отдельный `plan.md` / `summary.md` не создавался; сводка — `evals/reports/vector-db-baseline.md`)
 
 ---
 
@@ -355,21 +355,32 @@ Sprint считается завершённым, когда выполнены 
 | 4 | `search_knowledge_base` через vector store; backend из конфига | ✅ | `check-rag-search-e2e`, pytest |
 | 5 | In-memory / FAISS убран из production RAG-пути | ✅ | `search.py` + lifespan без `build()` |
 | 6 | RAG search из vector DB (tool smoke) | ✅ | `check-rag-search-e2e` |
-| 7 | Baseline eval + отчёт | ⬜ | задача 05 |
+| 7 | Baseline eval + отчёт | ✅ | [`evals/reports/vector-db-baseline.md`](../../../evals/reports/vector-db-baseline.md) |
 
 ---
 
-## Прогресс (2026-06-26)
+## Итог
 
-- **Закрыто:** задачи 01–04 (ADR, Qdrant infra, offline index, semantic search / retriever).
-- **В работе:** задача 05 — baseline eval на Qdrant.
+### Задачи и артефакты
 
----
+| # | Задача | Статус | Ключевые артефакты |
+|---|--------|--------|--------------------|
+| 01 | Выбор векторной БД и ADR | ✅ | [`Docs/decisions/0005-vector-db.md`](../../decisions/0005-vector-db.md) |
+| 02 | Инфраструктурный слой | ✅ | [`docker-compose.yml`](../../../docker-compose.yml), [`.env.example`](../../../.env.example) |
+| 03 | Механизм индексации | ✅ | [`backend/app/rag/index_cli.py`](../../../backend/app/rag/index_cli.py), [`indexer.py`](../../../backend/app/rag/indexer.py), `make index` / `make.ps1 index` |
+| 04 | Семантический поиск (retriever) | ✅ | [`vector_store.py`](../../../backend/app/rag/vector_store.py), [`qdrant_store.py`](../../../backend/app/rag/qdrant_store.py), [`check_rag_search.py`](../../../backend/scripts/check_rag_search.py) |
+| 05 | Baseline-замеры | ✅ | [`vector-db-baseline.yaml`](../../../evals/configs/vector-db-baseline.yaml), [`vector-db-baseline.md`](../../../evals/reports/vector-db-baseline.md) |
 
-## Итог (заполняется после закрытия спринта)
+### Ключевые результаты
 
-_Не закрыт — остаётся задача 05._
+- **Qdrant** (`qdrant/qdrant:v1.18.1`, `qdrant-client==1.18.0`) — production retrieval path; решение зафиксировано в ADR-0005.
+- **Offline index:** `make index` / `.\make.ps1 index` с manifest, инкрементальностью и фильтром `audience` в payload.
+- **Абстракция `VectorIndexStore`:** backend через `VECTOR_DB_BACKEND`; in-memory / FAISS убраны из production-пути.
+- **Baseline eval (e2e-qa, 24 items):** faithfulness **0.791** vs in-memory **0.602** (+0.189); correctness **0.334** (≈ baseline); регрессии retrieval не обнаружено.
+- **Smoke:** `check-rag-search-e2e`, `check-rag-audience-filter`; backend-тесты проходят.
 
-**Summary:** RAG read path на Qdrant; index offline; search с фильтром audience и score.
+### Следующие шаги
 
-**Ключевые артефакты:** ADR-0005, `qdrant_store`, `vector_store`, `check_rag_search.py`, [summary задачи 04](tasks/04-semantic-search-retriever/summary.md)
+1. **v0.2 persistence** — Postgres для сессий и лидов (отдельный sprint).
+2. **Eval-fix loop** — улучшение generation (`generation_low_correctness`); re-run baseline с `LLM_MODEL=openai/gpt-4o-mini` для честного A/B.
+3. **Гибридный поиск** — вне scope sprint-05; при необходимости — ADR-0006 и отдельный sprint.

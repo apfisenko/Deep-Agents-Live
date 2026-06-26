@@ -49,3 +49,22 @@ def test_langfuse_initializes_once_when_reachable(monkeypatch) -> None:
 
     assert first == [handler]
     assert second == [handler]
+
+
+def test_ensure_langfuse_client_initializes_once(monkeypatch) -> None:
+    monkeypatch.setenv("LANGFUSE_ENABLED", "true")
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-lf-dev")
+    monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-lf-dev")
+    monkeypatch.setenv("LANGFUSE_HOST", "http://localhost:3001")
+    clear_settings_cache()
+    reset_langfuse_callbacks()
+
+    with (
+        patch("app.integrations.langfuse.is_langfuse_reachable", return_value=True),
+        patch("langfuse.Langfuse") as mock_langfuse_ctor,
+    ):
+        from app.integrations.langfuse import ensure_langfuse_client
+
+        assert ensure_langfuse_client() is True
+        assert ensure_langfuse_client() is True
+        mock_langfuse_ctor.assert_called_once()

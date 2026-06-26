@@ -43,8 +43,8 @@ def test_ensure_qdrant_url_raises_when_unreachable() -> None:
         patch("app.integrations.qdrant_url.platform.system", return_value="Windows"),
         patch("app.integrations.qdrant_url._qdrant_health_ok", return_value=False),
         patch("app.integrations.qdrant_url._wsl_host_ip", return_value="172.24.0.94"),
+        pytest.raises(ProviderUnavailableError) as exc_info,
     ):
-        with pytest.raises(ProviderUnavailableError) as exc_info:
-            ensure_qdrant_url("http://localhost:6333")
+        ensure_qdrant_url("http://localhost:6333")
 
     assert exc_info.value.error_code == "qdrant_unreachable"

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -117,6 +118,9 @@ def merge_agent_call_results(parts: list[AgentCallResult]) -> AgentCallResult:
 
 def _load_env() -> None:
     load_repo_env()
+    wsl_backend = os.environ.get("EVAL_BACKEND_URL", "").strip()
+    if wsl_backend:
+        os.environ["BACKEND_URL"] = wsl_backend.rstrip("/")
 
 
 def git_sha8() -> str:

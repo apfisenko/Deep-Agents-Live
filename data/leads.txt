@@ -2,3 +2,4 @@
 2026-06-02T15:03:15Z | segment=b2c | name=Александр | contact=alexandr.kozhin@gmail.com, +79119111111 | product=ai-agents-combo | notes=Оплатил комбо-пакет ИИ-агенты
 2026-06-02T15:14:30Z | segment=b2c | name=Кожин | contact=@akozhin | product=ai-coding-intensive-cursor | notes=Оплатил интенсив по Cursor
 {"session_id": "228eebd5-c613-4c88-a3f3-b25d0f3eea4a", "segment": "b2c", "product": "Deep Agents", "name": "", "contact": "eval-fnl-scn-001@example.com", "created_at": "2026-06-15T22:10:27.215894+00:00", "notes": ""}
+{"session_id": "session_2025_09_23_001", "segment": "b2c", "product": "Deep Agents", "name": "Алексей", "contact": "alexey@alex.com", "created_at": "2026-06-26T19:40:19.448133+00:00", "notes": "Оплатил курс Deep Agents"}
