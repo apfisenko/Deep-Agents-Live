@@ -36,3 +36,10 @@ data/leads.txt
 
 # Local demo screenshots (artifacts live under /opt/cursor/artifacts)
 /swagger-docs.png
+evals/.env
+frontend/node_modules
+frontend/.next
+
+comparison/.venv
+comparison/embeddings_cache
+

@@ -1,0 +1,26 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.18.1
+    ports:
+      - "6333:6333"   # REST
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  pgvector:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: vec
+      POSTGRES_PASSWORD: vec
+      POSTGRES_DB: vec
+    ports:
+      - "5433:5432"   # 5433 снаружи, чтобы не конфликтовать с локальным Postgres
+    volumes:
+      - pgvector_storage:/var/lib/postgresql/data
+
+# Chroma здесь нет: в pip-версии она работает embedded (в процессе ноутбука),
+# отдельный сервер не нужен — это часть демонстрации «самый простой старт».
+
+volumes:
+  qdrant_storage:
+  pgvector_storage:

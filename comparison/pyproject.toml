@@ -1,0 +1,21 @@
+[project]
+name = "vector-db-comparison"
+version = "0.1.0"
+description = "Учебный notebook: сравнение Qdrant / Chroma / pgvector на реальных эмбеддингах"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "qdrant-client>=1.12",
+    "chromadb>=1.5.4",
+    "pgvector>=0.4",
+    "psycopg[binary]>=3.2",
+    "fastembed>=0.7",
+    "datasets>=3.0",
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "matplotlib>=3.9",
+    "tqdm>=4.66",
+    "httpx>=0.28",
+    "jupyterlab>=4.2",
+    "ipykernel>=6.29",
+    "jupytext>=1.16",
+]
