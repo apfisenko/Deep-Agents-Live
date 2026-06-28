@@ -16,6 +16,31 @@
 
 Judge для всех RAGAS/DeepEval LLM-метрик: **`google/gemini-2.5-flash-lite`** из `evals/configs/baseline-react-inmemory.yaml` (`judge:` блок) — отдельно от модели агента.
 
+### GraphRAG (sprint-06): сравнение по сегментам
+
+Маршруты retrieval по сегменту — [`schema.md`](../sprints/sprint-06-graphrag/schema.md) §3; LPG-модель — §1–2.
+
+Для конфигов `graphrag-baseline`, `graphrag-hybrid`, `graphrag-final` **запрещено** усреднять все items в один score.
+
+| Роль | Метрика | Сегмент / датасет | Зачем |
+|------|---------|-------------------|-------|
+| **Главная (north-star)** | `avg_answer_correctness` | **per segment**: `graphrag/single-hop`, `graphrag/multi-hop`, `graphrag/global` | Регрессия single-hop; рост multi/global vs baseline |
+| **Retrieval (graph-aware)** | `avg_required_entity_recall_at_5` | per segment | Доля `required_entities[]` в top-5 retrieved contexts |
+| Guard | `avg_faithfulness` | per segment | Анти-галлюцинации |
+| Guard | `error_rate` | per dataset run | E-19 |
+
+**Baseline (Langfuse, 2026-06-28, `graphrag-baseline.yaml`):**
+
+| Сегмент | correctness | entity@5 | faithfulness |
+|---------|------------:|---------:|-------------:|
+| single-hop | 0.532 | 0.833 | 0.867 |
+| multi-hop | 0.458 | 0.552 | 0.581 |
+| global | 0.572 | 0.383 | 0.788 |
+
+Отчёт: [`evals/reports/graphrag-baseline.md`](../../evals/reports/graphrag-baseline.md).
+
+**Acceptance (задачи 06, 08):** multi-hop и global ↑ vs baseline; single-hop `answer_correctness` ≥ baseline − 0.02.
+
 ---
 
 ## Главная метрика и guard-метрики (E-18)
@@ -129,6 +154,26 @@ Judge для всех RAGAS/DeepEval LLM-метрик: **`google/gemini-2.5-flas
 
 ---
 
+### graphrag/single-hop · graphrag/multi-hop · graphrag/global
+
+*Один evaluator profile на все три slug (`evals/scripts/evaluators.py`); отчётность — **по `metadata.question_segment`**, не средним по union.*
+
+| Метрика | Ступень E-17 | Фреймворк / точное имя | Ссылка | Уровень | Тип | Порог 🟢 / 🔴 | Обоснование |
+|---------|--------------|------------------------|--------|---------|-----|---------------|-------------|
+| `answer_correctness` | б | RAGAS `AnswerCorrectness` | см. e2e-qa | item: trace | NUMERIC 0–1 | см. baseline + Δ | Reference из `data/`; развёрнутые эталоны |
+| `required_entity_recall_at_5` | а | свой код: доля `metadata.required_entities[]` в top-5 contexts | metrics-guide §A; `evaluators.required_entity_recall_at_k` | item: **span** (retrieval) | NUMERIC 0–1 | **≥ baseline сегмента** / &lt; baseline − 0.10 | Graph-aware retrieval; ключевой сигнал для multi/global |
+| `faithfulness` | б | RAGAS `Faithfulness` | см. e2e-qa | item: trace | NUMERIC 0–1 | **≥ 0.75** / &lt; 0.60 | Guard при graph/hybrid |
+| `task_error` | а | свой код | §A | item: trace | BOOLEAN | = 0 | E-19 |
+| `avg_answer_correctness` | — | агрегат run | E-19 | run | NUMERIC | per segment | Не смешивать slug'и |
+| `avg_required_entity_recall_at_5` | — | агрегат run | E-19 | run | NUMERIC | per segment | North-star retrieval для graph eval |
+| `avg_faithfulness` | — | агрегат run | E-19 | run | NUMERIC | **≥ 0.75** | Guard run-level |
+
+**Span:** `required_entity_recall_at_5` считается по `contexts[]` из SSE `search_knowledge_base_tool` (top-5 chunks).
+
+**Config:** [`evals/configs/graphrag-baseline.yaml`](../../evals/configs/graphrag-baseline.yaml) (Qdrant-hybrid, без graph).
+
+---
+
 ## Сквозные run-level метрики (все прогоны)
 
 | Метрика | Уровень | Описание |
@@ -145,7 +190,7 @@ Run-level ключи — только в `run_metadata`, не в metadata items 
 
 | Метрика | ADR | Статус |
 |---------|-----|--------|
-| — | — | **Нет.** Все метрики — категории A/B/C по metrics-guide. G-Eval и свой judge не требуются на MVP. |
+| `required_entity_recall_at_5` | sprint-06 graphrag task 02 | ✅ Реализована в `evaluators.py`; graphrag slug profile |
 
 ---
 
@@ -157,6 +202,7 @@ Run-level ключи — только в `run_metadata`, не в metadata items 
 |------|---------|--------------|-----------|
 | 2026-06-15 | все пороги в таблицах выше | — (initial) | plan задачи 03; стартовые ориентиры llmstart eval MVP |
 | 2026-06-17 | `executed_tools_count` / `avg_executed_tools_count` | — (initial) | P0 behavior-evaluator; пороги для benchmark_only (metrics-guide §C) |
+| 2026-06-28 | graphrag baseline (per segment) | — (initial) | sprint-06 task 02; см. таблицу «GraphRAG» выше и `graphrag-baseline.md` |
 
 *Примечание:* пороги на `approximate` gt (E-14) валидны для **относительного** compare конфигов, не для абсолютных SLA.
 
@@ -166,3 +212,4 @@ Run-level ключи — только в `run_metadata`, не в metadata items 
 
 - [x] dataset-map утверждён: 2026-06-15
 - [x] Карта метрик показана и утверждена: пользователь / 2026-06-15 (⛔ гейт задачи 03)
+- [x] GraphRAG метрики и segment-compare: sprint-06 task 02 / 2026-06-28

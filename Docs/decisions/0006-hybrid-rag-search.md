@@ -205,6 +205,7 @@ Sidecar override (без env): файл `{name}.pdf.extracted.txt` рядом с
 
 - [ADR-0005 — Qdrant](0005-vector-db.md)
 - [ADR-0006 — Hybrid RAG search](0006-hybrid-rag-search.md)
+- [ADR-0007 — Neo4j GraphRAG](0007-neo4j-graphrag.md) — graph store рядом с Qdrant; [schema](../sprints/sprint-06-graphrag/schema.md)
 - [Qdrant Hybrid Queries](https://qdrant.tech/documentation/search/hybrid-queries/)
 - [comparison/](../../comparison/) — RRF demo
 - [Sprint-05 vector-db](../sprints/sprint-05-vector-db/README.md)

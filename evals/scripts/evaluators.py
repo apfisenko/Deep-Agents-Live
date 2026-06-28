@@ -138,6 +138,16 @@ def fact_coverage_score(answer: str, facts: list[str]) -> float:
     return hits / len(facts)
 
 
+def _entity_present(text_lower: str, entity: str) -> bool:
+    entity_lower = entity.lower().replace("-", " ")
+    if entity_lower in text_lower:
+        return True
+    slug = entity_lower.replace(" ", "-")
+    if slug in text_lower:
+        return True
+    return _fact_present(text_lower, entity)
+
+
 def _fact_present(answer_lower: str, fact: str) -> bool:
     fact_lower = fact.lower()
     if fact_lower in answer_lower:
@@ -150,6 +160,22 @@ def _fact_present(answer_lower: str, fact: str) -> bool:
         return False
     matched = sum(1 for word in words if word in answer_lower)
     return matched >= max(1, len(words) // 2)
+
+
+def required_entity_recall_at_k(contexts: list[str], entities: list[str], k: int = 5) -> float:
+    if not entities:
+        return 1.0
+    top_text = " ".join(contexts[:k]).lower()
+    hits = sum(1 for entity in entities if _entity_present(top_text, entity))
+    return hits / len(entities)
+
+
+def _required_entities(metadata: Any, expected_output: Any = None) -> list[str]:
+    meta = _metadata_dict(metadata)
+    entities = meta.get("required_entities") or []
+    if entities:
+        return [str(e) for e in entities]
+    return _facts(metadata, expected_output)
 
 
 def tool_correctness_in_order(called: list[str], expected: list[str]) -> float:
@@ -240,6 +266,14 @@ def evaluator_names_for_slug(
             "faithfulness",
         ),
     }
+    graphrag_profile = (
+        "task_error",
+        "answer_correctness",
+        "required_entity_recall_at_5",
+        "faithfulness",
+    )
+    for graphrag_slug in ("graphrag/multi-hop", "graphrag/global", "graphrag/single-hop"):
+        mapping[graphrag_slug] = graphrag_profile
     if slug not in mapping:
         msg = f"No evaluator profile for {dataset_slug}"
         raise ValueError(msg)
@@ -436,6 +470,32 @@ def make_item_evaluators(
             return Evaluation(name="context_recall", value=value, comment=comment)
 
         evaluators.append(context_recall)
+
+    if "required_entity_recall_at_5" in names:
+
+        def required_entity_recall_at_5(
+            *,
+            output: Any,
+            metadata: Any = None,
+            expected_output: Any = None,
+            **_kw: Any,
+        ) -> Evaluation:
+            _, contexts, _, err = _unwrap_output(output)
+            if err:
+                return Evaluation(
+                    name="required_entity_recall_at_5",
+                    value=0.0,
+                    comment=err,
+                )
+            entities = _required_entities(metadata, expected_output)
+            value = required_entity_recall_at_k(contexts or [], entities, k=5)
+            return Evaluation(
+                name="required_entity_recall_at_5",
+                value=value,
+                comment=f"{int(value * len(entities))}/{len(entities)} entities in top-5 contexts",
+            )
+
+        evaluators.append(required_entity_recall_at_5)
 
     if "tool_correctness" in names:
 

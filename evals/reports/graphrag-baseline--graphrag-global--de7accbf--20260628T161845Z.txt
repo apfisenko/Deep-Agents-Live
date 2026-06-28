@@ -1,0 +1,29 @@
+Individual Results: Hidden (6 items)
+💡 Set include_item_results=True to view them
+
+──────────────────────────────────────────────────
+🧪 Experiment: baseline-graphrag/global/v001
+📋 Run name: graphrag-baseline--graphrag-global--de7accbf--20260628T161845Z - Sprint-06 task 02: Qdrant-hybrid baseline for graphrag segment datasets
+6 items
+Evaluations:
+  • required_entity_recall_at_5
+  • task_error
+  • faithfulness
+  • answer_correctness
+
+Average Scores:
+  • required_entity_recall_at_5: 0.383
+  • task_error: 0.000
+  • faithfulness: 0.788
+  • answer_correctness: 0.572
+
+Run Evaluations:
+  • error_rate: 0.000
+  • avg_answer_correctness: 0.572
+  • avg_required_entity_recall_at_5: 0.383
+  • avg_faithfulness: 0.788
+
+🔗 Dataset Run:
+   http://localhost:3001/project/default/datasets/cmqxzjs7x001sn308gmsjpzoj/runs/27065308-1dcd-4ec1-a479-ee49e7872549
+
+dataset_run_url: http://localhost:3001/project/default/datasets/cmqxzjs7x001sn308gmsjpzoj/runs/27065308-1dcd-4ec1-a479-ee49e7872549

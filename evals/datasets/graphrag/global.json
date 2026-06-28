@@ -1,0 +1,78 @@
+[
+  {
+    "id": "graphrag-gl-01",
+    "segment": "global",
+    "question": "Дай обзор траектории комбо «ИИ-агенты»: все 4 ступени, уровень, формат обучения и итоговое портфолио.",
+    "reference_answer": "Комбо «ИИ-агенты» (ai-agents-combo, 59 990 ₽) — единая траектория из 4 ступеней. Ступень 1: Интенсив Cursor (интенсив, в записи, 14 990 ₽) — AI-driven workflow, 3 продукта. Ступень 2: AI-driven Fullstack (средний, запись + чат, 39 990 ₽) — full cycle web/backend/DevOps. Ступень 3: AI-driven Agents (средний, гибрид 8+3, 39 990 ₽) — RAG, LangGraph, MCP, security, evals, multi-agent. Ступень 4: Deep Agents (продвинутый, online live, 44 990 ₽) — GraphRAG, Deep Agents, context engineering, prompt mgmt, A2A/A2UI. Итоговое портфолио комбо: ассистенты, мультимодальный продукт, веб-приложение, RAG, агентная и мультиагентная система, MCP-инструменты.",
+    "required_entities": [
+      "ai-agents-combo",
+      "ai-coding-intensive-cursor",
+      "ai-driven-fullstack",
+      "ai-coding-agents-base",
+      "deep-agents-advanced"
+    ]
+  },
+  {
+    "id": "graphrag-gl-02",
+    "segment": "global",
+    "question": "Какие технологии и подходы проходят сквозь все 4 ступени комбо «ИИ-агенты»?",
+    "reference_answer": "Сквозные темы траектории: AI-driven методология (AIDD) — во всех 4 программах и комбо; Cursor как IDE-агент — ступени 1–4; LLM / промпт-инжиниринг / контекст-инжиниринг — все ступени; Python + LLM API; RAG (от базового к Advanced и GraphRAG); LangChain/LangGraph; MCP; evals и observability (LangSmith/LangFuse); production-практики и деплой.",
+    "required_entities": [
+      "AI-driven методология",
+      "Cursor",
+      "LLM",
+      "RAG",
+      "LangChain"
+    ]
+  },
+  {
+    "id": "graphrag-gl-03",
+    "segment": "global",
+    "question": "Сравни целевые аудитории всех B2C-программ траектории комбо.",
+    "reference_answer": "Интенсив Cursor: разработчики, ИТ-специалисты, продакты/аналитики/дизайнеры/менеджеры без ежедневного кодинга, тимлиды, CTO/CEO, предприниматели. Fullstack: разработчики, tech lead, архитекторы — full cycle с AI. Agents base: ИТ-специалисты, tech lead — production-ready агентные системы. Deep Agents: AI-инженеры с базой LLM/агентов, разработчики и архитекторы — продвинутые production-системы. Комбо объединяет профили: быстрый старт, fullstack, agents&RAG, карьерный переход; отдельно CPO — комбо или только интенсив.",
+    "required_entities": [
+      "ai-coding-intensive-cursor",
+      "ai-driven-fullstack",
+      "ai-coding-agents-base",
+      "deep-agents-advanced",
+      "Audience"
+    ]
+  },
+  {
+    "id": "graphrag-gl-04",
+    "segment": "global",
+    "question": "Сколько стоит комбо «ИИ-агенты», какая сумма курсов по отдельности и какой процент скидки?",
+    "reference_answer": "Комбо «ИИ-агенты» (ai-agents-combo): текущая цена 59 990 ₽. В таблице цен комбо сумма по отдельности — 134 960 ₽, скидка −56%. В тексте «Отдельно» также указан пересчёт: 14 990 + 39 990 + 39 990 + 44 990 = 139 960 ₽. Фактические цены SKU: интенсив 14 990 ₽, Fullstack 39 990 ₽, Agents 39 990 ₽, Deep Agents 44 990 ₽.",
+    "required_entities": [
+      "ai-agents-combo",
+      "59 990",
+      "134 960",
+      "139 960"
+    ]
+  },
+  {
+    "id": "graphrag-gl-05",
+    "segment": "global",
+    "question": "Какие production-компоненты входят в итоговое портфолио комбо «ИИ-агенты»?",
+    "reference_answer": "По описанию комбо и ступеней в портфолио траектории: LLM-ассистент и мультимодальный продукт (интенсив); Telegram/веб-приложение с backend, БД, CI/CD и observability (Fullstack); Advanced RAG-система с hybrid search, LangGraph-агент, MCP-интеграции, guardrails (Agents); GraphRAG, Deep Agents с planning/subagents, multi-agent и A2A/A2UI (Deep Agents). Комбо формулирует: ассистенты, мультимодальный продукт, веб-приложение, RAG, агентная и мультиагентная система, MCP-инструменты.",
+    "required_entities": [
+      "RAG",
+      "GraphRAG",
+      "Multi-agent",
+      "MCP",
+      "Telegram-бот"
+    ]
+  },
+  {
+    "id": "graphrag-gl-06",
+    "segment": "global",
+    "question": "Чем корпоративное B2B-предложение LLMStart отличается от покупки B2C-курса на сайте?",
+    "reference_answer": "B2B (corporate-training.md): корпоративное обучение, разработка под заказ и консалтации/аудит для компаний — адаптация под команду, процессы и внедрение, воркшопы, серия вебинаров, сопровождение; запрос КП и индивидуальная программа. B2C — покупка отдельных курсов/комбо физлицом (каталог programs: интенсив, Fullstack, Agents, Deep Agents, комбо). Каталог B2C не заменяет корпоративное предложение.",
+    "required_entities": [
+      "corporate-training",
+      "B2B",
+      "B2C",
+      "ai-agents-combo"
+    ]
+  }
+]

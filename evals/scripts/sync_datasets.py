@@ -10,6 +10,7 @@ import urllib.request
 from base64 import b64encode
 from pathlib import Path
 
+from dataset_registry import should_apply_langfuse_name_override
 from env_loader import load_repo_env, resolve_langfuse_keys
 from models import (
     discover_manifests,
@@ -65,12 +66,13 @@ def ensure_dataset(host: str, headers: dict[str, str], name: str, description: s
 
 def upsert_item(host: str, headers: dict[str, str], dataset_name: str, payload: dict) -> None:
     url = f"{host.rstrip('/')}/api/public/dataset-items"
+    metadata = dict(payload.get("metadata") or {})
+    metadata.setdefault("manifest_item_id", payload["id"])
     body = {
         "datasetName": dataset_name,
-        "id": payload["id"],
         "input": payload["input"],
         "expectedOutput": payload["expectedOutput"],
-        "metadata": payload.get("metadata", {}),
+        "metadata": metadata,
     }
     _api_request("POST", url, body, headers)
 
@@ -123,7 +125,11 @@ def main() -> int:
         return 0
 
     require_reviewed_by = not args.allow_unreviewed
-    apply_name_override = args.dataset != "all"
+    slug_hint = args.dataset.strip().strip("/") if args.dataset != "all" else ""
+    apply_name_override = should_apply_langfuse_name_override(
+        slug_hint,
+        apply_name_override=args.dataset != "all",
+    )
     for path in paths:
         min_items = args.min_items if "e2e-qa" in str(path) else 1
         if args.validate_only:

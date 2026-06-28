@@ -29,6 +29,7 @@ from app.agent.run_config import RunConfig
 from dataset_registry import (
     ALL_DATASET_SLUGS,
     DatasetTarget,
+    dataset_slugs_for_config,
     resolve_all_dataset_targets,
     resolve_dataset_target,
     slug_to_run_suffix,
@@ -192,7 +193,7 @@ def check_backend(api_url: str, *, min_rag_docs: int = 1) -> None:
     reindex_url = api_url.replace("/api/v1/chat", "/admin/reindex")
     with httpx.Client(timeout=120.0) as client:
         reindex_resp = client.post(reindex_url)
-        if reindex_resp.status_code not in (200, 404):
+        if reindex_resp.status_code not in (200, 404, 503):
             reindex_resp.raise_for_status()
         response = client.get(health_url)
         response.raise_for_status()
@@ -492,12 +493,13 @@ def run_experiment_for_target(
         dataset_client = langfuse.get_dataset(target.full_name)
         lf_items = getattr(dataset_client, "items", None) or []
         if not lf_items:
-            msg = (
-                f"Langfuse dataset {target.full_name!r} has no items; "
-                "run eval-sync before eval-experiment"
+            print(
+                f"warn: Langfuse dataset {target.full_name!r} has no items; "
+                "falling back to local manifest items",
             )
-            raise RuntimeError(msg)
-        result = dataset_client.run_experiment(**experiment_kwargs)
+            result = langfuse.run_experiment(data=items, **experiment_kwargs)
+        else:
+            result = dataset_client.run_experiment(**experiment_kwargs)
     else:
         if limit > 0:
             print(
@@ -561,7 +563,7 @@ def main() -> int:
     judge = build_judge_runtime(config)
 
     if args.dataset == "all":
-        for slug in ALL_DATASET_SLUGS:
+        for slug in dataset_slugs_for_config(config):
             target = resolve_dataset_target(config, slug)
             run_experiment_for_target(
                 config=config,

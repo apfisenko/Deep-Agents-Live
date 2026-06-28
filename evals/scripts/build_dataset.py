@@ -21,6 +21,9 @@ BUILDERS: dict[str, str] = {
     "behavior/funnel-to-lead": "build_funnel_to_lead_manifest",
     "edge/out-of-catalog": "build_out_of_catalog_manifest",
     "edge/objections-trust": "build_objections_trust_manifest",
+    "graphrag/multi-hop": "build_graphrag_manifest",
+    "graphrag/global": "build_graphrag_manifest",
+    "graphrag/single-hop": "build_graphrag_manifest",
 }
 
 

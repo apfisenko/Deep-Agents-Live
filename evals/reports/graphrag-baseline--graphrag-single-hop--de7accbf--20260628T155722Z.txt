@@ -1,0 +1,27 @@
+Local graphrag baseline run: graphrag-baseline--graphrag-single-hop--de7accbf--20260628T155722Z
+3 items
+Evaluations:
+  • answer_correctness
+  • required_entity_recall_at_5
+  • faithfulness
+  • task_error
+
+Average Scores:
+  • faithfulness: 0.786
+  • answer_correctness: 0.515
+  • required_entity_recall_at_5: 0.833
+
+Run Evaluations:
+  • avg_answer_correctness: 0.515
+  • avg_faithfulness: 0.786
+  • avg_required_entity_recall_at_5: 0.833
+  • error_rate: 0.000
+
+Items:
+graphrag-sh-01|Стоимость курса **Deep Agents** при покупке отдельно — **44 990 ₽**. Это указано в открытых материалах программы. Если понадобится более подробная информация о составе курса или возможных скидках, дай|correctness=0.333|entity@5=1.000|faith=0.667
+graphrag-sh-02|В курсе **AI‑driven разработка ИИ‑агентов** — **11 занятий** в формате «гибрид»:  
+- **8 live‑занятий** (прямых)  
+- **3 записанных** (доступны в библиотеке)
+
+Такой формат позволяет пройти обучение в |correctness=0.667|entity@5=0.500|faith=0.857
+graphrag-sh-03|**Гарантия возврата есть** – в описании программы указано **«Гарантия возврата 14 дней»** [^1]. Это относится к *Ступени 1: Интенсив AI‑кодинг ИИ‑агентов в Cursor*, который входит в комбо‑программу из|correctness=0.545|entity@5=1.000|faith=0.833

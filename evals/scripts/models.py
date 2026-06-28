@@ -20,6 +20,7 @@ from app.agent.run_config import RunConfig
 DATASETS_DIR = REPO_ROOT / "evals" / "datasets"
 
 Segment = Literal["b2c", "b2b"]
+QuestionSegment = Literal["single-hop", "multi-hop", "global"]
 GtQuality = Literal["verified", "approximate"]
 Source = Literal["real_dialog", "synthetic", "manual"]
 
@@ -39,6 +40,8 @@ class DatasetItemMetadata(BaseModel):
     intent: str
     source: Source
     gt_quality: GtQuality
+    question_segment: QuestionSegment | None = None
+    required_entities: list[str] = Field(default_factory=list)
     reviewed_by: str | None = None
     product_id: str | None = None
     nearest_product_id: str | None = None
@@ -61,6 +64,19 @@ class DatasetItemMetadata(BaseModel):
             raise ValueError(msg)
         return value
 
+    @field_validator("required_entities")
+    @classmethod
+    def required_entities_non_empty_for_graphrag(
+        cls,
+        value: list[str],
+        info: Any,
+    ) -> list[str]:
+        data = info.data if hasattr(info, "data") else {}
+        if data.get("question_segment") and not value:
+            msg = "required_entities must not be empty for graphrag items"
+            raise ValueError(msg)
+        return value
+
 
 class DatasetItem(BaseModel):
     id: str = Field(min_length=1)
@@ -71,7 +87,7 @@ class DatasetItem(BaseModel):
 
 class DatasetManifest(BaseModel):
     dataset: str
-    group: Literal["e2e", "rag", "behavior", "edge"]
+    group: Literal["e2e", "rag", "behavior", "edge", "graphrag"]
     version: str
     created: str
     description: str
@@ -139,6 +155,7 @@ def manifest_to_langfuse_item(manifest: DatasetManifest, item: DatasetItem) -> d
     metadata = item.metadata.model_dump(exclude_none=True)
     facts = metadata.pop("facts", [])
     metadata["facts_count"] = len(facts)
+    metadata["item_id"] = item.id
     if facts:
         preview = "; ".join(facts[:3])
         metadata["facts_preview"] = preview[:200]

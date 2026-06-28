@@ -1,0 +1,45 @@
+# Sprint-06 graphrag baseline: Qdrant hybrid RAG without graph (measurement only).
+config_id: graphrag-baseline
+comment: "Sprint-06 task 02: Qdrant-hybrid baseline for graphrag segment datasets"
+
+benchmark_only: false
+
+agent:
+  impl: langchain-react
+  api_url: ${BACKEND_URL}/api/v1/chat
+
+retrieval:
+  backend: qdrant
+
+vector_db:
+  engine: qdrant
+  server_image: qdrant/qdrant:v1.18.1
+  client: qdrant-client==1.18.0
+  collection: knowledge_base
+  embedding_model: openai/text-embedding-3-small
+  chunk_size: 600
+  chunk_overlap: 80
+  top_k: 5
+  langfuse_dataset: deep_agents_live_v001
+
+model:
+  provider: openrouter
+  name: ${LLM_MODEL}
+  temperature: ${LLM_TEMPERATURE}
+
+judge:
+  provider: openrouter
+  name: ${EVAL_JUDGE_MODEL}
+  temperature: ${EVAL_JUDGE_TEMPERATURE}
+
+prompt:
+  source: file
+  path: ${SYSTEM_PROMPT_PATH}
+  name: SYSTEM_PROMPT_SEARCH_FALLBACK
+
+datasets:
+  multi-hop: v001
+  global: v001
+  single-hop: v001
+
+extra_evaluators: []

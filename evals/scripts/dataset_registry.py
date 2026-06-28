@@ -22,9 +22,29 @@ DATASET_MIN_ITEMS: dict[str, int] = {
     "edge/out-of-catalog": 8,
     "edge/objections-trust": 10,
     "edge/error-analysis-hits": 5,
+    "graphrag/multi-hop": 10,
+    "graphrag/global": 6,
+    "graphrag/single-hop": 3,
 }
 
 ALL_DATASET_SLUGS = tuple(DATASET_MIN_ITEMS.keys())
+
+GRAPHAG_DATASET_SLUGS = (
+    "graphrag/multi-hop",
+    "graphrag/global",
+    "graphrag/single-hop",
+)
+
+CONFIG_DATASET_SLUGS: dict[str, tuple[str, ...]] = {
+    "graphrag-baseline": GRAPHAG_DATASET_SLUGS,
+}
+
+
+def dataset_slugs_for_config(config: RunConfig) -> tuple[str, ...]:
+    override = CONFIG_DATASET_SLUGS.get(config.config_id)
+    if override is not None:
+        return override
+    return ALL_DATASET_SLUGS
 
 
 @dataclass(frozen=True)
@@ -48,6 +68,13 @@ def manifest_path_for_slug(slug: str, version: str) -> Path:
         msg = f"No manifest for {slug} version {version} under {base}"
         raise FileNotFoundError(msg)
     return candidates[0]
+
+
+def should_apply_langfuse_name_override(slug: str, *, apply_name_override: bool) -> bool:
+    """GraphRAG segment datasets always use manifest path names in Langfuse."""
+    if slug.startswith("graphrag/"):
+        return False
+    return apply_name_override
 
 
 def resolve_dataset_target(
@@ -75,7 +102,13 @@ def resolve_dataset_target(
         require_reviewed_by=True,
         min_items=min_items,
     )
-    full_name = langfuse_dataset_name(manifest, apply_name_override=apply_name_override)
+    full_name = langfuse_dataset_name(
+        manifest,
+        apply_name_override=should_apply_langfuse_name_override(
+            slug,
+            apply_name_override=apply_name_override,
+        ),
+    )
     return DatasetTarget(
         slug=slug,
         full_name=full_name,
@@ -87,7 +120,7 @@ def resolve_dataset_target(
 
 
 def resolve_all_dataset_targets(config: RunConfig) -> list[DatasetTarget]:
-    return [resolve_dataset_target(config, slug) for slug in ALL_DATASET_SLUGS]
+    return [resolve_dataset_target(config, slug) for slug in dataset_slugs_for_config(config)]
 
 
 def slug_to_run_suffix(slug: str) -> str:

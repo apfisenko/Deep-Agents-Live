@@ -1,0 +1,67 @@
+Local graphrag baseline run: graphrag-baseline--graphrag-multi-hop--de7accbf--20260628T155122Z
+11 items
+Evaluations:
+  • answer_correctness
+  • required_entity_recall_at_5
+  • faithfulness
+  • task_error
+
+Average Scores:
+  • faithfulness: 0.784
+  • answer_correctness: 0.288
+  • required_entity_recall_at_5: 0.000
+
+Run Evaluations:
+  • avg_answer_correctness: 0.288
+  • avg_faithfulness: 0.784
+  • avg_required_entity_recall_at_5: 0.000
+  • error_rate: 0.000
+
+Items:
+graphrag-mh-01|**Следующая ступень после курса «AI‑driven Fullstack» — это комбо **«ИИ‑агенты»** (продукт **Deep Agents**).**
+
+| Параметр | Значение |
+|---|---|
+| **ID продукта** | `deep-agents` |
+| **Название** | D|correctness=0.200|entity@5=0.000|faith=0.733
+graphrag-mh-02|**Где изучается GraphRAG:**  
+Технология GraphRAG входит в траекторию **Deep Agents** – продвинутого онлайн‑курса по AI‑агентам и production‑архитектуре.
+
+**Что нужно пройти до этой темы:**  
+Для успе|correctness=0.111|entity@5=0.000|faith=1.000
+graphrag-mh-03|## Где изучается MCP в траектории комбо?
+
+Согласно текущему каталогу B2C‑продуктов:
+
+| Продукт | Уровень | Краткое описание |
+|--------|---------|-------------------|
+| **Deep Agents** | Продвинутый ||correctness=0.615|entity@5=0.000|faith=1.000
+graphrag-mh-04|**Ответ основан на данных каталога B2C, который мы получили после попытки поиска.**
+
+### Что представлено в каталоге
+| ID продукта | Название | Цена (руб.) | Формат | Краткое описание |
+|------------||correctness=0.286|entity@5=0.000|faith=0.000
+graphrag-mh-05|## Рекомендация
+
+Учитывая, что вы прошли интенсив **AI‑кодинг в Cursor** и сейчас ищете следующий комбо‑курс для **fullstack production**, а RAG‑технологии пока не требуются, оптимальным выбором будет|correctness=0.231|entity@5=0.000|faith=0.000
+graphrag-mh-06|## Где изучается hybrid search и как он связан с vector DB
+
+В открытом каталоге B2C‑продуктов **продвинутый курс «Deep Agents»** (ID `deep-agents`) посвящён AI‑агентам и production‑архитектуре. Именно|correctness=0.375|entity@5=0.000|faith=1.000
+graphrag-mh-07|## Что взять вместо полной четырёхступенчатой траектории
+
+Для руководителей продукт‑разработки (CPO), которые хотят внедрять **ИИ‑агенты**, но не планируют писать код каждый день, оптимальным решением|correctness=0.286|entity@5=0.000|faith=1.000
+graphrag-mh-08|**LangGraph и ReAct** в нашем каталоге B2C‑обучения рассматриваются в рамках одного из курсов:
+
+| Курс | Цена | Формат | Краткое описание |
+|------|------|--------|-------------------|
+| **Deep Agents|correctness=0.190|entity@5=0.000|faith=1.000
+graphrag-mh-09|We need to respond to the user request: "Какая полная prerequisite-цепочка четырёх ступеней комбо «ИИ-агенты»?" They want the full prerequisite chain of the four-step combo "ИИ-агенты". We have some d|correctness=0.179|entity@5=0.000|faith=1.000
+graphrag-mh-10|**Ответ**
+
+В траектории обучения эти темы раскрываются в курсе **«Deep Agents»** – продвинутом онлайн‑программном модуле, посвящённом AI‑агентам и production‑архитектуре.  
+
+- **Оценка RAG (Retrieval‑|correctness=0.476|entity@5=0.000|faith=1.000
+graphrag-mh-11|## Multi‑agent системы: ступени комбо и требования  
+
+- **Ступень появления**  
+  - Наиболее детально про многоагентные системы рассматривается в курсе **«Deep Agents»** – продвинутом онлайн‑курсе по |correctness=0.222|entity@5=0.000|faith=0.889

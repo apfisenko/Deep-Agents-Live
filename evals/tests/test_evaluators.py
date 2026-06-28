@@ -7,6 +7,7 @@ from evaluators import (
     evaluator_names_for_slug,
     executed_tools_count_value,
     fact_coverage_score,
+    required_entity_recall_at_k,
     resolve_evaluator_names,
     tool_correctness_in_order,
 )
@@ -60,6 +61,23 @@ def test_evaluator_profile_funnel_simulation() -> None:
 def test_executed_tools_count_value() -> None:
     assert executed_tools_count_value([]) == 0.0
     assert executed_tools_count_value(["search_knowledge_base_tool", "list_b2c_products"]) == 2.0
+
+
+def test_evaluator_profile_graphrag() -> None:
+    names = evaluator_names_for_slug("graphrag/multi-hop")
+    assert "answer_correctness" in names
+    assert "required_entity_recall_at_5" in names
+    assert "faithfulness" in names
+
+
+def test_required_entity_recall_partial() -> None:
+    contexts = [
+        "AI-driven Fullstack ai-driven-fullstack 10 занятий",
+        "Agents base LangGraph MCP",
+    ]
+    entities = ["ai-driven-fullstack", "LangGraph", "GraphRAG"]
+    score = required_entity_recall_at_k(contexts, entities, k=5)
+    assert 0.33 <= score <= 0.67
 
 
 def test_resolve_evaluator_names_merges_extra() -> None:

@@ -1,0 +1,62 @@
+dataset: single-hop
+group: graphrag
+version: v001
+created: '2026-06-28'
+description: GraphRAG single-hop guard items
+items:
+- id: graphrag-sh-01
+  input:
+    message: Сколько стоит курс Deep Agents отдельно?
+    channel: web
+  expected_output:
+    answer: 'Курс «Deep Agents: продвинутая разработка ИИ-агентов» (deep-agents-advanced,
+      ступень 4 комбо) стоит 44 990 ₽ отдельно; в комбо указана та же цена SKU.'
+  metadata:
+    segment: b2c
+    question_segment: single-hop
+    intent: single-hop
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-06-task-02
+    required_entities: &id001
+    - deep-agents-advanced
+    - 44 990
+    facts: *id001
+- id: graphrag-sh-02
+  input:
+    message: Сколько занятий в курсе AI-driven разработка ИИ-агентов?
+    channel: web
+  expected_output:
+    answer: 'Курс «AI-driven разработка ИИ-агентов» (ai-coding-agents-base): 11 занятий,
+      длительность ~1,5 месяца; формат — гибрид (8 live + 3 в записи).'
+  metadata:
+    segment: b2c
+    question_segment: single-hop
+    intent: single-hop
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-06-task-02
+    required_entities: &id002
+    - ai-coding-agents-base
+    - 11 занятий
+    facts: *id002
+- id: graphrag-sh-03
+  input:
+    message: Есть ли гарантия возврата на интенсиве AI-кодинг в Cursor?
+    channel: web
+  expected_output:
+    answer: 'Да: на интенсиве «AI-кодинг ИИ-агентов в Cursor» (ai-coding-intensive-cursor)
+      действует гарантия возврата 14 дней (указано в блоке формата/гарантии программы
+      и в описании комбо).'
+  metadata:
+    segment: b2c
+    question_segment: single-hop
+    intent: single-hop
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-06-task-02
+    required_entities: &id003
+    - ai-coding-intensive-cursor
+    - 14 дней
+    - гарантия возврата
+    facts: *id003

@@ -1,0 +1,43 @@
+Local graphrag baseline run: graphrag-baseline--graphrag-global--de7accbf--20260628T155625Z
+6 items
+Evaluations:
+  • answer_correctness
+  • required_entity_recall_at_5
+  • faithfulness
+  • task_error
+
+Average Scores:
+  • faithfulness: 0.806
+  • answer_correctness: 0.349
+  • required_entity_recall_at_5: 0.083
+
+Run Evaluations:
+  • avg_answer_correctness: 0.349
+  • avg_faithfulness: 0.806
+  • avg_required_entity_recall_at_5: 0.083
+  • error_rate: 0.000
+
+Items:
+graphrag-gl-01|## Обзор траектории «ИИ‑агенты»
+
+| Параметр | Значение |
+|---|---|
+| **Курс** | **Deep Agents** (ID: `deep-agents`) |
+| **Уровень** | Продвинутый |
+| **Формат** | Онлайн (самостоятельные задания + веб|correctness=0.372|entity@5=0.000|faith=1.000
+graphrag-gl-02|## Технологии и подходы, проходящие сквозь все 4 ступени комбо «ИИ‑агенты»
+
+Комбо «ИИ‑агенты» охватывает четыре последовательных стадии, которые детально разбираваются в **продвинутом курсе «Deep Agen|correctness=0.375|entity@5=0.000|faith=1.000
+graphrag-gl-03|## Сравнение целевых аудиторий B2C‑программ «траектория комбо»
+
+| Программа | Кто является целевой аудиторией | Что подчёркивает описание |
+|---|---|---|
+| **Deep Agents** | Специалисты с опытом в маш|correctness=0.581|entity@5=0.000|faith=1.000
+graphrag-gl-04|We need to respond to the user's question: "Сколько стоит комбо «ИИ-агенты», какая сумма курсов по отдельности и какой процент скидки?" They want the price of the combo "ИИ-агенты", the sum of courses|correctness=0.077|entity@5=0.000|faith=0.000
+graphrag-gl-05|## Производственные компоненты в составе комбо «ИИ‑агенты»
+
+В каталоге B2C доступен курс **Deep Agents** (ID = `deep-agents`), который называется **«Продвинутый курс по AI‑агентам и production‑архитек|correctness=0.083|entity@5=0.000|faith=1.000
+graphrag-gl-06|## Кратко о различиях B2B‑предложения и B2C‑курса
+
+| Аспект | B2C‑курс (индивидуальная покупка) | Корпоративное B2B‑предложение |
+|--------|----------------------------------|-------------------------|correctness=0.606|entity@5=0.500|faith=0.833

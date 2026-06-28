@@ -1,0 +1,33 @@
+[
+  {
+    "id": "graphrag-sh-01",
+    "segment": "single-hop",
+    "question": "Сколько стоит курс Deep Agents отдельно?",
+    "reference_answer": "Курс «Deep Agents: продвинутая разработка ИИ-агентов» (deep-agents-advanced, ступень 4 комбо) стоит 44 990 ₽ отдельно; в комбо указана та же цена SKU.",
+    "required_entities": [
+      "deep-agents-advanced",
+      "44 990"
+    ]
+  },
+  {
+    "id": "graphrag-sh-02",
+    "segment": "single-hop",
+    "question": "Сколько занятий в курсе AI-driven разработка ИИ-агентов?",
+    "reference_answer": "Курс «AI-driven разработка ИИ-агентов» (ai-coding-agents-base): 11 занятий, длительность ~1,5 месяца; формат — гибрид (8 live + 3 в записи).",
+    "required_entities": [
+      "ai-coding-agents-base",
+      "11 занятий"
+    ]
+  },
+  {
+    "id": "graphrag-sh-03",
+    "segment": "single-hop",
+    "question": "Есть ли гарантия возврата на интенсиве AI-кодинг в Cursor?",
+    "reference_answer": "Да: на интенсиве «AI-кодинг ИИ-агентов в Cursor» (ai-coding-intensive-cursor) действует гарантия возврата 14 дней (указано в блоке формата/гарантии программы и в описании комбо).",
+    "required_entities": [
+      "ai-coding-intensive-cursor",
+      "14 дней",
+      "гарантия возврата"
+    ]
+  }
+]

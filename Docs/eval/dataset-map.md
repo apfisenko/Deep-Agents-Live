@@ -54,6 +54,7 @@
 | G5 Несовпадение формата | 1/5 | `edge/objections-trust` |
 | G6 Follow-up / nurture | 3/5 | `e2e/e2e-qa` (isolated turns только) |
 | G7 B2B сегментация | 1/5 | `behavior/segment-routing` |
+| **GraphRAG** single / multi / global (каталог B2C) | sprint-06 | `graphrag/single-hop`, `graphrag/multi-hop`, `graphrag/global` — маршруты retrieval: [`schema.md`](../sprints/sprint-06-graphrag/schema.md) §3 |
 
 ---
 
@@ -164,6 +165,66 @@
 
 ---
 
+### graphrag/single-hop
+
+| Поле | Значение |
+|------|----------|
+| **Группа (слой)** | graphrag |
+| **Маршрут retrieval** | `vector` only — [`schema.md`](../sprints/sprint-06-graphrag/schema.md) §3.1; graph **не** вызывается |
+| **Что проверяет** | **Single-hop** вопросы по каталогу B2C: один факт из одного program-файла (цена, формат, гарантия). Guard-сегмент — flat RAG должен оставаться сильным. |
+| **Обоснование** | [`analysis.md`](../sprints/sprint-06-graphrag/analysis.md) §3 S1–S3; baseline для регрессии при включении graph/hybrid (задачи 06, 08). |
+| **Источник items** | synthetic: 100% (эталоны из `data/b2c/programs/`, `ai-agents-combo.md`) |
+| **Источник правды (git)** | [`evals/datasets/graphrag/single_hop.json`](../../evals/datasets/graphrag/single_hop.json) → manifest `graphrag/single-hop/v001_*.yaml` |
+| **Схема item** | input: `{ message, channel: web }` · expected_output: **reference** (развёрнутый эталон) · metadata: `{ segment: b2c, question_segment: single-hop, intent: single-hop, required_entities[], facts[] (= required_entities), source: synthetic, gt_quality: verified, reviewed_by }` |
+| **Размер (MVP)** | **3** (guard; расширение не планируется) |
+| **Ground truth** | Строго из `data/`; `verified`; `reviewed_by: sprint-06-task-02` |
+| **Предполагаемый тип проверки** | judge + `required_entity_recall_at_5` + faithfulness |
+| **Eval-config** | [`evals/configs/graphrag-baseline.yaml`](../../evals/configs/graphrag-baseline.yaml) |
+
+---
+
+### graphrag/multi-hop
+
+| Поле | Значение |
+|------|----------|
+| **Группа (слой)** | graphrag |
+| **Маршрут retrieval** | `graph` (+ Qdrant anchor) — [`schema.md`](../sprints/sprint-06-graphrag/schema.md) §3.2; паттерны `RECOMMENDED_BEFORE*`, `COVERS`, `REQUIRES*` |
+| **Что проверяет** | **Multi-hop**: prerequisite-цепочки, diff тем между ступенями, cross-file связи (RECOMMENDED_BEFORE, COVERS, legacy SKU). |
+| **Обоснование** | analysis §3 M1–M11; flat RAG ожидаемо проседает — целевой сегмент для graph retrieval (sprint-06). |
+| **Источник items** | synthetic: 100% (вопросы и обоснование «почему flat промахнётся» — analysis §3) |
+| **Источник правды (git)** | [`evals/datasets/graphrag/multi_hop.json`](../../evals/datasets/graphrag/multi_hop.json) → manifest `graphrag/multi-hop/v001_*.yaml` |
+| **Схема item** | metadata: `{ question_segment: multi-hop, required_entities[] }` — см. single-hop |
+| **Размер (MVP)** | **11** (целевой диапазон 10–12) |
+| **Ground truth** | Эталоны из нескольких `data/b2c/programs/*.md`; entity resolution: канон `ai-driven-fullstack` vs `aidd-program` |
+| **Предполагаемый тип проверки** | judge + `required_entity_recall_at_5` + faithfulness |
+| **Eval-config** | `graphrag-baseline.yaml` |
+
+---
+
+### graphrag/global
+
+| Поле | Значение |
+|------|----------|
+| **Группа (слой)** | graphrag |
+| **Маршрут retrieval** | `global` / `text2cypher` — [`schema.md`](../sprints/sprint-06-graphrag/schema.md) §3.3–3.4; агрегат от `Combo` |
+| **Что проверяет** | **Global**: обзор траектории комбо, сквозные технологии, аудитории, цены/скидка, портфолио, B2B vs B2C. |
+| **Обоснование** | analysis §3 G1–G6; агрегаты по 4–5 файлам — целевой сегмент для global/text2cypher (sprint-06). |
+| **Источник items** | synthetic: 100% |
+| **Источник правды (git)** | [`evals/datasets/graphrag/global.json`](../../evals/datasets/graphrag/global.json) → manifest `graphrag/global/v001_*.yaml` |
+| **Схема item** | metadata: `{ question_segment: global, required_entities[] }` — см. single-hop |
+| **Размер (MVP)** | **6** |
+| **Ground truth** | Комбо + 4 ступени + `corporate-training.md` для B2B; известная нестыковка суммы комбо (134 960 vs 139 960) — эталон фиксирует обе цифры |
+| **Предполагаемый тип проверки** | judge + `required_entity_recall_at_5` + faithfulness |
+| **Eval-config** | `graphrag-baseline.yaml` |
+
+**Langfuse (E-16):** `graphrag/multi-hop/v001`, `graphrag/global/v001`, `graphrag/single-hop/v001` — **без** `EVAL_DATASET_NAME` override (см. `dataset_registry.should_apply_langfuse_name_override`).
+
+**Baseline-отчёт:** [`evals/reports/graphrag-baseline.md`](../../evals/reports/graphrag-baseline.md).
+
+**LPG-схема и boundary:** [`schema.md`](../sprints/sprint-06-graphrag/schema.md) · **ADR:** [`0007-neo4j-graphrag.md`](../decisions/0007-neo4j-graphrag.md).
+
+---
+
 ## Чего сознательно НЕ покрываем
 
 | Сценарий / риск | Причина |
@@ -186,13 +247,15 @@
 |--------|----------|--------|
 | **eval-01** (vertical slice) | `e2e/e2e-qa` v001 — ≥20 items, review, sync, baseline | задача 04–05 |
 | **eval-02** | `rag-format-facts`, `rag-product-facts`, `segment-routing`, `funnel-to-lead`, `out-of-catalog`, `objections-trust` | по приоритету G1→G7 |
+| **sprint-06 graphrag** | `graphrag/single-hop`, `graphrag/multi-hop`, `graphrag/global` v001 | задача 02; baseline `graphrag-baseline.yaml` |
 
 **Миграция `dataset/v0.1.jsonl`:** тип A → `rag-format-facts` + часть `e2e-qa`; B → `rag-product-facts` + `e2e-qa`; C → `segment-routing`.
 
-**Зеркалирование Langfuse (E-16):** folders-as-versions — `e2e/e2e-qa/v001`, …
+**Зеркалирование Langfuse (E-16):** folders-as-versions — `e2e/e2e-qa/v001`, `graphrag/multi-hop/v001`, …
 
 ---
 
 ## Утверждение
 
 - [x] Карта показана и утверждена: пользователь / 2026-06-15 (⛔ гейт задачи 02)
+- [x] GraphRAG-сегменты добавлены: sprint-06 task 02 / 2026-06-28 (`graphrag/*` v001, baseline зафиксирован)

@@ -1,0 +1,142 @@
+[
+  {
+    "id": "graphrag-mh-01",
+    "segment": "multi-hop",
+    "question": "После курса AI-driven Fullstack какая следующая ступень комбо «ИИ-агенты» и какие новые темы там появляются по сравнению с Fullstack?",
+    "reference_answer": "После ступени 2 (AI-driven Fullstack, slug ai-driven-fullstack) по цепочке RECOMMENDED_BEFORE идёт ступень 3 — «AI-driven разработка ИИ-агентов» (ai-coding-agents-base). В Fullstack (10 занятий) фокус на full cycle: Telegram/веб, backend API, PostgreSQL, frontend, Docker, CI/CD, observability и production-деплой. На ступени Agents (11 занятий, гибрид 8 live + 3 запись) добавляются RAG (LangChain), мониторинг и evals RAG, Advanced RAG с hybrid search, LangGraph и tool calling, MCP, security/guardrails, evals агентов и multi-agent — то, чего нет как отдельного блока во Fullstack.",
+    "required_entities": [
+      "ai-driven-fullstack",
+      "ai-coding-agents-base",
+      "RAG",
+      "LangGraph",
+      "MCP",
+      "Hybrid Search"
+    ]
+  },
+  {
+    "id": "graphrag-mh-02",
+    "segment": "multi-hop",
+    "question": "В каком курсе траектории комбо изучается GraphRAG и что нужно пройти до этой темы?",
+    "reference_answer": "GraphRAG — тема 5 программы «Deep Agents: продвинутая разработка ИИ-агентов» (deep-agents-advanced, ступень 4). До неё по программе Deep Agents идут векторные БД (тема 4), а концептуально GraphRAG опирается на базовый RAG (ступень 3 Agents, темы 4–6) и Vector DB. В описании GraphRAG требует Vector DB, Knowledge Graph и RAG pipeline.",
+    "required_entities": [
+      "deep-agents-advanced",
+      "GraphRAG",
+      "Vector DB",
+      "RAG",
+      "ai-coding-agents-base"
+    ]
+  },
+  {
+    "id": "graphrag-mh-03",
+    "segment": "multi-hop",
+    "question": "Где в траектории комбо изучается MCP и после каких тем его логично брать?",
+    "reference_answer": "MCP (Model Context Protocol) подробно в «AI-driven разработка ИИ-агентов» — тема 8 (после LangGraph/tool calling в теме 7). В Deep Agents MCP встречается в темах 1–2 (интеграция инструментов, контекст кодового агента), теме 7 (внешние источники) и теме 10 (prompt management). Логичный порядок: сначала LangGraph и tool calling на ступени Agents (т.7), затем MCP (т.8); в Deep Agents MCP углубляется на production-уровне.",
+    "required_entities": [
+      "MCP",
+      "LangGraph",
+      "ai-coding-agents-base",
+      "deep-agents-advanced",
+      "Tool calling"
+    ]
+  },
+  {
+    "id": "graphrag-mh-04",
+    "segment": "multi-hop",
+    "question": "Чем отличается SKU AI-driven Fullstack от legacy-программы aidd-program.md по объёму и структуре?",
+    "reference_answer": "Канонический B2C SKU — AI-driven Fullstack (ai-driven-fullstack): 10 занятий (~1,5 мес.), цена 39 990 ₽, формат в записи + чат. Legacy-файл aidd-program.md — то же направление Fullstack AI-driven, но расширенная программа: 12 тем (не 10), без отдельного SKU/цены в каталоге; больше детализации DevOps и MCP для браузера. Для комбо и prerequisite-цепочки используется ступень ai-driven-fullstack.",
+    "required_entities": [
+      "ai-driven-fullstack",
+      "aidd-program",
+      "10 занятий",
+      "12 тем"
+    ]
+  },
+  {
+    "id": "graphrag-mh-05",
+    "segment": "multi-hop",
+    "question": "Прошёл интенсив AI-кодинг в Cursor — какой следующий курс комбо для fullstack production, если RAG пока не нужен?",
+    "reference_answer": "После ступени 1 (Интенсив AI-кодинг ИИ-агентов в Cursor, ai-coding-intensive-cursor) по порядку комбо следующая ступень 2 — AI-driven Fullstack (ai-driven-fullstack): full cycle production (backend, frontend, БД, Docker, CI/CD, observability, деплой). RAG и агентные системы — это уже ступень 3 (ai-coding-agents-base), её можно пропустить, если нужен именно fullstack production без RAG.",
+    "required_entities": [
+      "ai-coding-intensive-cursor",
+      "ai-driven-fullstack",
+      "ai-coding-agents-base",
+      "production"
+    ]
+  },
+  {
+    "id": "graphrag-mh-06",
+    "segment": "multi-hop",
+    "question": "В какой ступени комбо изучается hybrid search и как он связан с vector DB?",
+    "reference_answer": "Hybrid Search (комбинация semantic + keyword) — в Advanced RAG на ступени 3 «AI-driven разработка ИИ-агентов» (тема 6, ai-coding-agents-base). Vector DB как отдельная тема — на ступени 4 Deep Agents (тема 4 «Векторные и графовые БД»); GraphRAG на теме 5 опирается и на vector DB, и на граф. Связь: hybrid search требует vector/semantic поиск + keyword search; vector DB — инфраструктурный слой для semantic части и для GraphRAG.",
+    "required_entities": [
+      "Hybrid Search",
+      "Vector DB",
+      "ai-coding-agents-base",
+      "deep-agents-advanced",
+      "Advanced RAG"
+    ]
+  },
+  {
+    "id": "graphrag-mh-07",
+    "segment": "multi-hop",
+    "question": "Комбо «ИИ-агенты» для CPO без ежедневного кодинга — что брать вместо полной четырёхступенчатой траектории?",
+    "reference_answer": "Для CPO / продакта, который не пишет код ежедневно, в комбо указано: целевая траектория — полное комбо «ИИ-агенты» (ai-agents-combo), потому что в AI-driven подходе код пишет Cursor/агент. Альтернатива без длинного маршрута — только «Интенсив AI-кодинг ИИ-агентов в Cursor» (ai-coding-intensive-cursor): быстрый старт, 4 модуля, формат в записи; интенсив также таргетирует тимлидов, CTO и предпринимателей без ежедневного кодинга.",
+    "required_entities": [
+      "ai-agents-combo",
+      "ai-coding-intensive-cursor",
+      "CPO",
+      "Cursor"
+    ]
+  },
+  {
+    "id": "graphrag-mh-08",
+    "segment": "multi-hop",
+    "question": "LangGraph и ReAct — в каких курсах и темах траектории комбо это изучается?",
+    "reference_answer": "ReAct (Reasoning + Acting, автономные агенты с инструментами) — интенсив Cursor, тема 4 / модуль 4 (ai-coding-intensive-cursor). LangGraph (графовые workflows, tool calling, память) — ступень 3 Agents, тема 7 «Агенты с LangChain и LangGraph» (ai-coding-agents-base); там же ReAct рассматривается в агентском контексте. Deep Agents углубляет multi-agent и Deep Agents patterns (т.8, 11–12).",
+    "required_entities": [
+      "ReAct",
+      "LangGraph",
+      "ai-coding-intensive-cursor",
+      "ai-coding-agents-base"
+    ]
+  },
+  {
+    "id": "graphrag-mh-09",
+    "segment": "multi-hop",
+    "question": "Какая полная prerequisite-цепочка четырёх ступеней комбо «ИИ-агенты»?",
+    "reference_answer": "Комбо «ИИ-агенты» (ai-agents-combo) включает 4 программы в порядке: (1) Интенсив AI-кодинг в Cursor — ai-coding-intensive-cursor, интенсив, 14 990 ₽; (2) AI-driven Fullstack — ai-driven-fullstack, средний, 39 990 ₽; (3) AI-driven разработка ИИ-агентов — ai-coding-agents-base, средний, 39 990 ₽; (4) Deep Agents — deep-agents-advanced, продвинутый, 44 990 ₽. RECOMMENDED_BEFORE: 1→2→3→4.",
+    "required_entities": [
+      "ai-agents-combo",
+      "ai-coding-intensive-cursor",
+      "ai-driven-fullstack",
+      "ai-coding-agents-base",
+      "deep-agents-advanced"
+    ]
+  },
+  {
+    "id": "graphrag-mh-10",
+    "segment": "multi-hop",
+    "question": "Где в траектории комбо изучаются evals RAG и evals агентов — и на какой ступени они связаны?",
+    "reference_answer": "Evals RAG / мониторинг RAG — ступень 3 Agents: тема 5 (мониторинг и observability RAG) и тема 10 (evals агентов, LLM-as-Judge). На ступени 4 Deep Agents тема 9 — evaluation, red teaming и продвинутые evals production-систем. Связь: базовые RAG-evals на Agents опираются на RAG pipeline (т.4–6); Deep Agents добавляет red team и prompt management (т.10).",
+    "required_entities": [
+      "RAG evals",
+      "ai-coding-agents-base",
+      "deep-agents-advanced",
+      "Evals",
+      "LLM-as-Judge"
+    ]
+  },
+  {
+    "id": "graphrag-mh-11",
+    "segment": "multi-hop",
+    "question": "Multi-agent системы — на каких ступенях комбо они появляются и что нужно до них?",
+    "reference_answer": "Multi-agent — тема 11 «AI-driven разработка ИИ-агентов» (ai-coding-agents-base): Network, Supervisor, Hierarchical паттерны на LangChain/LangGraph; требует single-agent/LangGraph (т.7). На Deep Agents (deep-agents-advanced) темы 11–12 углубляют multi-agent, A2A и A2UI протоколы. Prerequisite: LangGraph agents и production RAG/agents со ступени 3.",
+    "required_entities": [
+      "Multi-agent",
+      "ai-coding-agents-base",
+      "deep-agents-advanced",
+      "LangGraph",
+      "A2A"
+    ]
+  }
+]

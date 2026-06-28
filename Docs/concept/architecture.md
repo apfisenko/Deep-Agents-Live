@@ -27,6 +27,8 @@ flowchart TB
 
     subgraph data["Данные и внешние сервисы"]
         KB[("data/b2b, b2c")]
+        QD[("Qdrant<br/>hybrid vectors")]
+        N4J[("Neo4j<br/>catalog graph")]
         LEADS[("leads.txt")]
         LLM["OpenRouter"]
         LF["Langfuse"]
@@ -43,9 +45,15 @@ flowchart TB
     TG --> TGA
 
     API --> KB
+    API --> QD
+    API --> N4J
     API --> LEADS
     API --> LLM
     API --> LF
+
+    KB -.->|"make index"| QD
+    KB -.->|"make graph-index"| N4J
+    N4J -.->|"join by slug / source_path"| QD
 ```
 
 ---
@@ -58,6 +66,8 @@ flowchart TB
 | **Web widget** (`frontend/`) | Чат-виджет «Айра», SSE-клиент, UI reasoning/tools | Next.js 16, React 19, Tailwind 4, shadcn | [design-reference-blue-green.png](../../design-reference-blue-green.png) |
 | **Telegram bot** (`frontend/bot/`) | Long polling, вызов Core, HTML-форматирование | aiogram 3.x | [ADR-0001](../decisions/0001-single-agent-core.md) |
 | **Knowledge base** (`data/`) | RAG-источники, мок CRM | PDF, MD, plain text | — |
+| **Qdrant** | Vector store: dense + BM25 sparse, filter `audience` | Docker, [ADR-0005](../decisions/0005-vector-db.md) | [ADR-0006](../decisions/0006-hybrid-rag-search.md) |
+| **Neo4j** | LPG каталога B2C: ступени, темы, prerequisite | Docker + APOC, [ADR-0007](../decisions/0007-neo4j-graphrag.md) | [schema.md](../sprints/sprint-06-graphrag/schema.md) |
 | **Langfuse** | Observability, traces | Self-hosted Docker | [integrations.md](integrations.md) |
 
 ---
@@ -100,14 +110,21 @@ sequenceDiagram
     participant U as B2C-клиент
     participant W as Web widget
     participant B as Agent Core
-    participant R as RAG index
+    participant Q as Qdrant
+    participant G as Neo4j graph
     participant L as OpenRouter
 
     U->>W: «Какой курс для новичка?»
     W->>B: POST /chat/stream {session_id, channel: web, message}
     B->>B: agent_step: анализ запроса
-    B->>R: search_knowledge_base(audience=b2c)
-    R-->>B: chunks
+    B->>Q: search_knowledge_base(audience=b2c)
+    Q-->>B: chunks
+    opt multi-hop / global
+        B->>G: graph / global / text2cypher
+        G-->>B: entities + paths
+        B->>Q: fetch chunks by source_path / slug
+        Q-->>B: linked chunks
+    end
     B->>B: agent_step: поиск в каталоге
     B->>L: ReAct LLM
     L-->>B: tool: list_b2c_products
@@ -219,7 +236,7 @@ backend/
 │   │   └── routers/          # chat (JSON + SSE), health
 │   ├── agent/                # ReAct graph, prompts, step labels
 │   ├── tools/                # search_knowledge_base, list_b2c_products, ...
-│   ├── rag/                  # indexer, in-memory store, manifest
+│   ├── rag/                  # Qdrant hybrid, graph retriever (sprint-06)
 │   ├── memory/               # in-memory sessions по session_id
 │   └── integrations/         # OpenRouter, Langfuse
 └── tests/
@@ -227,32 +244,71 @@ backend/
 
 - **Роутеры** — валидация запроса, выбор SSE vs JSON, маппинг событий агента в SSE.
 - **agent/** — оркестрация ReAct, генерация `agent_step` для UI.
-- **rag/** — in-memory vector index; см. раздел ниже.
+- **rag/** — Qdrant hybrid + (sprint-06) graph/global/hybrid retriever; см. раздел ниже.
 - **memory/** — словарь `session_id → messages[]`; сброс при рестарте.
 
-### RAG — индексация и контроль дубликатов
+### RAG — dual store: Qdrant + Neo4j
 
-Индекс **in-memory**, пересобирается при старте Core. Повторные запуски и рестарты процесса **не дублируют** чанки.
+Два персистентных хранилища знаний; embeddings **только** в Qdrant ([ADR-0005](../decisions/0005-vector-db.md), [ADR-0006](../decisions/0006-hybrid-rag-search.md)). Структура каталога B2C — в Neo4j ([ADR-0007](../decisions/0007-neo4j-graphrag.md), [schema](../sprints/sprint-06-graphrag/schema.md)).
+
+```mermaid
+flowchart LR
+    DATA["data/b2b, b2c"]
+    IDX["make index"]
+    GIDX["make graph-index"]
+    QD[("Qdrant<br/>chunks + vectors")]
+    N4J[("Neo4j<br/>LPG catalog")]
+    RET["retriever<br/>vector | graph | global | hybrid"]
+
+    DATA --> IDX --> QD
+    DATA --> GIDX --> N4J
+    RET --> QD
+    RET --> N4J
+    N4J -->|"slug ↔ source_path"| QD
+```
+
+#### Связь по id (boundary rule)
+
+| Neo4j | Qdrant payload | Join |
+|-------|----------------|------|
+| `Course.slug`, `Combo.slug` | `source_path`, `doc_id` | `source_path` содержит `{slug}.md` |
+| `Theme.canonicalName` | упоминания в `text` чанков | graph — структура; vector — формулировки |
+| `sourcePaths[]` на узле | все чанки документа | filter Qdrant по path после graph-hop |
+
+**В графе:** порядок ступеней, COVERS/REQUIRES, цены, slug, аудитории, форматы.  
+**В Qdrant:** описания, FAQ, программы bullet-list, B2B PDF, embeddings.
+
+#### Qdrant — индексация
+
+Offline `make index` / `.\make.ps1 index`. Named volume — индекс переживает рестарт.
 
 | Правило | Реализация |
 |---------|------------|
-| Чистый индекс на старт | При запуске создаётся **новый пустой** in-memory store; данные не дописываются к предыдущему состоянию процесса |
-| Идентичность документа | `doc_id` = относительный путь + `sha256` содержимого + `audience` (`b2b` / `b2c`) |
-| Upsert, не append | Чанки одного `doc_id` заменяют предыдущие записи с тем же id, а не добавляются повторно |
-| Манифест | `data/.rag-manifest.json` — карта `{path, hash, audience, chunk_count, indexed_at}` |
-| Инкремент при старте | Сравнение файлов в `data/b2b/`, `data/b2c/` с манифестом: индексируются только **новые** и **изменённые** файлы; неизменённые пропускаются; удалённые файлы — удаляются из индекса |
-| Один проход | `RagIndexer` — singleton; повторный вызов `build()` в рамках жизни процесса идемпотентен (без повторной вставки тех же `doc_id`) |
-| Dev reload | Опционально `POST /admin/reindex` (только `ENV=dev`) — тот же алгоритм upsert + обновление манифеста |
+| Идентичность документа | `doc_id` = путь + hash + `audience` |
+| Upsert | чанки одного `doc_id` заменяют предыдущие |
+| Манифест | `data/.rag-manifest.json` |
+| Hybrid | dense + sparse BM25, RRF; `HYBRID_SEARCH_ENABLED` |
+
+#### Neo4j — граф каталога
+
+Offline `make graph-index` (sprint-06): seed.cypher + schema-guided extraction по [`schema.md`](../sprints/sprint-06-graphrag/schema.md).
+
+| Класс вопроса | Backend | Graph |
+|---------------|---------|-------|
+| single-hop | `vector` | нет |
+| multi-hop | `graph` + vector anchor | да |
+| global | `global` / `text2cypher` | да |
 
 ```
 backend/app/rag/
-├── indexer.py        # обход data/, hash, upsert, manifest
-├── store.py          # in-memory vector store (единственный экземпляр)
-├── manifest.py       # чтение/запись data/.rag-manifest.json
-└── search.py         # search_knowledge_base с фильтром audience
+├── indexer.py, qdrant_store.py, search.py
+├── sparse_embed.py
+└── retriever/                    # sprint-06
+
+backend/app/graph/                # Neo4j client, index CLI (sprint-06)
 ```
 
-При ошибке индексации отдельного файла Core логирует предупреждение и продолжает старт (fail fast только при недоступности всего каталога `data/`).
+При ошибке индексации отдельного файла Core логирует предупреждение и продолжает старт.
 - **tools/** — файловые операции (`leads.txt`), моки оплаты.
 
 ---
@@ -330,11 +386,11 @@ frontend/bot/
 
 ### Основная схема (по умолчанию)
 
-Нативный запуск приложений на Windows; **только Langfuse** в Docker Compose через WSL2.
+Нативный запуск приложений на Windows; **Langfuse, Qdrant, Neo4j** в Docker Compose через WSL2.
 
 | Команда | Действие |
 |---------|----------|
-| `make up` / `make.ps1 up` | `docker compose up -d` — Langfuse stack (WSL) |
+| `make up` / `make.ps1 up` | `docker compose up -d` — Langfuse + Qdrant + Neo4j (WSL) |
 | `make down` / `make.ps1 down` | остановить compose |
 | `make ps` / `make.ps1 ps` | статус контейнеров |
 | `make logs` / `make.ps1 logs` | логи compose |
@@ -362,18 +418,20 @@ frontend/bot/
 
 ### Порты и volumes
 
-| langfuse | 3001 | `GET /api/public/health`; UI http://localhost:3001 |
-|--------|-----------|--------|
+| Сервис | Порт | Health |
+|--------|------|--------|
+| qdrant | 6333 | REST/gRPC health |
+| neo4j | 7474 / 7687 | Browser / Bolt; [ADR-0007](../decisions/0007-neo4j-graphrag.md) |
+| langfuse | 3001 | UI / health endpoint |
 | backend | 8000 | `GET /health` |
 | frontend | 3000 | `GET /api/health` (Next route) |
-| bot | — | процесс + ping Core `/health` |
-| langfuse | 3001 | UI / health endpoint образа |
-См. `.env.example`: `OPENROUTER_API_KEY`, `TELEGRAM_BOT_TOKEN`, `LANGFUSE_*`, `BACKEND_URL`, `CORS_ORIGINS`. Langfuse (запуск, headless init, вход): [integrations.md](integrations.md).
+| bot | — | ping Core `/health` |
+
 Volume: `data/` монтируется в backend (RAG + `leads.txt`).
 
 ### Переменные окружения
 
-См. `.env.example`: `OPENROUTER_API_KEY`, `TELEGRAM_BOT_TOKEN`, `LANGFUSE_*`, `BACKEND_URL`, `CORS_ORIGINS`.
+См. `.env.example`: `OPENROUTER_API_KEY`, `TELEGRAM_BOT_TOKEN`, `LANGFUSE_*`, `QDRANT_*`, `NEO4J_*`, `HYBRID_SEARCH_ENABLED`, `GRAPH_RETRIEVAL_*`, `BACKEND_URL`, `CORS_ORIGINS`. Langfuse: [integrations.md](integrations.md).
 
 ---
 
@@ -394,6 +452,8 @@ Volume: `data/` монтируется в backend (RAG + `leads.txt`).
 | backend | `GET :8000/health` | 200, версия, uptime |
 | frontend | `GET :3000/api/health` | 200 |
 | bot | script / compose healthcheck | Core `/health` доступен, polling активен |
+| qdrant | HTTP `:6333/healthz` | ready |
+| neo4j | HTTP `:7474` или bolt ping | ready (sprint-06) |
 | langfuse | HTTP health образа | UI отвечает |
 
 В `docker-compose.yml` — `healthcheck` для каждого сервиса при `make compose-dev`.
@@ -405,5 +465,6 @@ Volume: `data/` монтируется в backend (RAG + `leads.txt`).
 - [vision.md](vision.md) — сценарии и принципы
 - [api-contracts.md](api-contracts.md) — REST/SSE контракты
 - [integrations.md](integrations.md) — внешние сервисы
-- [decisions/](../decisions/) — ADR
+- [decisions/](../decisions/) — ADR ([0007 Neo4j GraphRAG](../decisions/0007-neo4j-graphrag.md))
+- [sprint-06 schema](../sprints/sprint-06-graphrag/schema.md) — LPG-схема каталога
 - [design-reference-blue-green.png](../../design-reference-blue-green.png) — UI виджета

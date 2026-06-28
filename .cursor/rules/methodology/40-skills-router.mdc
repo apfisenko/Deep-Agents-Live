@@ -38,6 +38,34 @@ alwaysApply: true
 |-----------|-------|------|
 | Проектирование PostgreSQL-схемы | `postgresql-table-design` | `.agents/skills/postgresql-table-design/SKILL.md` |
 
+### Neo4j
+
+Установленные skills: `.agents/skills/neo4j-*`.
+
+| Тип работы | Skill | Путь |
+|-----------|-------|------|
+| Проектирование онтологии, graph-схемы, labels/rels/constraints | `neo4j-modeling-skill` | `.agents/skills/neo4j-modeling-skill/SKILL.md` |
+| Написание, оптимизация и отладка Cypher-запросов | `neo4j-cypher-skill` | `.agents/skills/neo4j-cypher-skill/SKILL.md` |
+| GraphRAG-пайплайны, выбор retriever, `retrieval_query` | `neo4j-graphrag-skill` | `.agents/skills/neo4j-graphrag-skill/SKILL.md` |
+| Python Driver v6: сессии, транзакции, async, batching | `neo4j-driver-python-skill` | `.agents/skills/neo4j-driver-python-skill/SKILL.md` |
+| Vector index, ANN/kNN, hybrid search (vector + fulltext) | `neo4j-vector-index-skill` | `.agents/skills/neo4j-vector-index-skill/SKILL.md` |
+| Импорт документов в KG (chunking, SimpleKGPipeline) | `neo4j-document-import-skill` | `.agents/skills/neo4j-document-import-skill/SKILL.md` |
+| Zero-to-app: provision → model → load → query → build | `neo4j-getting-started-skill` | `.agents/skills/neo4j-getting-started-skill/SKILL.md` |
+
+**Когда читать ключевые Neo4j skills:**
+
+| Ситуация | Skill | Действие |
+|----------|-------|----------|
+| Проектирование онтологии и схемы графа | `neo4j-modeling-skill` | Прочитать **до** фиксации labels, relationship types, constraints и indexes |
+| Написание и отладка Cypher | `neo4j-cypher-skill` | Прочитать **до** генерации или правки запросов; при отладке — EXPLAIN, schema-first protocol |
+| Реализация GraphRAG retriever и выбор паттерна | `neo4j-graphrag-skill` | Прочитать **до** выбора retriever (Vector/Hybrid/VectorCypher/HybridCypher/Text2Cypher/Tools) и написания `retrieval_query` |
+
+**Порядок работы с Neo4j:**
+1. Новый проект / greenfield — `neo4j-getting-started-skill` или `neo4j-modeling-skill` (схема).
+2. Схема → Cypher (`neo4j-cypher-skill`) → ingestion (`neo4j-document-import-skill`) → vector index (`neo4j-vector-index-skill`) → retrieval (`neo4j-graphrag-skill`).
+3. Python-код с driver — `neo4j-driver-python-skill`; Cypher внутри retriever — оба: `neo4j-graphrag-skill` + `neo4j-cypher-skill`.
+4. Не смешивать зоны ответственности: modeling ≠ cypher ≠ graphrag ≠ vector-index (см. «When NOT to Use» в каждом `SKILL.md`).
+
 ### API
 
 | Тип работы | Skill | Путь |

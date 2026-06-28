@@ -8,6 +8,8 @@ import pytest
 from app.agent.run_config import RunConfig
 from dataset_registry import (
     ALL_DATASET_SLUGS,
+    GRAPHAG_DATASET_SLUGS,
+    dataset_slugs_for_config,
     resolve_all_dataset_targets,
     resolve_dataset_target,
     slug_to_run_suffix,
@@ -15,10 +17,12 @@ from dataset_registry import (
 
 EVALS_ROOT = Path(__file__).resolve().parents[1]
 CONFIG = EVALS_ROOT / "configs" / "baseline-react-inmemory.yaml"
+GRAPHRAG_CONFIG = EVALS_ROOT / "configs" / "graphrag-baseline.yaml"
 
 
 def test_all_dataset_slugs_count() -> None:
-    assert len(ALL_DATASET_SLUGS) == 8
+    assert len(ALL_DATASET_SLUGS) == 11
+    assert len(GRAPHAG_DATASET_SLUGS) == 3
 
 
 def test_resolve_rag_format_facts(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -35,7 +39,16 @@ def test_resolve_all_targets(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("EVAL_DATASET_NAME", raising=False)
     config = RunConfig.from_yaml_path(CONFIG)
     targets = resolve_all_dataset_targets(config)
-    assert len(targets) == 8
+    assert len(targets) == len(ALL_DATASET_SLUGS)
+
+
+def test_resolve_graphrag_targets(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("EVAL_DATASET_PREFIX", raising=False)
+    monkeypatch.delenv("EVAL_DATASET_NAME", raising=False)
+    config = RunConfig.from_yaml_path(GRAPHRAG_CONFIG)
+    assert dataset_slugs_for_config(config) == GRAPHAG_DATASET_SLUGS
+    targets = resolve_all_dataset_targets(config)
+    assert len(targets) == 3
 
 
 def test_resolve_unknown_dataset() -> None:
