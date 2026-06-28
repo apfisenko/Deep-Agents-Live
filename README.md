@@ -39,6 +39,8 @@ copy .env.example .env
 | Langfuse | http://localhost:3001 |
 | Qdrant (REST) | http://localhost:6333 |
 | Qdrant Dashboard | http://localhost:6333/dashboard |
+| Neo4j Browser | http://localhost:7474 |
+| Neo4j Bolt | bolt://localhost:7687 |
 
 Telegram-бот: `TELEGRAM_BOT_TOKEN` в `.env`, затем `.\make.ps1 dev-bot`
 
@@ -140,6 +142,45 @@ Invoke-WebRequest -Uri http://localhost:6333/collections -UseBasicParsing
 
 ---
 
+## Neo4j (graph DB)
+
+Neo4j — граф знаний каталога курсов (sprint-06, [ADR-0007](docs/decisions/0007-neo4j-graphrag.md), [ADR-0008](docs/decisions/0008-neo4j-docker-infra.md)). Поднимается вместе с Langfuse/Qdrant через `make up` или отдельно через `graph-up`.
+
+| | |
+|---|---|
+| **Browser** | http://localhost:7474 |
+| **Bolt** | bolt://localhost:7687 |
+| **Health** | http://localhost:7474/db/neo4j/available |
+| **Volume (dev)** | `neo4j_data` |
+| **Text2cypher user** | `NEO4J_READONLY_*` — отдельный user ([devops/README.md](devops/README.md); RBAC read-only только на Enterprise) |
+
+### Проверка, что сервис поднялся
+
+```powershell
+.\make.ps1 graph-up
+.\make.ps1 graph-status
+# neo4j — State: running, Health: healthy
+# Connection OK
+
+# Browser (логин NEO4J_USER / NEO4J_PASSWORD из .env)
+Start-Process http://localhost:7474
+
+# Cypher shell (без docker exec вручную)
+.\make.ps1 graph-shell
+```
+
+После **первого** запуска создайте пользователя text2cypher (отдельные credentials):
+
+```powershell
+.\make.ps1 graph-init-readonly
+```
+
+> **Community Edition:** RBAC (`CREATE ROLE` / `GRANT`) недоступен — user создаётся, но write блокируется в приложении (задача 07). Подробнее: [devops/README.md](devops/README.md).
+
+Переменные — в `.env.example` (`NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_READONLY_USER`, `NEO4J_READONLY_PASSWORD`).
+
+---
+
 ## Make-цели
 
 | Цель | Описание |
@@ -152,8 +193,12 @@ Invoke-WebRequest -Uri http://localhost:6333/collections -UseBasicParsing
 | `index` | Index `data/` into Qdrant |
 | `check-rag-search-e2e` | Smoke: semantic search b2c после `index` (sprint-05) |
 | `check-rag-audience-filter` | Smoke: фильтр b2b/b2c (sprint-05) |
+| `graph-up` / `graph-down` | Neo4j только (sprint-06) |
+| `graph-status` | Статус контейнера + `Connection OK` |
+| `graph-shell` | Интерактивный cypher-shell |
+| `graph-init-readonly` | Read-only user для text2cypher |
 | `ci` | lint + typecheck + test |
-| `up` / `down` / `ps` / `logs` | Docker / Langfuse |
+| `up` / `down` / `ps` / `logs` | Docker / Langfuse (+ Qdrant + Neo4j) |
 
 Windows: `.\make.ps1 <цель>`. Linux/macOS: `make <цель>`.
 

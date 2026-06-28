@@ -53,7 +53,7 @@ Sprint считается завершённым, когда выполнены 
 | 01 | Анализ корпуса и таксономия вопросов | ✅ Done | [plan](tasks/01-corpus-analysis-taxonomy/plan.md) | [analysis](analysis.md) |
 | 02 | Датасеты и baseline-замеры | ✅ Done | [plan](tasks/02-datasets-baseline/plan.md) | [summary](tasks/02-datasets-baseline/summary.md) |
 | 03 | Графовая схема и ADR | ✅ Done | [plan](tasks/03-graph-schema-adr/plan.md) | [schema](schema.md) |
-| 04 | Инфраструктурный слой Neo4j | 📋 | [plan](tasks/04-neo4j-infra/plan.md) | — |
+| 04 | Инфраструктурный слой Neo4j | ✅ Done | [plan](tasks/04-neo4j-infra/plan.md) | [§04 ниже](#задача-04-инфраструктурный-слой-neo4j--done) |
 | 05 | Индексация графа | 📋 | [plan](tasks/05-graph-indexing/plan.md) | — |
 | 06 | Графовый retrieval и гибрид с реранкером | 📋 | [plan](tasks/06-graph-retrieval-hybrid/plan.md) | — |
 | 07 | Инструмент text2cypher с guardrails | 📋 | [plan](tasks/07-text2cypher-tool/plan.md) | — |
@@ -347,24 +347,24 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 
 ---
 
-## Задача 04: Инфраструктурный слой Neo4j 📋
+## Задача 04: Инфраструктурный слой Neo4j ✅ Done
 
 ### Цель
 
 Добавить Neo4j в локальный Docker-стек с APOC, health check, read-only ролью для text2cypher и smoke-подключением из backend.
 
-> 💡 **Скиллы:** [`docker-expert`](../../../.agents/skills/docker-expert/SKILL.md), [`neo4j-driver-python-skill`](../../../.agents/skills/neo4j-driver-python-skill/SKILL.md), [ADR-0007](../../decisions/0007-neo4j-graphrag.md), [`schema.md`](schema.md).
+> 💡 **Скиллы:** [`docker-expert`](../../../.agents/skills/docker-expert/SKILL.md), [`neo4j-driver-python-skill`](../../../.agents/skills/neo4j-driver-python-skill/SKILL.md), [ADR-0007](../../decisions/0007-neo4j-graphrag.md), [ADR-0008](../../decisions/0008-neo4j-docker-infra.md), [`schema.md`](schema.md).
 
 ### Состав работ
 
-- [ ] Сервис Neo4j в `docker-compose.yml`: образ из ADR, плагин APOC, named volume, healthcheck
-- [ ] Переменные в `.env.example`: `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_DATABASE`, read-only credentials
-- [ ] Read-only пользователь/роль для text2cypher (init script или документированная процедура)
-- [ ] Цели `make up` / `make down` / `make.ps1 up` / `make.ps1 down` — Neo4j поднимается вместе со стеком (WSL)
-- [ ] Быстрые команды: статус, cypher-shell / neo4j-admin (в Makefile help)
-- [ ] Smoke-подключение из кода приложения (health или `check-neo4j`)
-- [ ] Unit/smoke-тест URL и connectivity
-- [ ] Самопроверка по критериям DoD
+- [x] Сервис Neo4j в `docker-compose.yml`: образ из ADR, плагин APOC, named volume, healthcheck
+- [x] Переменные в `.env.example`: `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_DATABASE`, read-only credentials
+- [x] Пользователь text2cypher: `graph-init-readonly` + [devops/README.md](../../../devops/README.md) (Community: CREATE USER; RBAC — Enterprise)
+- [x] Neo4j поднимается вместе со стеком: `make up` / `make.ps1 up` (WSL)
+- [x] Make-цели: `graph-up`, `graph-down`, `graph-status`, `graph-shell`, `graph-init-readonly` (+ зеркало в `make.ps1`)
+- [x] Smoke-подключение из backend: `app/graph/client.py`, `make graph-status` → `Connection OK`
+- [x] Unit-тесты URI resolution: `backend/tests/test_graph_client.py`
+- [x] Самопроверка по критериям DoD
 
 ### Критерии готовности (DoD)
 
@@ -374,28 +374,61 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 |---|----------|-----------------|
 | 1 | Neo4j healthy после `make up` (WSL) | `docker compose ps` |
 | 2 | Named volume переживает `down`/`up` | Рестарт без потери данных |
-| 3 | Smoke из backend | `make check-neo4j` или pytest smoke |
+| 3 | Smoke из backend | `make graph-status` / `pytest tests/test_graph_client.py` |
 | 4 | `.env.example` содержит все NEO4J_* с комментариями | Diff review |
-| 5 | Версия образа = ADR | Сверка compose ↔ ADR |
+| 5 | Версия образа = ADR | Сверка compose ↔ ADR-0007 / ADR-0008 |
 | 6 | `make.ps1` зеркалирует новые цели | `.\make.ps1 help` |
 
 **Пользователь проверяет:**
 
-- Neo4j Browser открывается (`http://localhost:7474` или порт из ADR)
-- Read-only пользователь не может CREATE/MERGE/DELETE (ручной cypher-shell)
+- Neo4j Browser открывается (`http://localhost:7474`)
+- `graph-init-readonly` создаёт user `text2cypher` (Community: write блокируется в app, задача 07)
 - WSL compose workflow работает на своей машине
 
 ### Артефакты
 
-- `docker-compose.yml` — сервис `neo4j`, volume, healthcheck, APOC
-- `.env.example` — `NEO4J_*`
-- `backend/app/graph/neo4j_client.py` (или эквивалент)
-- `Makefile` / `make.ps1` — `check-neo4j`, обновлённые `up`/`down`
+**ADR и документация**
+
+| Файл | Назначение |
+|------|------------|
+| [`Docs/decisions/0008-neo4j-docker-infra.md`](../../decisions/0008-neo4j-docker-infra.md) | Порты, compose, volume, healthcheck, Community vs Enterprise RBAC |
+| [`Docs/decisions/0007-neo4j-graphrag.md`](../../decisions/0007-neo4j-graphrag.md) | Обновлён: статус Accepted, ссылка на ADR-0008, митигация write guardrails |
+| [`devops/README.md`](../../../devops/README.md) | Операции Neo4j, `graph-init-readonly`, ограничения Community |
+| [`README.md`](../../../README.md) | Секция Neo4j, make-цели |
+
+**Infra и конфиг**
+
+| Файл | Назначение |
+|------|------------|
+| [`docker-compose.yml`](../../../docker-compose.yml) | Сервис `neo4j` (`neo4j:5.26.2-community`), APOC, volume `neo4j_data`, healthcheck |
+| [`.env.example`](../../../.env.example) | `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_DATABASE`, `NEO4J_READONLY_*` |
+| [`Makefile`](../../../Makefile) | `graph-up`, `graph-down`, `graph-status`, `graph-shell`, `graph-init-readonly` |
+| [`make.ps1`](../../../make.ps1) | Зеркало graph-* целей, WSL fallback для Bolt |
+
+**DevOps scripts**
+
+| Файл | Назначение |
+|------|------------|
+| [`devops/neo4j/create-readonly-user.sh`](../../../devops/neo4j/create-readonly-user.sh) | CREATE USER + verify login (Community) |
+| [`devops/neo4j/init-readonly.cypher`](../../../devops/neo4j/init-readonly.cypher) | Ссылка на Community/Enterprise процедуры |
+| [`devops/neo4j/init-readonly-enterprise.cypher`](../../../devops/neo4j/init-readonly-enterprise.cypher) | RBAC-шаблон для Enterprise/Aura |
+
+**Backend**
+
+| Файл | Назначение |
+|------|------------|
+| [`backend/app/graph/__init__.py`](../../../backend/app/graph/__init__.py) | Пакет graph store |
+| [`backend/app/graph/client.py`](../../../backend/app/graph/client.py) | Driver, `verify_connectivity()`, WSL URI fallback |
+| [`backend/app/config.py`](../../../backend/app/config.py) | Settings: `NEO4J_*` |
+| [`backend/scripts/check_neo4j.py`](../../../backend/scripts/check_neo4j.py) | Smoke CLI для `graph-status` |
+| [`backend/tests/test_graph_client.py`](../../../backend/tests/test_graph_client.py) | Unit-тесты URI resolution |
+| [`backend/pyproject.toml`](../../../backend/pyproject.toml) | Зависимость `neo4j==5.28.2` |
+| [`backend/uv.lock`](../../../backend/uv.lock) | Lockfile после `uv sync` |
 
 ### Документы
 
 - 📋 [План задачи](tasks/04-neo4j-infra/plan.md)
-- 📝 [Summary](tasks/04-neo4j-infra/summary.md)
+- 📝 [Summary](tasks/04-neo4j-infra/summary.md) — *(не создан; итог в артефактах выше)*
 
 ---
 

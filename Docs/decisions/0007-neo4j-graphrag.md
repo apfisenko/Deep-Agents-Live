@@ -1,6 +1,6 @@
 # ADR-0007 — Neo4j как графовая БД рядом с Qdrant (GraphRAG)
 
-> **Статус:** 📋 Proposed (ожидает апрув перед задачей 04)
+> **Статус:** ✅ Accepted
 > **Дата:** 2026-06-28
 > **Область:** Deep-Agents-Live
 > **Extends:** [ADR-0005 — Qdrant](0005-vector-db.md), [ADR-0006 — Hybrid RAG search](0006-hybrid-rag-search.md)
@@ -107,7 +107,7 @@ Join: `source_path` содержит `{slug}.md`; узлы несут `sourcePat
 
 | Компонент | Версия | Где фиксируется |
 |-----------|--------|-----------------|
-| **Docker-образ Neo4j** | `neo4j:5.26.2-community` | `docker-compose.yml` (задача 04) |
+| **Docker-образ Neo4j** | `neo4j:5.26.2-community` | `docker-compose.yml`, [ADR-0008](0008-neo4j-docker-infra.md) |
 | **APOC** | bundled plugin, `NEO4J_PLUGINS='["apoc"]'` | compose env |
 | **Python driver** | `neo4j==5.28.2` | `backend/pyproject.toml` (задача 04+) |
 | **neo4j-graphrag** | `neo4j-graphrag==1.17.0` | `backend/pyproject.toml` — SimpleKGPipeline, Text2CypherRetriever, VectorCypherRetriever |
@@ -178,7 +178,7 @@ Join: `source_path` содержит `{slug}.md`; узлы несут `sourcePat
 | Два store — drift slug/path | manifest + graph-qa.cypher; `sourcePaths[]` на узлах |
 | Регрессия single-hop | routing: graph **off** для single-hop; сегментные метрики |
 | Дубли тем (Fullstack) | entity resolution в seed (задача 05) |
-| Write через LLM Cypher | read-only role + regex + LIMIT + узкий tool description |
+| Write через LLM Cypher | Community: отдельный user + app guardrails (regex, LIMIT); Enterprise/Aura: read-only role + regex |
 | Windows без WSL | ADR-0004; `make.ps1` mirror |
 | Противоречия цен в корпусе | канон в ADR + свойства графа; Qdrant для prose |
 

@@ -41,6 +41,43 @@ function Test-QdrantHealth {
     }
 }
 
+function Test-Neo4jBoltPort {
+    param([string]$HostName, [int]$Port = 7687)
+    try {
+        $client = New-Object System.Net.Sockets.TcpClient
+        $async = $client.BeginConnect($HostName, $Port, $null, $null)
+        $ok = $async.AsyncWaitHandle.WaitOne(3000, $false)
+        if (-not $ok) {
+            $client.Close()
+            return $false
+        }
+        $client.EndConnect($async)
+        $client.Close()
+        return $true
+    } catch {
+        return $false
+    }
+}
+
+function Resolve-Neo4jUriForWindows {
+    $configured = if ($env:NEO4J_URI) { $env:NEO4J_URI } else { "bolt://localhost:7687" }
+    if ($configured -notmatch 'localhost|127\.0\.0\.1') {
+        return $configured
+    }
+
+    if (Test-Neo4jBoltPort "127.0.0.1") {
+        return "bolt://127.0.0.1:7687"
+    }
+
+    $wslIp = (wsl hostname -I).Split()[0].Trim()
+    if ($wslIp -and (Test-Neo4jBoltPort $wslIp)) {
+        Write-Host "Neo4j: using WSL host bolt://${wslIp}:7687 (localhost unreachable from Windows)"
+        return "bolt://${wslIp}:7687"
+    }
+
+    return $configured
+}
+
 function Resolve-QdrantUrlForWindows {
     $configured = if ($env:QDRANT_URL) { $env:QDRANT_URL } else { "http://localhost:6333" }
     if ($configured -notmatch 'localhost|127\.0\.0\.1') {
@@ -166,6 +203,11 @@ function Show-Help {
     Write-Host "  index          - index data/ into vector DB (Qdrant); --force to reindex all"
     Write-Host "  up             - docker compose up -d (WSL)"
     Write-Host "  down           - docker compose down (WSL)"
+    Write-Host "  graph-up       - docker compose up -d neo4j only"
+    Write-Host "  graph-down     - stop Neo4j container"
+    Write-Host "  graph-status   - neo4j container status + Connection OK smoke"
+    Write-Host "  graph-shell    - interactive cypher-shell in neo4j container"
+    Write-Host "  graph-init-readonly - create text2cypher read-only user"
     Write-Host "  ps / status    - docker compose ps (WSL)"
     Write-Host "  logs           - docker compose logs [--tail N] [service]"
     Write-Host "  compose        - docker compose <args>"
@@ -345,6 +387,17 @@ function Invoke-CheckApi {
     }
 }
 
+function Invoke-CheckNeo4j {
+    Push-Location $BackendDir
+    try {
+        $env:NEO4J_URI = Resolve-Neo4jUriForWindows
+        uv run python scripts/check_neo4j.py status
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
 function Invoke-CheckRagSearch {
     param([string]$Command)
     Push-Location $BackendDir
@@ -499,6 +552,23 @@ switch ($Target) {
     }
     "down" {
         Invoke-WslDocker "docker compose down"
+    }
+    "graph-up" {
+        Invoke-WslDocker "docker compose up -d neo4j"
+    }
+    "graph-down" {
+        Invoke-WslDocker "docker compose stop neo4j"
+    }
+    "graph-status" {
+        Invoke-WslDocker "docker compose ps neo4j"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        Invoke-CheckNeo4j
+    }
+    "graph-shell" {
+        Invoke-WslDocker "docker compose exec -it neo4j cypher-shell"
+    }
+    "graph-init-readonly" {
+        Invoke-WslDocker "bash devops/neo4j/create-readonly-user.sh"
     }
     "ps" {
         Invoke-WslDocker "docker compose ps"

@@ -12,6 +12,7 @@ dependencies = [
     "langchain-text-splitters>=1.1.2",
     "langfuse>=4.7.1",
     "langgraph>=1.2.4",
+    "neo4j==5.28.2",
     "pydantic-settings>=2.14.1",
     "pymupdf>=1.27.2.3",
     "pyyaml>=6.0.2",
@@ -78,6 +79,7 @@ ignore = [
 "app/api/routers/chat.py" = ["ANN202", "ANN001"]
 "app/integrations/langfuse.py" = ["PLC0415", "S310"]
 "app/integrations/qdrant_url.py" = ["S607", "TRY003"]
+"app/graph/client.py" = ["S607", "TRY003"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -92,6 +94,7 @@ module = [
     "langgraph.*",
     "langchain_core.*",
     "qdrant_client.*",
+    "neo4j.*",
     "fitz.*",
     "fastembed.*",
 ]

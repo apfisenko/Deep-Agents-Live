@@ -3,6 +3,7 @@
 	up down ps status logs compose docker migrate migrate-new ci compose-dev \
 	check-health check-reindex check-chat check-chat-stream check-langfuse check-traces check-telegram check-api \
 	check-rag-search-e2e check-rag-audience-filter \
+	graph-up graph-down graph-status graph-shell graph-init-readonly \
 	chat-telegram chat-stream langfuse-upload-dataset \
 	eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare
 
@@ -40,6 +41,11 @@ help:
 	@echo "  index          - index data/ into vector DB (Qdrant); ARGS=\"--force\" to reindex all"
 	@echo "  up             - docker compose up -d (WSL)"
 	@echo "  down           - docker compose down (WSL)"
+	@echo "  graph-up       - docker compose up -d neo4j only"
+	@echo "  graph-down     - stop Neo4j container"
+	@echo "  graph-status   - neo4j container status + Connection OK smoke"
+	@echo "  graph-shell    - interactive cypher-shell in neo4j container"
+	@echo "  graph-init-readonly - create text2cypher read-only user (devops/README.md)"
 	@echo "  ps / status    - docker compose ps (WSL)"
 	@echo "  logs           - docker compose logs (SVC=, TAIL=50)"
 	@echo "  compose        - docker compose <ARGS>  e.g. make compose ARGS=\"logs -f langfuse-web\""
@@ -125,6 +131,22 @@ up:
 
 down:
 	$(call DOCKER_WSL,docker compose down)
+
+graph-up:
+	$(call DOCKER_WSL,docker compose up -d neo4j)
+
+graph-down:
+	$(call DOCKER_WSL,docker compose stop neo4j)
+
+graph-status:
+	$(call DOCKER_WSL,docker compose ps neo4j)
+	cd $(BACKEND_DIR) && uv run python scripts/check_neo4j.py status
+
+graph-shell:
+	$(call DOCKER_WSL,docker compose exec -it neo4j cypher-shell)
+
+graph-init-readonly:
+	$(call DOCKER_WSL,bash devops/neo4j/create-readonly-user.sh)
 
 ps status:
 	$(call DOCKER_WSL,docker compose ps)

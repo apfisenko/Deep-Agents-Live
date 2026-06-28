@@ -1,6 +1,7 @@
 # Langfuse self-hosted stack for local observability (sprint-01).
 # UI: http://localhost:3001
 # Qdrant vector DB (sprint-05): http://localhost:6333
+# Neo4j graph DB (sprint-06): http://localhost:7474 · bolt://localhost:7687
 # Full app stack (backend/frontend/bot) — sprint-04 compose-dev.
 #
 # Start: make up  /  .\make.ps1 up  (via WSL2 on Windows)
@@ -147,6 +148,33 @@ services:
       retries: 5
       start_period: 10s
 
+  neo4j:
+    image: neo4j:5.26.2-community
+    restart: unless-stopped
+    ports:
+      - "${NEO4J_HTTP_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_PORT:-7687}:7687"
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-neo4j-dev-password}
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_apoc_export_file_enabled: "true"
+      NEO4J_apoc_import_file_enabled: "true"
+      NEO4J_apoc_import_file_use__neo4j__config: "true"
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+      NEO4J_dbms_security_procedures_allowlist: apoc.*
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://127.0.0.1:7474/db/neo4j/available || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
   qdrant:
     image: qdrant/qdrant:v1.18.1
     restart: unless-stopped
@@ -229,4 +257,5 @@ volumes:
   langfuse_postgres_data:
   langfuse_clickhouse_data:
   langfuse_minio_data:
+  neo4j_data:
   qdrant_storage:
