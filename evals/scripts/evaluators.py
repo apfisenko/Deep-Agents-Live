@@ -5,7 +5,8 @@ from __future__ import annotations
 import asyncio
 import os
 import re
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, field
 from typing import Any
 
 from langfuse.experiment import Evaluation
@@ -25,27 +26,66 @@ from ragas.metrics.collections import (
     Faithfulness,
 )
 
-_JUDGE_RETRY_ATTEMPTS = int(os.environ.get("EVAL_JUDGE_RETRY_ATTEMPTS", "4"))
-_JUDGE_RETRY_BASE_SEC = float(os.environ.get("EVAL_JUDGE_RETRY_BASE_SEC", "15"))
+_JUDGE_RETRY_ATTEMPTS = int(os.environ.get("EVAL_JUDGE_RETRY_ATTEMPTS", "6"))
+_JUDGE_RETRY_BASE_SEC = float(os.environ.get("EVAL_JUDGE_RETRY_BASE_SEC", "20"))
+_JUDGE_MIN_INTERVAL_SEC = float(os.environ.get("EVAL_JUDGE_MIN_INTERVAL_SEC", "1.5"))
+
+_TRANSIENT_JUDGE_MARKERS = (
+    "rate_limit",
+    "429",
+    "nlistatementoutput",
+    "classificationwithreason",
+    "json_invalid",
+    "invalid json",
+    "max_tokens",
+    "eof while parsing",
+    "max retries exceeded",
+    "validation error",
+)
+
+
+def _iter_exception_chain(exc: BaseException) -> list[BaseException]:
+    chain: list[BaseException] = []
+    seen: set[int] = set()
+    current: BaseException | None = exc
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        chain.append(current)
+        current = current.__cause__ or current.__context__
+    return chain
 
 
 def _is_judge_transient_error(exc: BaseException) -> bool:
-    msg = str(exc).lower()
-    transient_markers = (
-        "rate_limit",
-        "429",
-        "nlistatementoutput",
-        "json_invalid",
-        "invalid json",
-        "max_tokens",
-        "eof while parsing",
-    )
-    return any(marker in msg for marker in transient_markers)
+    for link in _iter_exception_chain(exc):
+        msg = str(link).lower()
+        if any(marker in msg for marker in _TRANSIENT_JUDGE_MARKERS):
+            return True
+    return False
+
+
+@dataclass
+class _JudgeThrottleState:
+    last_call_monotonic: float = 0.0
+    lock: asyncio.Lock = field(default_factory=asyncio.Lock)
+
+
+_judge_throttle = _JudgeThrottleState()
+
+
+async def _throttle_judge_call() -> None:
+    if _JUDGE_MIN_INTERVAL_SEC <= 0:
+        return
+    async with _judge_throttle.lock:
+        elapsed = time.monotonic() - _judge_throttle.last_call_monotonic
+        if elapsed < _JUDGE_MIN_INTERVAL_SEC:
+            await asyncio.sleep(_JUDGE_MIN_INTERVAL_SEC - elapsed)
+        _judge_throttle.last_call_monotonic = time.monotonic()
 
 
 async def _ragas_ascore_with_retry(scorer: Any, *args: Any, **kwargs: Any) -> Any:
     last_exc: BaseException | None = None
     for attempt in range(_JUDGE_RETRY_ATTEMPTS):
+        await _throttle_judge_call()
         try:
             return await scorer.ascore(*args, **kwargs)
         except Exception as exc:

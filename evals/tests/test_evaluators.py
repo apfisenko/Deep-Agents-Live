@@ -103,4 +103,10 @@ def test_is_judge_transient_error_rate_limit() -> None:
 
     assert _is_judge_transient_error(RuntimeError("rate_limit_exceeded"))
     assert _is_judge_transient_error(ValueError("Invalid JSON: EOF while parsing"))
+    assert _is_judge_transient_error(
+        RuntimeError(
+            "Max retries exceeded. Total attempts: 4, Last error: "
+            "ClassificationWithReason json_invalid",
+        ),
+    )
     assert not _is_judge_transient_error(RuntimeError("unexpected failure"))

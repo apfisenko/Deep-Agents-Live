@@ -20,5 +20,6 @@ def configure_logging(level: str, *, env: str) -> None:
             datefmt=_DEV_DATEFMT,
             force=True,
         )
+        logging.getLogger("neo4j.notifications").setLevel(logging.WARNING)
         return
     logging.basicConfig(level=level_num, force=True)

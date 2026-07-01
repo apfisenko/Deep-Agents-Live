@@ -163,6 +163,17 @@ def _extra_evaluators(config: RunConfig) -> tuple[str, ...]:
     return tuple(config.extra_evaluators)
 
 
+def _eval_max_concurrency(*, simulation: bool) -> int:
+    if simulation:
+        return 1
+    raw = os.environ.get("EVAL_MAX_CONCURRENCY", "1").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        return 1
+    return max(value, 1)
+
+
 def build_run_metadata(
     config: RunConfig,
     *,
@@ -493,7 +504,7 @@ def run_experiment_for_target(
             simulation=use_simulation,
             extra_evaluators=extra,
         ),
-        "max_concurrency": 1 if use_simulation else 2,
+        "max_concurrency": _eval_max_concurrency(simulation=use_simulation),
         "metadata": metadata,
     }
 

@@ -11,6 +11,7 @@ from app.agent.run_config import RunConfig
 from dataset_registry import resolve_dataset_target
 from run_experiment import (
     AgentCallResult,
+    _eval_max_concurrency,
     build_run_metadata,
     extract_contexts_from_tool_result,
     merge_agent_call_results,
@@ -123,7 +124,7 @@ def test_parse_sse_event_token_and_tool_result() -> None:
 
 def test_parse_sse_event_tool_call() -> None:
     tool = parse_sse_event(
-        "tool_call", {"name": "create_payment_link", "args": {"product_id": "x"}}
+        "tool_call", {"name": "create_payment_link", "args": {"product_id": "x"}},
     )
     assert tool == AgentCallResult(tools_called=["create_payment_link"])
 
@@ -138,3 +139,12 @@ def test_merge_agent_call_results_tools() -> None:
     )
     assert merged.tools_called == ["list_b2c_products", "create_payment_link"]
     assert merged.contexts == ["KB"]
+
+
+def test_eval_max_concurrency_defaults_to_one(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("EVAL_MAX_CONCURRENCY", raising=False)
+    assert _eval_max_concurrency(simulation=False) == 1
+
+
+def test_eval_max_concurrency_simulation_forced_one() -> None:
+    assert _eval_max_concurrency(simulation=True) == 1
