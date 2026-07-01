@@ -15,6 +15,7 @@ from run_experiment import (
     extract_contexts_from_tool_result,
     merge_agent_call_results,
     parse_sse_event,
+    resolve_config_path,
     resolve_eval_stream_url,
     run_name,
 )
@@ -34,6 +35,17 @@ def _eval_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "SYSTEM_PROMPT_PATH",
         "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
     )
+
+
+def test_resolve_config_path_repo_root_style() -> None:
+    path = resolve_config_path("evals/configs/graphrag-v001.yaml")
+    assert path == EVALS_ROOT / "configs" / "graphrag-v001.yaml"
+    assert path.is_file()
+
+
+def test_resolve_config_path_evals_relative() -> None:
+    path = resolve_config_path("configs/graphrag-v001.yaml")
+    assert path == EVALS_ROOT / "configs" / "graphrag-v001.yaml"
 
 
 def test_run_name_format() -> None:

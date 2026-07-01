@@ -8,6 +8,7 @@ import pytest
 from app.agent.config_registry import reset_config_registry
 from app.agent.react_agent import AgentRunResult, StreamEvent, reset_agent_runner
 from app.config import clear_settings_cache
+from app.graph.client import reset_neo4j_driver
 from app.integrations.langfuse import reset_langfuse_callbacks
 from app.memory.sessions import reset_session_store
 from app.rag.indexer import reset_indexer
@@ -25,6 +26,16 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     monkeypatch.setenv("LANGFUSE_ENABLED", "false")
     monkeypatch.setenv("VECTOR_DB_BACKEND", "in-memory")
     monkeypatch.setenv("HYBRID_SEARCH_ENABLED", "false")
+    monkeypatch.setenv("RETRIEVER_BACKEND", "vector")
+    monkeypatch.setenv("LLM_TEMPERATURE", "0.2")
+    monkeypatch.setenv("EVAL_JUDGE_TEMPERATURE", "0.0")
+    monkeypatch.setenv("LLM_MODEL", "openai/gpt-4o-mini")
+    monkeypatch.setenv("EVAL_JUDGE_MODEL", "google/gemini-2.5-flash-lite")
+    monkeypatch.setenv("BACKEND_URL", "http://localhost:8000")
+    monkeypatch.setenv(
+        "SYSTEM_PROMPT_PATH",
+        "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
+    )
     monkeypatch.setenv("PDF_OCR_LLM_FALLBACK", "false")
     monkeypatch.delenv("DOTENV_CONFIG", raising=False)
     clear_settings_cache()
@@ -34,7 +45,7 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     reset_agent_runner()
     reset_config_registry()
     reset_langfuse_callbacks()
-    reset_langfuse_callbacks()
+    reset_neo4j_driver()
     yield
     clear_settings_cache()
     reset_store()
@@ -43,6 +54,7 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     reset_agent_runner()
     reset_config_registry()
     reset_langfuse_callbacks()
+    reset_neo4j_driver()
 
 
 @pytest.fixture

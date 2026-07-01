@@ -18,6 +18,7 @@ from dataset_registry import (
 EVALS_ROOT = Path(__file__).resolve().parents[1]
 CONFIG = EVALS_ROOT / "configs" / "baseline-react-inmemory.yaml"
 GRAPHRAG_CONFIG = EVALS_ROOT / "configs" / "graphrag-baseline.yaml"
+GRAPHRAG_V001_CONFIG = EVALS_ROOT / "configs" / "graphrag-v001.yaml"
 
 
 def test_all_dataset_slugs_count() -> None:
@@ -49,6 +50,14 @@ def test_resolve_graphrag_targets(monkeypatch: pytest.MonkeyPatch) -> None:
     assert dataset_slugs_for_config(config) == GRAPHAG_DATASET_SLUGS
     targets = resolve_all_dataset_targets(config)
     assert len(targets) == 3
+
+
+def test_resolve_graphrag_v001_targets(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("EVAL_DATASET_PREFIX", raising=False)
+    monkeypatch.delenv("EVAL_DATASET_NAME", raising=False)
+    config = RunConfig.from_yaml_path(GRAPHRAG_V001_CONFIG)
+    assert config.retriever.backend == "hybrid"
+    assert dataset_slugs_for_config(config) == GRAPHAG_DATASET_SLUGS
 
 
 def test_resolve_unknown_dataset() -> None:

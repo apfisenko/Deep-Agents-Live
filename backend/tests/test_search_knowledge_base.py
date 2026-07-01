@@ -39,7 +39,7 @@ def _fake_embed_query(text: str, _settings: object = None) -> list[float]:
 def test_search_knowledge_base_returns_score(rag_data_dir: Path) -> None:
     with (
         patch("app.rag.indexer.embed_documents", side_effect=_fake_embed_documents_batch),
-        patch("app.rag.search.embed_query", side_effect=_fake_embed_query),
+        patch("app.rag.retriever.vector_backend.embed_query", side_effect=_fake_embed_query),
     ):
         RagIndexer().build(force=True)
         results = search_knowledge_base("Deep Agents", "b2c")
@@ -54,7 +54,7 @@ def test_search_knowledge_base_returns_score(rag_data_dir: Path) -> None:
 def test_search_knowledge_base_filters_by_audience(rag_data_dir: Path) -> None:
     with (
         patch("app.rag.indexer.embed_documents", side_effect=_fake_embed_documents_batch),
-        patch("app.rag.search.embed_query", side_effect=_fake_embed_query),
+        patch("app.rag.retriever.vector_backend.embed_query", side_effect=_fake_embed_query),
     ):
         RagIndexer().build(force=True)
         b2c_results = search_knowledge_base("training", "b2c")
@@ -87,8 +87,11 @@ def test_search_knowledge_base_tool_qdrant_unavailable(
     )
 
     with (
-        patch("app.rag.search.get_vector_index_store", return_value=mock_store),
-        patch("app.rag.search.embed_query", return_value=[1.0, 0.0, 0.0]),
+        patch(
+            "app.rag.retriever.vector_backend.get_vector_index_store",
+            return_value=mock_store,
+        ),
+        patch("app.rag.retriever.vector_backend.embed_query", return_value=[1.0, 0.0, 0.0]),
     ):
         raw = search_knowledge_base_tool.invoke({"query": "test", "audience": "b2c"})
 

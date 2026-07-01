@@ -49,6 +49,19 @@ SEARCH_TOOL_NAMES = frozenset({"search_knowledge_base_tool", "search_knowledge_b
 FUNNEL_SLUG = "behavior/funnel-to-lead"
 
 
+def resolve_config_path(config_arg: str | Path) -> Path:
+    """Resolve CONFIG from repo root or evals-relative path."""
+    config_path = Path(config_arg)
+    if config_path.is_absolute():
+        return config_path
+
+    parts = config_path.parts
+    if parts and parts[0] == "evals":
+        config_path = Path(*parts[1:])
+
+    return EVALS_ROOT / config_path
+
+
 @dataclass(frozen=True)
 class AgentCallResult:
     answer: str = ""
@@ -536,9 +549,7 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=0, help="Limit items (0 = all)")
     args = parser.parse_args()
 
-    config_path = Path(args.config)
-    if not config_path.is_absolute():
-        config_path = EVALS_ROOT / config_path
+    config_path = resolve_config_path(args.config)
 
     if args.dry_run:
         _load_env()
