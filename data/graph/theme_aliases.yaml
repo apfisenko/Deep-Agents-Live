@@ -1,0 +1,31 @@
+RAG:
+  - Retrieval-Augmented Generation
+  - Naive RAG
+Observability:
+  - LangSmith
+  - LangFuse
+  - Langfuse
+  - tracing
+AI-driven методология:
+  - AIDD
+  - AI-driven подход
+  - AI-driven разработка
+  - Fullstack AI-driven
+Vector DB:
+  - ChromaDB
+  - Qdrant
+  - векторные базы данных
+GraphRAG:
+  - Graph DB
+  - Knowledge Graph
+  - графовые базы данных
+MCP:
+  - Model Context Protocol
+Advanced RAG:
+  - Agentic RAG
+LangGraph agents:
+  - LangGraph
+  - tool calling
+Multi-agent systems:
+  - Multi-agent
+  - мультиагентные системы

@@ -24,6 +24,11 @@ from app.exceptions import AgentCoreError
 from app.integrations.langfuse import get_langfuse_callbacks
 from app.integrations.openrouter import create_chat_model, map_openai_exception
 from app.memory.sessions import get_session_store
+from app.rag.retriever.context import (
+    reset_retriever_runtime_config,
+    set_retriever_runtime_config,
+)
+from app.rag.retriever.runtime import runtime_from_run_config
 from app.tools.registry import get_agent_tools
 
 if TYPE_CHECKING:
@@ -108,6 +113,7 @@ class ReactAgentRunner:
         store = get_session_store()
         history = store.get_messages(session_id)
         state = _StreamState()
+        retriever_token = set_retriever_runtime_config(runtime_from_run_config(self._run_config))
 
         yield StreamEvent(
             event="agent_step",
@@ -146,6 +152,8 @@ class ReactAgentRunner:
             raise
         except Exception as exc:
             raise map_openai_exception(exc) from exc
+        finally:
+            reset_retriever_runtime_config(retriever_token)
 
         yield StreamEvent(
             event="agent_step",

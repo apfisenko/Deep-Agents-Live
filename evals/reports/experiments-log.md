@@ -14,3 +14,4 @@
 | 2026-06-17 | [exp-loop-03-gpt4o](exp-loop-03-gpt4o-v001.md) | gpt-4o vs mini — generation | e2e/e2e-qa@v001 | 0.339 → **0.399** | faithfulness **0.604** | **iterate** (+0.060; 173842Z annulled) |
 | 2026-06-17 | [exp-loop-03-oss](exp-loop-03-gpt-oss-120b-v001.md) | gpt-oss-120b:free OSS benchmark | e2e/e2e-qa@v001 | 0.339 → **0.312** | faithfulness 0.716 | **reject** (−0.027; generation 17) |
 | 2026-06-17 | [exp-behavior-evaluator](exp-report-behavior-evaluator-20260617.md) | `executed_tools_count` §C + baseline vs OSS | e2e/e2e-qa@v001 | 0.337 → **0.317** | faithfulness 0.676, **tools 0.917** | **reject OSS** (−0.020); evaluator **accept** |
+| 2026-07-01 | graphrag-v001 (planned) | hybrid RRF (vector+graph+global) + bge-reranker-v2-m3 поднимет multi/global entity@5 vs baseline | graphrag/*@v001 | baseline multi 0.458 / global 0.572 → TBD | single-hop guard ≤ −0.02 | **pending run** |

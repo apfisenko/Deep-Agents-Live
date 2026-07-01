@@ -208,6 +208,8 @@ function Show-Help {
     Write-Host "  graph-status   - neo4j container status + Connection OK smoke"
     Write-Host "  graph-shell    - interactive cypher-shell in neo4j container"
     Write-Host "  graph-init-readonly - create text2cypher read-only user"
+    Write-Host "  graph-index    - seed Neo4j from data/graph/seed.cypher; --full for full pipeline"
+    Write-Host "  graph-qa       - gates + graph-qa.cypher report; --gates-only to skip report"
     Write-Host "  ps / status    - docker compose ps (WSL)"
     Write-Host "  logs           - docker compose logs [--tail N] [service]"
     Write-Host "  compose        - docker compose <args>"
@@ -398,6 +400,21 @@ function Invoke-CheckNeo4j {
     }
 }
 
+function Invoke-GraphCli {
+    param(
+        [string]$Module,
+        [string[]]$ExtraArgs = @()
+    )
+    Push-Location $BackendDir
+    try {
+        $env:NEO4J_URI = Resolve-Neo4jUriForWindows
+        uv run python -m $Module @ExtraArgs
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
 function Invoke-CheckRagSearch {
     param([string]$Command)
     Push-Location $BackendDir
@@ -569,6 +586,12 @@ switch ($Target) {
     }
     "graph-init-readonly" {
         Invoke-WslDocker "bash devops/neo4j/create-readonly-user.sh"
+    }
+    "graph-index" {
+        Invoke-GraphCli -Module "app.graph.index_cli" -ExtraArgs $DockerArgs
+    }
+    "graph-qa" {
+        Invoke-GraphCli -Module "app.graph.qa_cli" -ExtraArgs $DockerArgs
     }
     "ps" {
         Invoke-WslDocker "docker compose ps"

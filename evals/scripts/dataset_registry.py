@@ -37,6 +37,7 @@ GRAPHAG_DATASET_SLUGS = (
 
 CONFIG_DATASET_SLUGS: dict[str, tuple[str, ...]] = {
     "graphrag-baseline": GRAPHAG_DATASET_SLUGS,
+    "graphrag-v001": GRAPHAG_DATASET_SLUGS,
 }
 
 

@@ -3,29 +3,14 @@
 from typing import Any
 
 from app.config import get_settings
-from app.integrations.openrouter import embed_query
-from app.rag.sparse_embed import encode_sparse_query
-from app.rag.vector_store import get_vector_index_store
+from app.rag.retriever.context import get_retriever_runtime_config
+from app.rag.retriever.factory import get_retriever_backend
 
 
 def search_knowledge_base(query: str, audience: str) -> list[dict[str, Any]]:
     settings = get_settings()
-    store = get_vector_index_store(settings)
-    query_embedding = embed_query(query, settings)
-    query_sparse = encode_sparse_query(query) if settings.hybrid_search_enabled else None
-
-    hits = store.search(
-        query_embedding,
-        top_k=5,
-        segment_filter=audience,
-        query_sparse=query_sparse,
-    )
-    return [
-        {
-            "text": hit.text,
-            "source": hit.source_path,
-            "audience": hit.audience,
-            "score": hit.score,
-        }
-        for hit in hits
-    ]
+    runtime = get_retriever_runtime_config()
+    top_k = runtime.top_k if runtime is not None else settings.retriever_top_k
+    backend = get_retriever_backend(settings)
+    chunks = backend.retrieve(query, audience, top_k=top_k)
+    return [chunk.to_dict() for chunk in chunks]

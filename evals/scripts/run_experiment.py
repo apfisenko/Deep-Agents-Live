@@ -184,6 +184,7 @@ def build_run_metadata(
         "model_name": config.model.name,
         "model_temperature": str(config.model.temperature),
         "retrieval_backend": config.retrieval.backend,
+        "retriever_backend": config.retriever.backend,
         **judge_metadata(config.judge),
     }
 

@@ -14,6 +14,9 @@ from app.exceptions import ProviderUnavailableError
 
 logger = logging.getLogger(__name__)
 
+_driver: Driver | None = None
+_driver_key: tuple[str, str, str] | None = None
+
 _DEFAULT_BOLT_PORT = 7687
 _CONNECT_TIMEOUT_SEC = 10.0
 _PROBE_TIMEOUT_SEC = 3.0
@@ -67,6 +70,43 @@ def create_driver(uri: str, user: str, password: str) -> Driver:
         auth=auth,
         connection_timeout=_CONNECT_TIMEOUT_SEC,
     )
+
+
+def get_neo4j_driver(
+    settings: object | None = None,
+    *,
+    uri: str | None = None,
+    user: str | None = None,
+    password: str | None = None,
+) -> Driver:
+    """Return a process-wide cached Neo4j driver."""
+    global _driver, _driver_key
+
+    if settings is not None:
+        uri = uri or getattr(settings, "neo4j_uri", "")
+        user = user or getattr(settings, "neo4j_user", "neo4j")
+        password = password or getattr(settings, "neo4j_password", "")
+
+    if not uri or user is None or password is None:
+        msg = "Neo4j connection settings are required"
+        raise ValueError(msg)
+
+    key = (uri, user, password)
+    if _driver is None or _driver_key != key:
+        if _driver is not None:
+            _driver.close()
+        _driver = create_driver(uri, user, password)
+        _driver_key = key
+    return _driver
+
+
+def reset_neo4j_driver() -> None:
+    """Close cached driver (tests)."""
+    global _driver, _driver_key
+    if _driver is not None:
+        _driver.close()
+    _driver = None
+    _driver_key = None
 
 
 def verify_connectivity(uri: str, user: str, password: str) -> None:

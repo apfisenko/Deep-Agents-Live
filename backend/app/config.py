@@ -69,6 +69,29 @@ class Settings(BaseSettings):
     neo4j_database: str = Field(default="neo4j", validation_alias="NEO4J_DATABASE")
     neo4j_readonly_user: str = Field(default="text2cypher", validation_alias="NEO4J_READONLY_USER")
     neo4j_readonly_password: str = Field(default="", validation_alias="NEO4J_READONLY_PASSWORD")
+    graph_extract_model: str = Field(
+        default="openai/gpt-4o-mini",
+        validation_alias="GRAPH_EXTRACT_MODEL",
+    )
+    graph_extract_strict: bool = Field(default=True, validation_alias="GRAPH_EXTRACT_STRICT")
+    retriever_backend: str = Field(default="vector", validation_alias="RETRIEVER_BACKEND")
+    retriever_top_k: int = Field(default=5, validation_alias="RETRIEVER_TOP_K")
+    rrf_k: int = Field(default=60, validation_alias="RRF_K")
+    rrf_weight_vector: float = Field(default=1.0, validation_alias="RRF_WEIGHT_VECTOR")
+    rrf_weight_graph: float = Field(default=1.2, validation_alias="RRF_WEIGHT_GRAPH")
+    rrf_weight_global: float = Field(default=1.2, validation_alias="RRF_WEIGHT_GLOBAL")
+    reranker_enabled: bool = Field(default=True, validation_alias="RERANKER_ENABLED")
+    reranker_model: str = Field(
+        default="BAAI/bge-reranker-v2-m3",
+        validation_alias="RERANKER_MODEL",
+    )
+    reranker_candidate_k: int = Field(default=15, validation_alias="RERANKER_CANDIDATE_K")
+    reranker_timeout_sec: float = Field(default=8.0, validation_alias="RERANKER_TIMEOUT_SEC")
+    graph_retrieval_combo_slug: str = Field(
+        default="ai-agents-combo",
+        validation_alias="GRAPH_RETRIEVAL_COMBO_SLUG",
+    )
+    graph_retrieval_anchor_k: int = Field(default=8, validation_alias="GRAPH_RETRIEVAL_ANCHOR_K")
     llm_timeout_sec: int = Field(default=60, validation_alias="LLM_TIMEOUT_SEC")
     embedding_timeout_sec: int = Field(default=30, validation_alias="EMBEDDING_TIMEOUT_SEC")
     llm_max_tokens: int = Field(default=2048, validation_alias="LLM_MAX_TOKENS")

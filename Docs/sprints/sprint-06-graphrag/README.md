@@ -54,7 +54,7 @@ Sprint считается завершённым, когда выполнены 
 | 02 | Датасеты и baseline-замеры | ✅ Done | [plan](tasks/02-datasets-baseline/plan.md) | [summary](tasks/02-datasets-baseline/summary.md) |
 | 03 | Графовая схема и ADR | ✅ Done | [plan](tasks/03-graph-schema-adr/plan.md) | [schema](schema.md) |
 | 04 | Инфраструктурный слой Neo4j | ✅ Done | [plan](tasks/04-neo4j-infra/plan.md) | [§04 ниже](#задача-04-инфраструктурный-слой-neo4j--done) |
-| 05 | Индексация графа | 📋 | [plan](tasks/05-graph-indexing/plan.md) | — |
+| 05 | Индексация графа | ✅ Done | [plan](tasks/05-graph-index/plan.md) | [summary](tasks/05-graph-index/summary.md) |
 | 06 | Графовый retrieval и гибрид с реранкером | 📋 | [plan](tasks/06-graph-retrieval-hybrid/plan.md) | — |
 | 07 | Инструмент text2cypher с guardrails | 📋 | [plan](tasks/07-text2cypher-tool/plan.md) | — |
 | 08 | Агентная маршрутизация и сегментный замер | 📋 | [plan](tasks/08-agent-routing-segment-eval/plan.md) | — |
@@ -152,8 +152,8 @@ docker-compose.yml                      # + neo4j (APOC), volume, healthcheck
 .env.example                            # + NEO4J_*, GRAPH_RETRIEVAL_*, RERANKER_*
 
 backend/app/rag/                        # retriever protocol, graph/global branches
-backend/app/graph/                      # neo4j client, seed, index CLI (уточнить в plan 04–05)
-backend/scripts/graph/                  # seed.cypher, graph-qa.cypher
+backend/app/graph/                      # client, index/qa CLI, extraction, entity resolution
+data/graph/                             # seed.cypher, graph-qa.cypher, aliases, requires
 backend/tests/test_text2cypher_guardrails.py
 
 Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
@@ -432,7 +432,7 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 
 ---
 
-## Задача 05: Индексация графа 📋
+## Задача 05: Индексация графа ✅ Done
 
 ### Цель
 
@@ -442,14 +442,13 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 
 ### Состав работ
 
-- [ ] **(а)** `seed.cypher` — комбо, 4 курса, prerequisite-цепочка, свойства (цены, форматы)
-- [ ] **(б)** Авто-извлечение тем строго по схеме: `SimpleKGPipeline` (neo4j-graphrag) **или** LlamaIndex `SchemaLLMPathExtractor`
-- [ ] **(в)** Entity resolution: алиасы тем; дубль Fullstack → один канонический узел
-- [ ] **(г)** `graph-qa.cypher` — орфаны, похожие дубли, распределение степеней, покрытие тем
-- [ ] CLI / `make graph-index` с параметрами (seed-only / full / resolve-only); зеркало в `make.ps1`
-- [ ] Визуальная проверка: Neo4j Browser + rich CLI (документировать команды)
-- [ ] Задокументировать нестыковки (цена комбо) в summary
-- [ ] Самопроверка по критериям DoD
+- [x] **(а)** `seed.cypher` — комбо, 4 курса, prerequisite-цепочка, свойства (цены, форматы)
+- [x] **(б)** Авто-извлечение тем строго по схеме: `SimpleKGPipeline` (neo4j-graphrag), allowed labels `Course`/`Theme`, rels `COVERS`/`REQUIRES`
+- [x] **(в)** Entity resolution: алиасы тем (`theme_aliases.yaml`); дубль Fullstack → один канонический узел `ai-driven-fullstack`
+- [x] **(г)** `graph-qa.cypher` + `make graph-qa` — 12 gates (орфаны, дубли APOC, degree, % courses with COVERS)
+- [x] CLI / `make graph-index` с параметрами (`--seed-only` / `--full` / `--resolve-only`); зеркало в `make.ps1`
+- [x] `CatalogNeo4jWriter` — MERGE catalog `Course`/`Theme` при повторной индексации (без constraint-конфликтов)
+- [x] Самопроверка по критериям DoD (`graph-index --full` + `graph-qa --gates-only` → 12/12 PASS)
 
 ### Критерии готовности (DoD)
 
@@ -459,27 +458,74 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 |---|----------|-----------------|
 | 1 | `make graph-index` exit 0 при поднятом Neo4j | CI / local run |
 | 2 | `.\make.ps1 graph-index` — тот же результат | Windows mirror |
-| 3 | graph-qa: нет критичных orphan Theme/Course | Запуск `graph-qa.cypher` |
-| 4 | Fullstack — один канонический Course | `MATCH (c:Course) WHERE c.name CONTAINS 'Fullstack' RETURN count(c)` |
-| 5 | Prerequisite-цепочка из 4 ступеней связана | Cypher path query |
+| 3 | graph-qa: нет критичных orphan Theme/Course | `make graph-qa --gates-only` |
+| 4 | Fullstack — один канонический Course | gate `fullstack_single_course` |
+| 5 | Prerequisite-цепочка из 4 ступеней связана | gate `prerequisite_chain` |
 
 **Пользователь проверяет:**
 
 - Neo4j Browser: граф читаем, комбо и ступени на месте
 - Темы покрытия соответствуют ожиданиям по каталогу
-- Rich CLI snapshot приложен в summary или demo
 
 ### Артефакты
 
-- `backend/scripts/graph/seed.cypher`
-- `backend/scripts/graph/graph-qa.cypher`
-- `backend/app/graph/index_cli.py` (или `backend/scripts/graph_index.py`)
-- `Makefile` / `make.ps1` — target `graph-index`
+**Data (Cypher / YAML / docs)**
+
+| Файл | Назначение |
+|------|------------|
+| [`data/graph/seed.cypher`](../../../data/graph/seed.cypher) | Constraints, Combo, 4 Course, Module, Audience/Format/Level, prerequisite-цепочка |
+| [`data/graph/graph-qa.cypher`](../../../data/graph/graph-qa.cypher) | Диагностические запросы: орфаны, APOC similarity, degree, покрытие COVERS |
+| [`data/graph/theme_aliases.yaml`](../../../data/graph/theme_aliases.yaml) | Канон → алиасы тем для entity resolution |
+| [`data/graph/theme_requires.cypher`](../../../data/graph/theme_requires.cypher) | Baseline `Theme-[:REQUIRES]->Theme` |
+| [`data/graph/entity-resolution.md`](../../../data/graph/entity-resolution.md) | Описание стратегии resolution (Course guard, alias merge) |
+
+**Backend — indexing pipeline**
+
+| Файл | Назначение |
+|------|------------|
+| [`backend/app/graph/index_cli.py`](../../../backend/app/graph/index_cli.py) | CLI: `--seed-only` / `--full` / `--resolve-only` |
+| [`backend/app/graph/qa_cli.py`](../../../backend/app/graph/qa_cli.py) | CLI: 12 QA gates + отчёт из `graph-qa.cypher` |
+| [`backend/app/graph/cypher_file.py`](../../../backend/app/graph/cypher_file.py) | Парсер и runner для `.cypher` файлов |
+| [`backend/app/graph/extraction_schema.py`](../../../backend/app/graph/extraction_schema.py) | GraphSchema: Course + Theme, COVERS + REQUIRES |
+| [`backend/app/graph/section_splitter.py`](../../../backend/app/graph/section_splitter.py) | Split программ по `### Тема N` / `### Модуль N` |
+| [`backend/app/graph/noop_embedder.py`](../../../backend/app/graph/noop_embedder.py) | Stub embedder (без vector index в Neo4j) |
+| [`backend/app/graph/theme_extractor.py`](../../../backend/app/graph/theme_extractor.py) | SimpleKGPipeline + baseline + REQUIRES + prune orphans |
+| [`backend/app/graph/catalog_kg_writer.py`](../../../backend/app/graph/catalog_kg_writer.py) | MERGE seed Course/Theme вместо CREATE (idempotent `--full`) |
+| [`backend/app/graph/theme_promoter.py`](../../../backend/app/graph/theme_promoter.py) | Promote COVERS на seed Course, cleanup lexical layer |
+| [`backend/app/graph/theme_baseline.py`](../../../backend/app/graph/theme_baseline.py) | Deterministic Course→Theme COVERS из analysis §2 |
+| [`backend/app/graph/entity_resolver.py`](../../../backend/app/graph/entity_resolver.py) | Sanitize, Course guard, alias merge, REQUIRES orphan link |
+
+**Backend — config и зависимости**
+
+| Файл | Назначение |
+|------|------------|
+| [`backend/app/config.py`](../../../backend/app/config.py) | `GRAPH_EXTRACT_MODEL`, `GRAPH_EXTRACT_STRICT` |
+| [`backend/app/paths.py`](../../../backend/app/paths.py) | Пути к `data/graph/*`, program files |
+| [`backend/pyproject.toml`](../../../backend/pyproject.toml) | `neo4j-graphrag==1.17.0`, `rapidfuzz` |
+| [`.env.example`](../../../.env.example) | `GRAPH_EXTRACT_*` переменные |
+
+**Make / Windows**
+
+| Файл | Назначение |
+|------|------------|
+| [`Makefile`](../../../Makefile) | `graph-index`, `graph-qa` |
+| [`make.ps1`](../../../make.ps1) | Зеркало `graph-index`, `graph-qa` (+ WSL Neo4j fallback) |
+
+**Тесты**
+
+| Файл | Назначение |
+|------|------------|
+| [`backend/tests/test_graph_cypher_file.py`](../../../backend/tests/test_graph_cypher_file.py) | Парсер Cypher-файлов |
+| [`backend/tests/test_graph_extraction_schema.py`](../../../backend/tests/test_graph_extraction_schema.py) | Allowed labels/rels/patterns |
+| [`backend/tests/test_graph_section_splitter.py`](../../../backend/tests/test_graph_section_splitter.py) | Split по секциям программ |
+| [`backend/tests/test_graph_theme_baseline.py`](../../../backend/tests/test_graph_theme_baseline.py) | Baseline mappings |
+| [`backend/tests/test_graph_entity_resolver.py`](../../../backend/tests/test_graph_entity_resolver.py) | Загрузка theme aliases |
+| [`backend/tests/test_graph_catalog_kg_writer.py`](../../../backend/tests/test_graph_catalog_kg_writer.py) | Catalog MERGE writer |
 
 ### Документы
 
-- 📋 [План задачи](tasks/05-graph-indexing/plan.md)
-- 📝 [Summary](tasks/05-graph-indexing/summary.md)
+- 📋 [План задачи](tasks/05-graph-index/plan.md)
+- 📝 [Summary](tasks/05-graph-index/summary.md)
 
 ---
 
