@@ -18,6 +18,7 @@ from app.env_loader import load_repo_env
 from app.exceptions import ProviderUnavailableError
 from app.graph.client import create_driver, ensure_neo4j_uri
 from app.graph.cypher_file import parse_cypher_file
+from app.logging_config import configure_logging
 from app.paths import GRAPH_QA_CYPHER
 
 logger = logging.getLogger(__name__)
@@ -231,7 +232,7 @@ def main() -> int:
 
     _bootstrap_env()
     settings = get_settings()
-    logging.basicConfig(level=settings.log_level)
+    configure_logging(settings.log_level, env=settings.env)
 
     try:
         if args.gates_only:

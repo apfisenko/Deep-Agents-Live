@@ -16,6 +16,7 @@ from app.api.routers.chat import router as chat_router
 from app.api.routers.health import router as health_router
 from app.config import get_settings
 from app.exceptions import AgentCoreError
+from app.logging_config import configure_logging
 from app.rag.startup import verify_rag_backend_on_startup
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,6 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
-    logging.basicConfig(level=settings.log_level)
     logger.info(
         "Starting Agent Core",
         extra={"service": "backend", "version": settings.app_version, "env": settings.env},
@@ -36,6 +36,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    configure_logging(settings.log_level, env=settings.env)
     application = FastAPI(
         title="Deep-Agents-Live Agent Core",
         version=settings.app_version,

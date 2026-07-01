@@ -44,6 +44,12 @@ def _api_request(method: str, url: str, body: dict | None, headers: dict[str, st
         detail = exc.read().decode("utf-8", errors="replace")
         msg = f"{method} {url} -> {exc.code}: {detail}"
         raise RuntimeError(msg) from exc
+    except urllib.error.URLError as exc:
+        msg = (
+            f"Langfuse connection failed for {url}: {exc.reason}. "
+            "Start local stack: .\\make.ps1 up — then .\\make.ps1 check-langfuse"
+        )
+        raise RuntimeError(msg) from exc
 
 
 def auth_check(host: str, public_key: str, secret_key: str) -> None:

@@ -16,10 +16,17 @@ logger = logging.getLogger(__name__)
 _DEFAULT_QDRANT_PORT = 6333
 _HEALTH_TIMEOUT_SEC = 3.0
 _HTTP_OK = 200
+_resolved_urls: dict[tuple[str, bool], str] = {}
+_wsl_fallback_logged = False
 
 
 def resolve_qdrant_url(url: str, *, fail_fast: bool = False) -> str:
     """Pick a reachable Qdrant base URL; on Windows prefer WSL IP over dead localhost."""
+    cache_key = (url.rstrip("/"), fail_fast)
+    cached = _resolved_urls.get(cache_key)
+    if cached is not None:
+        return cached
+
     parsed = urlparse(url)
     host = parsed.hostname or "localhost"
     port = parsed.port or _DEFAULT_QDRANT_PORT
@@ -28,6 +35,7 @@ def resolve_qdrant_url(url: str, *, fail_fast: bool = False) -> str:
     if platform.system() != "Windows" or host not in {"localhost", "127.0.0.1"}:
         if fail_fast and not _qdrant_health_ok(url):
             _raise_unreachable(url)
+        _resolved_urls[cache_key] = url
         return url
 
     candidates = [f"{scheme}://127.0.0.1:{port}"]
@@ -37,21 +45,33 @@ def resolve_qdrant_url(url: str, *, fail_fast: bool = False) -> str:
 
     for candidate in candidates:
         if _qdrant_health_ok(candidate):
-            if candidate != url.rstrip("/") and candidate != f"{scheme}://{host}:{port}":
-                logger.info(
-                    "Qdrant localhost unreachable from Windows; using WSL host",
-                    extra={"qdrant_url": candidate},
-                )
+            configured = f"{scheme}://{host}:{port}".rstrip("/")
+            if candidate.rstrip("/") not in {url.rstrip("/"), configured}:
+                _log_wsl_fallback(candidate)
+            _resolved_urls[cache_key] = candidate
             return candidate
 
     if fail_fast:
         _raise_unreachable(url, wsl_ip=wsl_ip)
+    _resolved_urls[cache_key] = url
     return url
 
 
 def ensure_qdrant_url(url: str) -> str:
     """Resolve URL and fail fast when Qdrant is not reachable."""
     return resolve_qdrant_url(url, fail_fast=True)
+
+
+def _log_wsl_fallback(candidate: str) -> None:
+    global _wsl_fallback_logged
+    if _wsl_fallback_logged:
+        logger.debug("Qdrant via WSL host", extra={"qdrant_url": candidate})
+        return
+    _wsl_fallback_logged = True
+    logger.info(
+        "Qdrant localhost unreachable from Windows; using WSL host",
+        extra={"qdrant_url": candidate},
+    )
 
 
 def _qdrant_health_ok(base_url: str) -> bool:

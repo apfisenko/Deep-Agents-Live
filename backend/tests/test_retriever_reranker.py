@@ -30,3 +30,20 @@ def test_reranker_skips_when_few_candidates() -> None:
     chunks = [Chunk("only", "s", "b2c", 1.0, backend="vector")]
     result = rerank_chunks("q", chunks, model_name="m", top_k=5, timeout_sec=1.0)
     assert result == chunks
+
+
+def test_reranker_load_failure_disables_for_process() -> None:
+    chunks = [Chunk(f"c{i}", f"s{i}", "b2c", float(i), backend="vector") for i in range(5)]
+
+    with patch("app.rag.retriever.reranker._executor") as mock_executor:
+        future = MagicMock()
+        future.result.side_effect = OSError(1455, "paging file too small")
+        mock_executor.submit.return_value = future
+        with patch("app.rag.retriever.reranker.wait", return_value=({future}, set())):
+            first = rerank_chunks("q", chunks, model_name="heavy-model", top_k=3, timeout_sec=1.0)
+            second = rerank_chunks("q", chunks, model_name="heavy-model", top_k=3, timeout_sec=1.0)
+
+    assert len(first) == 3
+    assert first[0].text == "c0"
+    assert second == first
+    assert mock_executor.submit.call_count == 1

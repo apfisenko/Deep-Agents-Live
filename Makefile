@@ -93,7 +93,7 @@ stop-bot:
 	-@pkill -f "uv run python main.py" 2>/dev/null || true
 
 dev-backend: stop-backend
-	cd $(BACKEND_DIR) && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	cd $(BACKEND_DIR) && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --log-config log_config.dev.json
 
 dev-frontend: stop-frontend
 	cd $(FRONTEND_DIR) && pnpm dev

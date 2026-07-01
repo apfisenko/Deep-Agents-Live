@@ -85,6 +85,7 @@ ignore = [
 "app/integrations/langfuse.py" = ["PLC0415", "S310"]
 "app/integrations/qdrant_url.py" = ["S607", "TRY003"]
 "app/graph/client.py" = ["S607", "TRY003"]
+"app/env_loader.py" = ["S607", "TRY003", "T201"]
 "app/graph/index_cli.py" = ["TRY400"]
 "app/graph/qa_cli.py" = ["T201", "PLR2004", "TRY400", "TRY300"]
 "app/graph/theme_extractor.py" = ["TC001"]

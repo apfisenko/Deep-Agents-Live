@@ -123,13 +123,13 @@ class ReactAgentRunner:
         state.active_step_id = analyze_id
 
         messages = [*history, HumanMessage(content=message)]
-        trace_metadata = {
+        trace_metadata: dict[str, str] = {
             "channel": channel,
             "session_id": session_id,
             **self._run_config.to_metadata(),
         }
         if extra_metadata:
-            trace_metadata.update(extra_metadata)
+            trace_metadata.update({key: str(value) for key, value in extra_metadata.items()})
         config = cast(
             "RunnableConfig",
             {

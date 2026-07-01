@@ -448,7 +448,7 @@ switch ($Target) {
         Stop-BackendDev
         Push-Location $BackendDir
         try {
-            uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+            uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --log-config log_config.dev.json
         } finally {
             Pop-Location
         }

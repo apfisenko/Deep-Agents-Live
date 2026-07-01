@@ -7,9 +7,16 @@ import os
 import sys
 import time
 import uuid
+from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
+
+_BACKEND_ROOT = Path(__file__).resolve().parents[1]
+if str(_BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(_BACKEND_ROOT))
 
 import httpx
+from app.env_loader import langfuse_host_candidates, load_repo_env, resolve_langfuse_keys
 from langfuse import Langfuse
 
 DEFAULT_SESSION_ID = "550e8400-e29b-41d4-a716-446655440000"
@@ -24,7 +31,11 @@ def _backend_url() -> str:
     return os.getenv("BACKEND_URL", "http://localhost:8000").rstrip("/")
 
 
-def _langfuse_url() -> str:
+def _langfuse_url(*, probe: bool = False) -> str:
+    load_repo_env()
+    if probe:
+        host, _, _ = resolve_langfuse_keys()
+        return host
     return os.getenv("LANGFUSE_HOST", "http://localhost:3001").rstrip("/")
 
 
@@ -184,44 +195,56 @@ def check_langfuse_traces(client: httpx.Client, *, message: str) -> None:
 
 
 def check_langfuse(*, wait: bool = True) -> None:
-    url = f"{_langfuse_url()}/api/public/health"
-    deadline = time.monotonic() + (LANGFUSE_WAIT_SEC if wait else 0)
+    load_repo_env()
+    preferred = os.getenv("LANGFUSE_HOST", "http://localhost:3001").rstrip("/")
+    wait_sec = LANGFUSE_WAIT_SEC if wait else 0.0
+    deadline = time.monotonic() + wait_sec
+    candidates = langfuse_host_candidates(preferred)
     last_status: int | None = None
     last_body = ""
     last_error = ""
 
     while True:
-        try:
-            response = httpx.get(url, timeout=10.0, trust_env=False)
-            last_status = response.status_code
-            last_body = response.text.strip()
-            if response.status_code == 200:
-                _ok(f"Langfuse health -> {url}")
-                return
-            if response.status_code == 503 and wait and time.monotonic() < deadline:
-                print(
-                    f"WAIT: Langfuse ещё стартует (503). Повтор через {LANGFUSE_RETRY_SEC:.0f}s...",
-                )
-                time.sleep(LANGFUSE_RETRY_SEC)
+        for host in candidates:
+            url = f"{host.rstrip('/')}/api/public/health"
+            try:
+                response = httpx.get(url, timeout=10.0, trust_env=False)
+                last_status = response.status_code
+                last_body = response.text.strip()
+                if response.status_code == 200:
+                    if host != preferred:
+                        os.environ["LANGFUSE_HOST"] = host
+                        hostname = urlparse(host).hostname or ""
+                        if hostname not in {"localhost", "127.0.0.1"}:
+                            print(
+                                f"info: Langfuse via {host} "
+                                "(localhost unreachable from Windows)",
+                            )
+                    _ok(f"Langfuse health -> {url}")
+                    return
+                if response.status_code == 503 and wait and time.monotonic() < deadline:
+                    retry_sec = LANGFUSE_RETRY_SEC
+                    print(f"WAIT: Langfuse ещё стартует (503). Повтор через {retry_sec:.0f}s...")
+                    time.sleep(retry_sec)
+                    break
+                _fail(f"Langfuse health -> {response.status_code}: {last_body or '(empty)'}")
+            except httpx.HTTPError as exc:
+                last_error = str(exc)
                 continue
-            _fail(f"Langfuse health -> {response.status_code}: {last_body or '(empty)'}")
-        except httpx.HTTPError as exc:
-            last_error = str(exc)
+        else:
             if wait and time.monotonic() < deadline:
                 retry_sec = LANGFUSE_RETRY_SEC
-                print(f"WAIT: Langfuse недоступен ({exc}). Повтор через {retry_sec:.0f}s...")
-                time.sleep(LANGFUSE_RETRY_SEC)
+                print(f"WAIT: Langfuse недоступен. Повтор через {retry_sec:.0f}s...")
+                time.sleep(retry_sec)
                 continue
-            _fail(f"Langfuse health request failed: {exc}")
 
-        if not wait or time.monotonic() >= deadline:
             hint = (
                 "Запустите `make up`, подождите 1–3 мин и повторите. "
                 "Логи: `make compose logs langfuse-web`"
             )
             details = last_body or last_error or "нет ответа"
             _fail(
-                f"Langfuse не готов за {LANGFUSE_WAIT_SEC:.0f}s "
+                f"Langfuse не готов за {wait_sec:.0f}s "
                 f"(last status={last_status}): {details}. {hint}",
             )
 

@@ -8,6 +8,7 @@ import sys
 
 from app.config import get_settings
 from app.exceptions import AgentCoreError
+from app.logging_config import configure_logging
 from app.rag.indexer import RagIndexer
 
 
@@ -21,7 +22,7 @@ def main() -> int:
     args = parser.parse_args()
 
     settings = get_settings()
-    logging.basicConfig(level=settings.log_level)
+    configure_logging(settings.log_level, env=settings.env)
 
     indexer = RagIndexer()
     try:

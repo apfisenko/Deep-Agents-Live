@@ -11,14 +11,20 @@ if str(_BACKEND) not in sys.path:
 
 from app.env_loader import (
     is_local_langfuse_host,
+    langfuse_health_ok,
+    langfuse_host_candidates,
     load_repo_env,
     resolve_langfuse_host,
     resolve_langfuse_keys,
+    resolve_reachable_langfuse_host,
 )
 
 __all__ = [
     "is_local_langfuse_host",
+    "langfuse_health_ok",
+    "langfuse_host_candidates",
     "load_repo_env",
     "resolve_langfuse_host",
     "resolve_langfuse_keys",
+    "resolve_reachable_langfuse_host",
 ]

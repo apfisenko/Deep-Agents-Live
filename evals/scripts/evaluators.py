@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
 import re
 from dataclasses import dataclass
@@ -23,6 +24,40 @@ from ragas.metrics.collections import (
     ContextRecall,
     Faithfulness,
 )
+
+_JUDGE_RETRY_ATTEMPTS = int(os.environ.get("EVAL_JUDGE_RETRY_ATTEMPTS", "4"))
+_JUDGE_RETRY_BASE_SEC = float(os.environ.get("EVAL_JUDGE_RETRY_BASE_SEC", "15"))
+
+
+def _is_judge_transient_error(exc: BaseException) -> bool:
+    msg = str(exc).lower()
+    transient_markers = (
+        "rate_limit",
+        "429",
+        "nlistatementoutput",
+        "json_invalid",
+        "invalid json",
+        "max_tokens",
+        "eof while parsing",
+    )
+    return any(marker in msg for marker in transient_markers)
+
+
+async def _ragas_ascore_with_retry(scorer: Any, *args: Any, **kwargs: Any) -> Any:
+    last_exc: BaseException | None = None
+    for attempt in range(_JUDGE_RETRY_ATTEMPTS):
+        try:
+            return await scorer.ascore(*args, **kwargs)
+        except Exception as exc:
+            last_exc = exc
+            if not _is_judge_transient_error(exc) or attempt >= _JUDGE_RETRY_ATTEMPTS - 1:
+                raise
+            delay = _JUDGE_RETRY_BASE_SEC * (2**attempt)
+            await asyncio.sleep(delay)
+    if last_exc is not None:
+        raise last_exc
+    msg = "judge retry exhausted without result"
+    raise RuntimeError(msg)
 
 B2B_HINTS = ("b2b", "корпорат", "договор", "кп", "команд", "юрлиц")
 
@@ -378,14 +413,22 @@ def make_item_evaluators(
             answer, _, _, err = _unwrap_output(output)
             if err:
                 return Evaluation(name="answer_correctness", value=0.0, comment=err)
-            result = await judge.answer_correctness.ascore(
-                _user_input(input),
-                answer or "",
-                _expected_answer(expected_output),
-            )
+            try:
+                result = await _ragas_ascore_with_retry(
+                    judge.answer_correctness,
+                    _user_input(input),
+                    answer or "",
+                    _expected_answer(expected_output),
+                )
+            except Exception as exc:
+                return Evaluation(
+                    name="answer_correctness",
+                    value=0.0,
+                    comment=f"judge_error: {exc}",
+                )
             value = float(result.value)
             return Evaluation(
-                name="answer_correctness", value=value, comment=f"ragas score={value:.3f}"
+                name="answer_correctness", value=value, comment=f"ragas score={value:.3f}",
             )
 
         evaluators.append(answer_correctness)
@@ -396,11 +439,19 @@ def make_item_evaluators(
             answer, contexts, _, err = _unwrap_output(output)
             if err:
                 return Evaluation(name="faithfulness", value=0.0, comment=err)
-            result = await judge.faithfulness.ascore(
-                _user_input(input),
-                answer or "",
-                contexts or [" "],
-            )
+            try:
+                result = await _ragas_ascore_with_retry(
+                    judge.faithfulness,
+                    _user_input(input),
+                    answer or "",
+                    contexts or [" "],
+                )
+            except Exception as exc:
+                return Evaluation(
+                    name="faithfulness",
+                    value=0.0,
+                    comment=f"judge_error: {exc}",
+                )
             value = float(result.value)
             comment = f"ragas score={value:.3f}"
             if not contexts:
@@ -415,10 +466,21 @@ def make_item_evaluators(
             answer, _, _, err = _unwrap_output(output)
             if err:
                 return Evaluation(name="answer_relevancy", value=0.0, comment=err)
-            result = await judge.answer_relevancy.ascore(_user_input(input), answer or "")
+            try:
+                result = await _ragas_ascore_with_retry(
+                    judge.answer_relevancy,
+                    _user_input(input),
+                    answer or "",
+                )
+            except Exception as exc:
+                return Evaluation(
+                    name="answer_relevancy",
+                    value=0.0,
+                    comment=f"judge_error: {exc}",
+                )
             value = float(result.value)
             return Evaluation(
-                name="answer_relevancy", value=value, comment=f"ragas score={value:.3f}"
+                name="answer_relevancy", value=value, comment=f"ragas score={value:.3f}",
             )
 
         evaluators.append(answer_relevancy)
@@ -458,11 +520,19 @@ def make_item_evaluators(
             if err:
                 return Evaluation(name="context_recall", value=0.0, comment=err)
             reference = _expected_answer(expected_output)
-            result = await judge.context_recall.ascore(
-                _user_input(input),
-                contexts or [" "],
-                reference,
-            )
+            try:
+                result = await _ragas_ascore_with_retry(
+                    judge.context_recall,
+                    _user_input(input),
+                    contexts or [" "],
+                    reference,
+                )
+            except Exception as exc:
+                return Evaluation(
+                    name="context_recall",
+                    value=0.0,
+                    comment=f"judge_error: {exc}",
+                )
             value = float(result.value)
             comment = f"ragas score={value:.3f}"
             if not contexts:
@@ -538,11 +608,11 @@ def make_item_evaluators(
             must_not = [str(t) for t in (_metadata_dict(metadata).get("must_not") or [])]
             if not must_not:
                 return Evaluation(
-                    name="must_not_compliance", value=1.0, comment="n/a", data_type="BOOLEAN"
+                    name="must_not_compliance", value=1.0, comment="n/a", data_type="BOOLEAN",
                 )
             if err:
                 return Evaluation(
-                    name="must_not_compliance", value=0.0, comment=err, data_type="BOOLEAN"
+                    name="must_not_compliance", value=0.0, comment=err, data_type="BOOLEAN",
                 )
             violated = [tool for tool in must_not if tool in called]
             ok = not violated

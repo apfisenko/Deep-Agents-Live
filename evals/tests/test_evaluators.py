@@ -96,3 +96,11 @@ def test_resolve_evaluator_names_dedupes_extra() -> None:
     )
     assert names.count("tool_correctness") == 1
     assert "executed_tools_count" in names
+
+
+def test_is_judge_transient_error_rate_limit() -> None:
+    from evaluators import _is_judge_transient_error
+
+    assert _is_judge_transient_error(RuntimeError("rate_limit_exceeded"))
+    assert _is_judge_transient_error(ValueError("Invalid JSON: EOF while parsing"))
+    assert not _is_judge_transient_error(RuntimeError("unexpected failure"))

@@ -21,8 +21,8 @@ retriever:
     vector: 1.0
     graph: 1.2
     global: 1.2
-  reranker_enabled: true
-  reranker_model: BAAI/bge-reranker-v2-m3
+  reranker_enabled: false
+  reranker_model: jinaai/jina-reranker-v2-base-multilingual
   reranker_candidate_k: 15
   reranker_timeout_sec: 8.0
 

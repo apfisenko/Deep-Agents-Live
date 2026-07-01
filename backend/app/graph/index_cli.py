@@ -15,6 +15,7 @@ from app.graph.client import create_driver, ensure_neo4j_uri
 from app.graph.cypher_file import run_cypher_file
 from app.graph.entity_resolver import run_entity_resolution
 from app.graph.theme_extractor import run_extraction
+from app.logging_config import configure_logging
 from app.paths import GRAPH_SEED_CYPHER
 
 logger = logging.getLogger(__name__)
@@ -95,7 +96,7 @@ def main() -> int:
 
     _bootstrap_env()
     settings = get_settings()
-    logging.basicConfig(level=settings.log_level)
+    configure_logging(settings.log_level, env=settings.env)
 
     try:
         if args.resolve_only:

@@ -94,12 +94,13 @@ class RunConfig(BaseModel):
             raw = resolve_env_placeholders(raw)
         return cls.model_validate(raw)
 
-    def to_metadata(self) -> dict[str, Any]:
+    def to_metadata(self) -> dict[str, str]:
+        """Langfuse propagated attributes must be strings."""
         return {
             "config_id": self.config_id,
             "model": self.model.name,
-            "temperature": self.model.temperature,
-            "benchmark_only": self.benchmark_only,
+            "temperature": str(self.model.temperature),
+            "benchmark_only": str(self.benchmark_only).lower(),
             "retriever_backend": self.retriever.backend,
         }
 

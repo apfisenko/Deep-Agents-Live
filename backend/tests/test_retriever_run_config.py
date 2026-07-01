@@ -17,3 +17,11 @@ def test_graphrag_baseline_defaults_vector_retriever() -> None:
     path = EVALS_CONFIGS_DIR / "graphrag-baseline.yaml"
     config = RunConfig.from_yaml_path(path)
     assert config.retriever.backend == "vector"
+
+
+def test_to_metadata_values_are_strings() -> None:
+    path = EVALS_CONFIGS_DIR / "graphrag-v001.yaml"
+    config = RunConfig.from_yaml_path(path)
+    metadata = config.to_metadata()
+    assert all(isinstance(value, str) for value in metadata.values())
+    assert metadata["benchmark_only"] in {"true", "false"}
