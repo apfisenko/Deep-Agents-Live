@@ -1,0 +1,29 @@
+Individual Results: Hidden (24 items)
+💡 Set include_item_results=True to view them
+
+──────────────────────────────────────────────────
+🧪 Experiment: baseline-graphrag/single-hop/v001
+📋 Run name: graphrag-v001--graphrag-single-hop--58d595a4--20260701T230701Z - Sprint-06 task 06: hybrid retriever — vector+graph+global RRF, bge-reranker-v2-m3
+24 items
+Evaluations:
+  • task_error
+  • required_entity_recall_at_5
+  • answer_correctness
+  • faithfulness
+
+Average Scores:
+  • task_error: 0.000
+  • required_entity_recall_at_5: 0.722
+  • answer_correctness: 0.351
+  • faithfulness: 0.638
+
+Run Evaluations:
+  • error_rate: 0.000
+  • avg_answer_correctness: 0.351
+  • avg_required_entity_recall_at_5: 0.722
+  • avg_faithfulness: 0.638
+
+🔗 Dataset Run:
+   http://127.0.0.1:3001/project/default/datasets/cmqxzjsze001vn308htutndvq/runs/156c057d-4976-4fd0-80f2-c80decef318c
+
+dataset_run_url: http://127.0.0.1:3001/project/default/datasets/cmqxzjsze001vn308htutndvq/runs/156c057d-4976-4fd0-80f2-c80decef318c
