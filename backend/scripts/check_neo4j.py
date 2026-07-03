@@ -40,7 +40,7 @@ def run_status(*, quiet: bool = False) -> None:
         verify_connectivity(uri, settings.neo4j_user, settings.neo4j_password)
     except ProviderUnavailableError as exc:
         _fail(str(exc))
-    except Exception as exc:  # noqa: BLE001 — surface driver errors in smoke CLI
+    except Exception as exc:
         _fail(f"Neo4j connectivity check failed: {exc}")
 
     if not quiet:

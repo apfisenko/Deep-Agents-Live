@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from typing import Any
 
 from langfuse import observe
 from neo4j import RoutingControl
@@ -36,7 +37,7 @@ class GlobalBackend:
         lowered = query.lower()
         return any(keyword in lowered for keyword in _PRICING_KEYWORDS)
 
-    def _run_read(self, cypher: str, params: dict[str, object]) -> list[dict[str, object]]:
+    def _run_read(self, cypher: str, params: dict[str, Any]) -> list[dict[str, object]]:
         driver = get_neo4j_driver(self._settings)
         records, _, _ = driver.execute_query(
             cypher,
@@ -65,7 +66,7 @@ class GlobalBackend:
         return chunks[:top_k]
 
     def _structural_chunks(self, segment: str) -> list[Chunk]:
-        params = {"comboSlug": self._combo_slug}
+        params: dict[str, Any] = {"comboSlug": self._combo_slug}
         chunks: list[Chunk] = []
 
         trajectory = self._run_read(COMBO_TRAJECTORY_QUERY, params)

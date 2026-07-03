@@ -1,6 +1,6 @@
 # Sprint-06 task 06: GraphRAG hybrid retrieval (Qdrant + Neo4j RRF + reranker).
 config_id: graphrag-v001
-comment: "Sprint-06 task 06: hybrid retriever — vector+graph+global RRF, bge-reranker-v2-m3"
+comment: "Sprint-06 task 06: hybrid retriever — vector+graph+global RRF, jina-reranker-v2-base-multilingual"
 
 benchmark_only: false
 

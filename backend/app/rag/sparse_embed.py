@@ -29,7 +29,7 @@ def encode_sparse_documents(texts: list[str]) -> list[EncodedSparseVector]:
 
 def encode_sparse_query(text: str) -> EncodedSparseVector:
     model = _get_sparse_model()
-    return _to_encoded(next(model.embed([text])))
+    return _to_encoded(next(iter(model.embed([text]))))
 
 
 def to_qdrant_sparse(vector: EncodedSparseVector) -> SparseVector:

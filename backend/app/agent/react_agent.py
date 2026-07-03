@@ -65,7 +65,7 @@ class ReactAgentRunner:
         settings = get_settings()
         self._settings = settings
         self._run_config = run_config
-        self._tools = get_agent_tools()
+        self._tools = get_agent_tools(routing_enabled=run_config.agent.routing_enabled)
         self._graph = create_react_agent(
             create_chat_model(
                 settings,

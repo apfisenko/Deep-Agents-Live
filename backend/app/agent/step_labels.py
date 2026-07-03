@@ -2,6 +2,10 @@
 
 TOOL_LABELS: dict[str, str] = {
     "search_knowledge_base_tool": "Ищу в базе знаний",
+    "search_vector": "Векторный поиск",
+    "search_graph": "Графовый поиск",
+    "search_global": "Обзор каталога",
+    "search_text2cypher": "Структурный запрос к графу",
     "list_b2c_products": "Смотрю каталог курсов",
     "create_payment_link": "Формирую ссылку на оплату",
     "confirm_payment": "Подтверждаю оплату",

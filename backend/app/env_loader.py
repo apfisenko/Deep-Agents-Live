@@ -140,13 +140,12 @@ def resolve_reachable_langfuse_host(preferred: str) -> str:
     for candidate in langfuse_host_candidates(preferred):
         if langfuse_health_ok(candidate):
             if candidate != preferred:
-                both_loopback = _is_loopback_langfuse_host(candidate) and _is_loopback_langfuse_host(
-                    preferred,
-                )
+                both_loopback = _is_loopback_langfuse_host(
+                    candidate
+                ) and _is_loopback_langfuse_host(preferred)
                 if not both_loopback:
                     print(
-                        f"info: Langfuse via {candidate} "
-                        "(localhost unreachable from Windows)",
+                        f"info: Langfuse via {candidate} (localhost unreachable from Windows)",
                     )
                     logger.info(
                         "Langfuse localhost unreachable from Windows; using alternate host",

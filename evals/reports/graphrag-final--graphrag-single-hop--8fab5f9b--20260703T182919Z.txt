@@ -1,0 +1,27 @@
+Individual Results: Hidden (3 items)
+💡 Set include_item_results=True to view them
+
+──────────────────────────────────────────────────
+🧪 Experiment: baseline-graphrag/single-hop/v001
+📋 Run name: graphrag-final--graphrag-single-hop--8fab5f9b--20260703T182919Z - Sprint-06 task 08: agent routing — search_vector/graph/global/text2cypher
+3 items
+Evaluations:
+  • answer_correctness
+  • task_error
+  • faithfulness
+  • required_entity_recall_at_5
+  • executed_tools_count
+
+Average Scores:
+  • answer_correctness: 0.463
+  • task_error: 0.000
+  • faithfulness: 0.533
+  • required_entity_recall_at_5: 0.667
+  • executed_tools_count: 1.000
+
+Run Evaluations:
+  • error_rate: 0.000
+  • avg_answer_correctness: 0.463
+  • avg_required_entity_recall_at_5: 0.667
+  • avg_faithfulness: 0.533
+  • avg_executed_tools_count: 1.000

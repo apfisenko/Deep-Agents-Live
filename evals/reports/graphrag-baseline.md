@@ -7,9 +7,9 @@
 | Retriever | single-hop · correctness | single-hop · entity@5 | single-hop · faith | multi-hop · correctness | multi-hop · entity@5 | multi-hop · faith | global · correctness | global · entity@5 | global · faith |
 |-----------|------------------------:|--------------------:|-------------------:|------------------------:|-------------------:|------------------:|---------------------:|------------------:|----------------:|
 | qdrant_hybrid | 0.532 | 0.833 | 0.867 | 0.458 | 0.552 | 0.581 | 0.572 | 0.383 | 0.788 |
-| graph_hybrid | | | | | | | | | |
+| graph_hybrid | 0.351 | 0.722 | 0.638 | 0.416 | 0.807 | 0.532 | 0.414 | 0.703 | 0.555 |
 | text2cypher | | | | | | | | | |
-| agent_router | | | | | | | | | |
+| agent_router | 0.463 | 0.667 | 0.533 | 0.392 | 0.726 | 0.603 | 0.410 | 0.892 | 0.763 |
 
 ### Прогоны baseline (Langfuse)
 

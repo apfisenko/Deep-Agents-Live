@@ -12,8 +12,17 @@ from app.config import get_settings
 from app.exceptions import ProviderUnavailableError
 from app.paths import B2C_DIR
 from app.rag.search import search_knowledge_base
+from app.tools.retrieval_tools import search_global, search_graph, search_vector
+from app.tools.text2cypher_tool import search_text2cypher
 
 _pending_orders: dict[str, str] = {}
+
+ROUTING_RETRIEVAL_TOOLS: list[Any] = [
+    search_vector,
+    search_graph,
+    search_global,
+    search_text2cypher,
+]
 
 
 @tool
@@ -98,11 +107,13 @@ def save_lead(
     return json.dumps({"saved": True, "lead": record}, ensure_ascii=False)
 
 
-def get_agent_tools() -> list[Any]:
-    return [
-        search_knowledge_base_tool,
+def get_agent_tools(*, routing_enabled: bool = False) -> list[Any]:
+    business = [
         list_b2c_products,
         create_payment_link,
         confirm_payment,
         save_lead,
     ]
+    if routing_enabled:
+        return [*ROUTING_RETRIEVAL_TOOLS, *business]
+    return [search_knowledge_base_tool, *business]

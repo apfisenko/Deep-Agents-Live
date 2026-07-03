@@ -14,6 +14,7 @@ from app.env_resolver import resolve_env_placeholders
 class AgentSection(BaseModel):
     impl: Literal["langchain-react"]
     api_url: str
+    routing_enabled: bool = False
 
 
 class RetrievalSection(BaseModel):
@@ -36,7 +37,7 @@ class RetrieverSection(BaseModel):
     anchor_k: int = Field(default=8, ge=1, le=30)
     hybrid_weights: RetrieverHybridWeights = Field(default_factory=RetrieverHybridWeights)
     reranker_enabled: bool = True
-    reranker_model: str = "BAAI/bge-reranker-v2-m3"
+    reranker_model: str = "jinaai/jina-reranker-v2-base-multilingual"
     reranker_candidate_k: int = Field(default=15, ge=1, le=100)
     reranker_timeout_sec: float = Field(default=8.0, gt=0)
 
@@ -102,6 +103,7 @@ class RunConfig(BaseModel):
             "temperature": str(self.model.temperature),
             "benchmark_only": str(self.benchmark_only).lower(),
             "retriever_backend": self.retriever.backend,
+            "routing_enabled": str(self.agent.routing_enabled).lower(),
         }
 
     def to_retriever_runtime(self) -> dict[str, Any]:

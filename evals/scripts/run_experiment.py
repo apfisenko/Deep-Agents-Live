@@ -45,7 +45,17 @@ from evaluators import (
 from models import load_manifest
 
 EVALS_ROOT = REPO_ROOT / "evals"
-SEARCH_TOOL_NAMES = frozenset({"search_knowledge_base_tool", "search_knowledge_base"})
+SEARCH_TOOL_NAMES = frozenset(
+    {
+        "search_knowledge_base_tool",
+        "search_knowledge_base",
+        "search_vector",
+        "search_graph",
+        "search_global",
+        "search_text2cypher",
+    },
+)
+TEXT2CYPHER_TOOL_NAMES = frozenset({"search_text2cypher", "query_catalog_aggregate"})
 FUNNEL_SLUG = "behavior/funnel-to-lead"
 
 
@@ -80,7 +90,7 @@ def resolve_eval_stream_url(api_url: str) -> str:
 
 
 def extract_contexts_from_tool_result(tool_name: str, result: Any) -> list[str]:
-    if tool_name not in SEARCH_TOOL_NAMES:
+    if tool_name not in SEARCH_TOOL_NAMES and tool_name not in TEXT2CYPHER_TOOL_NAMES:
         return []
     payload: Any = result
     if isinstance(result, str):
@@ -90,6 +100,13 @@ def extract_contexts_from_tool_result(tool_name: str, result: Any) -> list[str]:
             return [result] if result.strip() else []
     if isinstance(payload, dict) and "error" in payload:
         return []
+    if tool_name in TEXT2CYPHER_TOOL_NAMES and isinstance(payload, dict):
+        rows = payload.get("rows")
+        if rows is not None:
+            return [json.dumps(rows, ensure_ascii=False)]
+        cypher = payload.get("cypher")
+        if cypher:
+            return [str(cypher)]
     if not isinstance(payload, list):
         return [str(payload)] if payload else []
     contexts: list[str] = []
@@ -209,6 +226,7 @@ def build_run_metadata(
         "model_temperature": str(config.model.temperature),
         "retrieval_backend": config.retrieval.backend,
         "retriever_backend": config.retriever.backend,
+        "routing_enabled": str(config.agent.routing_enabled).lower(),
         **judge_metadata(config.judge),
     }
 
@@ -267,8 +285,17 @@ async def call_agent(
     return AgentCallResult(answer=str(body.get("reply", "")).strip())
 
 
-def make_task(config: RunConfig) -> Any:
+def make_task(config: RunConfig, *, total_items: int = 0, progress_label: str = "") -> Any:
+    progress = {"done": 0}
+
     async def task(*, item: Any, **_kw: Any) -> dict[str, Any]:
+        progress["done"] += 1
+        if total_items > 0:
+            prefix = f"{progress_label} " if progress_label else ""
+            print(
+                f"[eval] {prefix}item {progress['done']}/{total_items} started",
+                flush=True,
+            )
         input_data = item.input if hasattr(item, "input") else item["input"]
         message = input_data["message"]
         channel = input_data.get("channel", "web")
@@ -311,12 +338,22 @@ def make_task(config: RunConfig) -> Any:
                 "error": str(exc),
             }
 
+        duration_ms = int((time.perf_counter() - started) * 1000)
+        if total_items > 0:
+            prefix = f"{progress_label} " if progress_label else ""
+            status = "ok" if result.answer else "empty"
+            print(
+                f"[eval] {prefix}item {progress['done']}/{total_items} done "
+                f"({status}, {duration_ms}ms, tools={result.tools_called})",
+                flush=True,
+            )
+
         return {
             "answer": result.answer,
             "contexts": result.contexts,
             "tools_called": result.tools_called,
             "session_id": session_id,
-            "duration_ms": int((time.perf_counter() - started) * 1000),
+            "duration_ms": duration_ms,
             "error": None if result.answer else "empty reply",
         }
 
@@ -414,7 +451,9 @@ def manifest_to_experiment_items(manifest_path: Path) -> list[dict[str, Any]]:
 def dry_run(config_path: Path, dataset_arg: str, *, isolated: bool = False) -> int:
     config = RunConfig.from_yaml_path(config_path)
     if dataset_arg == "all":
-        targets = resolve_all_dataset_targets(config)
+        targets = [
+            resolve_dataset_target(config, slug) for slug in dataset_slugs_for_config(config)
+        ]
         for target in targets:
             items, mode = resolve_experiment_items(target, limit=0, isolated=isolated)
             metadata = build_run_metadata(
@@ -482,10 +521,15 @@ def run_experiment_for_target(
         simulation_mode=mode,
     )
     experiment_run_name = run_name(config, target.slug)
+    progress_label = target.slug.split("/")[-1]
     task = (
         make_simulation_task(config, scenarios_path_for_target(target))
         if use_simulation
-        else make_task(config)
+        else make_task(
+            config,
+            total_items=len(items),
+            progress_label=progress_label,
+        )
     )
     extra = _extra_evaluators(config)
     experiment_kwargs: dict[str, Any] = {
@@ -508,7 +552,7 @@ def run_experiment_for_target(
         "metadata": metadata,
     }
 
-    use_langfuse_dataset = not use_simulation and limit <= 0
+    use_langfuse_dataset = not use_simulation and not isolated and limit <= 0
     print(
         f"starting experiment: {experiment_run_name} "
         f"({len(items)} items, mode={mode}, "
@@ -586,7 +630,12 @@ def main() -> int:
     judge = build_judge_runtime(config)
 
     if args.dataset == "all":
-        for slug in dataset_slugs_for_config(config):
+        slugs = dataset_slugs_for_config(config)
+        for idx, slug in enumerate(slugs, start=1):
+            print(
+                f"[eval] dataset {idx}/{len(slugs)}: {slug}",
+                flush=True,
+            )
             target = resolve_dataset_target(config, slug)
             run_experiment_for_target(
                 config=config,

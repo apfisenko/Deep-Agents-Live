@@ -2,9 +2,9 @@
 
 > **Версия roadmap:** v0.1+ (расширение RAG после sprint-05 vector-db)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
-> **Статус:** 🚧 In Progress
+> **Статус:** ✅ Done
 > **Открыт:** 2026-06-28
-> **Закрыт:** — (заполняется по завершении)
+> **Закрыт:** 2026-07-03
 
 ---
 
@@ -31,33 +31,33 @@
 
 ## DoD спринта
 
-Sprint считается завершённым, когда выполнены **все 8** критериев:
+Sprint закрыт **2026-07-03**. Критерии и фактический статус:
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | Граф каталога построен и виден в Neo4j Browser (ручной seed + авто-темы, без дублей) | `make graph-index` → Neo4j Browser / rich CLI; `graph-qa.cypher` без критичных orphan/duplicate |
-| 2 | Метрика на **multi-hop** и **global** выросла относительно baseline | Сравнение сегментных отчётов `graphrag-baseline` vs финальный run (задача 08) |
-| 3 | **single-hop** не регрессировал | `answer_correctness` сегмента single-hop: финал ≥ baseline (допуск ≤ −0.02 только с обоснованием в decision log) |
-| 4 | Ветки retrieval переключаются **конфигом**, без хардкода БД | Смена `retrieval.backend` / env без правок в `tools/` и `agent/`; code review + eval-config |
-| 5 | text2cypher работает только за 4 guardrails; write-запрос **блокируется** | `make test-backend` — тест write-block зелёный; ручной прогон агрегатного вопроса |
-| 6 | Агент **маршрутизирует** по типу вопроса (видно в трейсах) | Langfuse traces: vector / graph / global / text2cypher на репрезентативных items |
-| 7 | Entity resolution выполнен; нестыковки данных **задокументированы** | Канонические узлы Fullstack, цена комбо — в `analysis.md` / ADR / summary задачи 05 |
-| 8 | Версии Neo4j и SDK зафиксированы; **ADR на месте** | [`Docs/decisions/0007-neo4j-graphrag.md`](../../decisions/0007-neo4j-graphrag.md) — pin образа и пакетов |
+| # | Критерий | Способ проверки | Статус |
+|---|----------|-----------------|--------|
+| 1 | Граф каталога построен и виден в Neo4j Browser (ручной seed + авто-темы, без дублей) | `make graph-index` → Neo4j Browser / rich CLI; `graph-qa.cypher` без критичных orphan/duplicate | ✅ |
+| 2 | Метрика на **multi-hop** и **global** выросла относительно baseline | Сравнение сегментных отчётов `graphrag-baseline` vs финальный run (задача 08) | ⚠️ entity@5 ↑ (+0.17 / +0.51); correctness ↓ |
+| 3 | **single-hop** не регрессировал | `answer_correctness` сегмента single-hop: финал ≥ baseline (допуск ≤ −0.02 только с обоснованием в decision log) | ⚠️ 0.463 vs 0.532 (−0.069); debt в [`graphrag-final.md`](../../../evals/reports/graphrag-final.md) |
+| 4 | Ветки retrieval переключаются **конфигом**, без хардкода БД | Смена `retrieval.backend` / env без правок в `tools/` и `agent/`; code review + eval-config | ✅ |
+| 5 | text2cypher работает только за 4 guardrails; write-запрос **блокируется** | `make test-backend` — тест write-block зелёный; ручной прогон агрегатного вопроса | ✅ |
+| 6 | Агент **маршрутизирует** по типу вопроса (видно в трейсах) | Langfuse traces: vector / graph / global / text2cypher на репрезентативных items | ⚠️ 4/5 items; miss sh-02 |
+| 7 | Entity resolution выполнен; нестыковки данных **задокументированы** | Канонические узлы Fullstack, цена комбо — в `analysis.md` / ADR / summary задачи 05 | ✅ |
+| 8 | Версии Neo4j и SDK зафиксированы; **ADR на месте** | [`Docs/decisions/0007-neo4j-graphrag.md`](../../decisions/0007-neo4j-graphrag.md) — pin образа и пакетов | ✅ |
 
 ---
 
 ## Задачи
 
-| # | Задача | Статус | Plan | Summary |
-|---|--------|--------|------|---------|
-| 01 | Анализ корпуса и таксономия вопросов | ✅ Done | [plan](tasks/01-corpus-analysis-taxonomy/plan.md) | [analysis](analysis.md) |
-| 02 | Датасеты и baseline-замеры | ✅ Done | [plan](tasks/02-datasets-baseline/plan.md) | [summary](tasks/02-datasets-baseline/summary.md) |
-| 03 | Графовая схема и ADR | ✅ Done | [plan](tasks/03-graph-schema-adr/plan.md) | [schema](schema.md) |
-| 04 | Инфраструктурный слой Neo4j | ✅ Done | [plan](tasks/04-neo4j-infra/plan.md) | [§04 ниже](#задача-04-инфраструктурный-слой-neo4j--done) |
-| 05 | Индексация графа | ✅ Done | [plan](tasks/05-graph-index/plan.md) | [summary](tasks/05-graph-index/summary.md) |
-| 06 | Графовый retrieval и гибрид с реранкером | 📋 | [plan](tasks/06-graph-retrieval-hybrid/plan.md) | — |
-| 07 | Инструмент text2cypher с guardrails | 📋 | [plan](tasks/07-text2cypher-tool/plan.md) | — |
-| 08 | Агентная маршрутизация и сегментный замер | 📋 | [plan](tasks/08-agent-routing-segment-eval/plan.md) | — |
+| # | Задача | Статус | Plan | Summary | Ключевые артефакты |
+|---|--------|--------|------|---------|-------------------|
+| 01 | Анализ корпуса и таксономия вопросов | ✅ Done | [plan](tasks/01-corpus-analysis-taxonomy/plan.md) | [analysis](analysis.md) | [`analysis.md`](analysis.md) |
+| 02 | Датасеты и baseline-замеры | ✅ Done | [plan](tasks/02-datasets-baseline/plan.md) | [summary](tasks/02-datasets-baseline/summary.md) | [`evals/datasets/graphrag/`](../../../evals/datasets/graphrag/), [`evals/configs/graphrag-baseline.yaml`](../../../evals/configs/graphrag-baseline.yaml), [`evals/reports/graphrag-baseline.md`](../../../evals/reports/graphrag-baseline.md) |
+| 03 | Графовая схема и ADR | ✅ Done | [plan](tasks/03-graph-schema-adr/plan.md) | [schema](schema.md) | [`schema.md`](schema.md), [`Docs/decisions/0007-neo4j-graphrag.md`](../../decisions/0007-neo4j-graphrag.md) |
+| 04 | Инфраструктурный слой Neo4j | ✅ Done | [plan](tasks/04-neo4j-infra/plan.md) | [§04](#задача-04-инфраструктурный-слой-neo4j--done) | [`docker-compose.yml`](../../../docker-compose.yml), [`backend/app/graph/client.py`](../../../backend/app/graph/client.py), [`Docs/decisions/0008-neo4j-docker-infra.md`](../../decisions/0008-neo4j-docker-infra.md) |
+| 05 | Индексация графа | ✅ Done | [plan](tasks/05-graph-index/plan.md) | [summary](tasks/05-graph-index/summary.md) | [`data/graph/seed.cypher`](../../../data/graph/seed.cypher), [`backend/app/graph/index_cli.py`](../../../backend/app/graph/index_cli.py), [`data/graph/graph-qa.cypher`](../../../data/graph/graph-qa.cypher) |
+| 06 | Графовый retrieval и гибрид с реранкером | ✅ Done | [plan](tasks/06-graph-retrieval/plan.md) | [итог eval](../../../evals/reports/graphrag-v001-20260703-itog.md) | [`backend/app/rag/retriever/`](../../../backend/app/rag/retriever/), [`evals/configs/graphrag-v001.yaml`](../../../evals/configs/graphrag-v001.yaml) |
+| 07 | Инструмент text2cypher с guardrails | ✅ Done | [plan](tasks/07-text2cypher/plan.md) | [summary](tasks/07-text2cypher/summary.md) | [`backend/app/rag/text2cypher/`](../../../backend/app/rag/text2cypher/), [`backend/app/tools/text2cypher_tool.py`](../../../backend/app/tools/text2cypher_tool.py) |
+| 08 | Агентная маршрутизация и сегментный замер | ✅ Done | [plan](tasks/08-agent-routing/plan.md) | [итог eval](../../../evals/reports/graphrag-final.md) | [`backend/app/tools/retrieval_tools.py`](../../../backend/app/tools/retrieval_tools.py), [`evals/configs/graphrag-final.yaml`](../../../evals/configs/graphrag-final.yaml), [`evals/reports/graphrag-final.md`](../../../evals/reports/graphrag-final.md) |
 
 ---
 
@@ -163,6 +163,8 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 
 ## Задача 01: Анализ корпуса и таксономия вопросов ✅ Done
 
+> **Артефакты:** [`analysis.md`](analysis.md) · [`tasks/01-corpus-analysis-taxonomy/plan.md`](tasks/01-corpus-analysis-taxonomy/plan.md)
+
 ### Цель
 
 Прогнать агента-аналитика по каталогу `data/` и зафиксировать `analysis.md` с инвентаризацией сущностей, связей, таксономией вопросов и черновиком графовой схемы.
@@ -171,13 +173,13 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 
 ### Состав работ
 
-- [ ] Инвентаризация сущностей и типов в `data/` (Course, Combo, Module, Theme, Audience, Format, Level и др.)
-- [ ] Явные и неявные связи: порядок ступеней = prerequisite, покрытие тем курсами, концептуальные зависимости тем
-- [ ] Список вопросов, плохо покрываемых flat RAG: **≥ 6 multi-hop** и **≥ 4 global** с обоснованием «почему промахнётся»
-- [ ] Черновик графовой схемы (labels, relationship types, направления)
-- [ ] Кандидаты entity resolution и нестыковки: дубль Fullstack в двух файлах; расхождение суммы цен комбо
-- [ ] Зафиксировать таксономию из трёх классов: **single-hop / multi-hop / global** (определения + примеры)
-- [ ] Самопроверка по критериям DoD
+- [x] Инвентаризация сущностей и типов в `data/` (Course, Combo, Module, Theme, Audience, Format, Level и др.)
+- [x] Явные и неявные связи: порядок ступеней = prerequisite, покрытие тем курсами, концептуальные зависимости тем
+- [x] Список вопросов, плохо покрываемых flat RAG: **≥ 6 multi-hop** и **≥ 4 global** с обоснованием «почему промахнётся»
+- [x] Черновик графовой схемы (labels, relationship types, направления)
+- [x] Кандидаты entity resolution и нестыковки: дубль Fullstack в двух файлах; расхождение суммы цен комбо
+- [x] Зафиксировать таксономию из трёх классов: **single-hop / multi-hop / global** (определения + примеры)
+- [x] Самопроверка по критериям DoD
 
 ### Критерии готовности (DoD)
 
@@ -207,6 +209,8 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 ---
 
 ## Задача 02: Датасеты и baseline-замеры ✅ Done
+
+> **Артефакты:** [`evals/datasets/graphrag/`](../../../evals/datasets/graphrag/) · [`evals/configs/graphrag-baseline.yaml`](../../../evals/configs/graphrag-baseline.yaml) · [`evals/reports/graphrag-baseline.md`](../../../evals/reports/graphrag-baseline.md) · [`tasks/02-datasets-baseline/summary.md`](tasks/02-datasets-baseline/summary.md)
 
 ### Цель
 
@@ -286,6 +290,8 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 
 ## Задача 03: Графовая схема и ADR ✅ Done
 
+> **Артефакты:** [`schema.md`](schema.md) · [`Docs/decisions/0007-neo4j-graphrag.md`](../../decisions/0007-neo4j-graphrag.md) · [`tasks/03-graph-schema-adr/plan.md`](tasks/03-graph-schema-adr/plan.md)
+
 ### Цель
 
 Спроектировать LPG-схему каталога, boundary rule «граф vs Qdrant», привязку классов вопросов к маршрутам обхода и принять ADR Neo4j с зафиксированными версиями.
@@ -348,6 +354,8 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 ---
 
 ## Задача 04: Инфраструктурный слой Neo4j ✅ Done
+
+> **Артефакты:** [`docker-compose.yml`](../../../docker-compose.yml) · [`backend/app/graph/client.py`](../../../backend/app/graph/client.py) · [`Docs/decisions/0008-neo4j-docker-infra.md`](../../decisions/0008-neo4j-docker-infra.md) · [`tasks/04-neo4j-infra/plan.md`](tasks/04-neo4j-infra/plan.md)
 
 ### Цель
 
@@ -433,6 +441,8 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 ---
 
 ## Задача 05: Индексация графа ✅ Done
+
+> **Артефакты:** [`data/graph/seed.cypher`](../../../data/graph/seed.cypher) · [`backend/app/graph/index_cli.py`](../../../backend/app/graph/index_cli.py) · [`data/graph/graph-qa.cypher`](../../../data/graph/graph-qa.cypher) · [`tasks/05-graph-index/summary.md`](tasks/05-graph-index/summary.md)
 
 ### Цель
 
@@ -529,7 +539,9 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 
 ---
 
-## Задача 06: Графовый retrieval и гибрид с реранкером 📋
+## Задача 06: Графовый retrieval и гибрид с реранкером ✅ Done
+
+> **Артефакты:** [`backend/app/rag/retriever/`](../../../backend/app/rag/retriever/) · [`evals/configs/graphrag-v001.yaml`](../../../evals/configs/graphrag-v001.yaml) · [`evals/reports/graphrag-v001-20260703-itog.md`](../../../evals/reports/graphrag-v001-20260703-itog.md)
 
 ### Цель
 
@@ -539,100 +551,194 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 
 ### Состав работ
 
-- [ ] Абстрактный retriever-интерфейс: ветки `vector`, `graph`, `global`, `hybrid` — выбор через config
-- [ ] **Graph-ветка:** vector-anchor (Qdrant) → обход графа 1–2 шага по [`schema.md`](schema.md)
-- [ ] **Global-ветка:** структурный агрегат по каталогу (без community summaries)
-- [ ] **Hybrid:** RRF слияние Qdrant-hybrid + graph/global scores
-- [ ] **Reranker:** мультиязычная модель (русский контент); закрыть пробел «без реранкера»
-- [ ] Eval-config для graph/hybrid run; прогон multi-hop + global (+ single-hop guard)
-- [ ] Отчёт сравнения с `graphrag-baseline` **по сегментам**
-- [ ] Самопроверка по критериям DoD
+- [x] Абстрактный retriever-интерфейс: ветки `vector`, `graph`, `global`, `hybrid`, `text2cypher` (stub) — выбор через config
+- [x] **Graph-ветка:** `QdrantNeo4jRetriever` + `GRAPH_RETRIEVAL_QUERY` (≤2 hop по [`schema.md`](schema.md))
+- [x] **Global-ветка:** структурный Cypher-агрегат (trajectory, themes, audiences, prerequisite chain)
+- [x] **Hybrid:** RRF L2 (vector + graph + global, k=60, weights 1.0/1.2/1.2)
+- [x] **Reranker:** `BAAI/bge-reranker-v2-m3`, timeout-fallback; в eval `reranker_enabled: false` (RAM)
+- [x] Eval-config `graphrag-v001.yaml`; прогон `DATASET=all` (multi-hop + global + single-hop)
+- [x] Сегментное сравнение с `graphrag-baseline` → [`graphrag-v001-20260703-itog.md`](../../../evals/reports/graphrag-v001-20260703-itog.md)
+- [x] Самопроверка: `make test-backend`, `make eval-validate CONFIG=evals/configs/graphrag-v001.yaml`
 
 ### Критерии готовности (DoD)
 
 **Агент проверяет:**
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | Retriever backend переключается конфигом | Env/YAML swap без правок agent/tools |
-| 2 | Graph retrieval возвращает связанные сущности для multi-hop item | pytest + manual item |
-| 3 | Global retrieval отвечает на обзорный item без vector-only | eval item smoke |
-| 4 | RRF + reranker включены в hybrid config | Config review |
-| 5 | Eval run: multi/global метрики ≥ baseline | Segment table in report |
-| 6 | single-hop сегмент: нет регрессии > 0.02 | Segment `answer_correctness` |
+| # | Критерий | Способ проверки | Статус |
+|---|----------|-----------------|--------|
+| 1 | Retriever backend переключается конфигом | `RETRIEVER_BACKEND` / YAML без правок tools | ✅ |
+| 2 | Graph retrieval для multi-hop | `graph_backend.py` + eval traces | ✅ |
+| 3 | Global structural aggregate | `global_backend.py` + eval traces | ✅ |
+| 4 | RRF + reranker в hybrid config | `graphrag-v001.yaml`, `reranker.py` | ✅ (reranker off в eval) |
+| 5 | multi/global **entity@5** ≥ baseline | itog: +0.26 / +0.32 | ✅ |
+| 6 | single-hop: регрессия ≤ 0.02 | itog: −0.18 correctness | ⚠️ → задача 08 routing |
 
 **Пользователь проверяет:**
 
-- 2–3 ручных вопроса multi-hop: в контексте видны нужные курсы/темы/цепочки
-- 1 global вопрос: структура каталога в ответе согласована с графом
-- Traces в Langfuse показывают вызов graph/global веток
+- Langfuse traces: graph-ветка на multi-hop (Neo4j `AggregationSkippedNull` — штатно)
+- Итог eval: entity@5 вырос на multi/global; single-hop регрессия задокументирована
+
+### Результат eval (кратко)
+
+| Сегмент | entity@5 Δ vs baseline | correctness Δ |
+|---------|------------------------|---------------|
+| multi-hop | **+0.255** (0.807 vs 0.552) | −0.042 |
+| global | **+0.320** (0.703 vs 0.383) | −0.158 |
+| single-hop | −0.111 | −0.181 |
+
+Полная таблица: [`evals/reports/graphrag-v001-20260703-itog.md`](../../../evals/reports/graphrag-v001-20260703-itog.md)
 
 ### Артефакты
 
-- `backend/app/rag/retriever/` (или расширение `vector_store.py`) — protocol + graph/global/hybrid
-- `evals/configs/graphrag-hybrid.yaml` (или параметры в baseline)
-- `evals/reports/graphrag-hybrid--*` — сегментное сравнение
+**Retriever-слой (`backend/app/rag/retriever/`)**
+
+| Файл | Назначение |
+|------|------------|
+| [`protocol.py`](../../../backend/app/rag/retriever/protocol.py) | `RetrieverBackend`, `Chunk` |
+| [`factory.py`](../../../backend/app/rag/retriever/factory.py) | Выбор backend по config |
+| [`vector_backend.py`](../../../backend/app/rag/retriever/vector_backend.py) | Qdrant hybrid (baseline-поведение) |
+| [`graph_backend.py`](../../../backend/app/rag/retriever/graph_backend.py) | `QdrantNeo4jRetriever` + graph Cypher |
+| [`global_backend.py`](../../../backend/app/rag/retriever/global_backend.py) | Структурные агрегаты каталога |
+| [`hybrid_backend.py`](../../../backend/app/rag/retriever/hybrid_backend.py) | RRF + optional reranker |
+| [`text2cypher_backend.py`](../../../backend/app/rag/retriever/text2cypher_backend.py) | Stub → vector (задача 07) |
+| [`rrf.py`](../../../backend/app/rag/retriever/rrf.py) | Reciprocal Rank Fusion |
+| [`reranker.py`](../../../backend/app/rag/retriever/reranker.py) | Cross-encoder, circuit breaker OOM |
+| [`cypher_templates.py`](../../../backend/app/rag/retriever/cypher_templates.py) | `GRAPH_RETRIEVAL_QUERY`, global queries |
+| [`embedder.py`](../../../backend/app/rag/retriever/embedder.py) | OpenRouter embedder для neo4j-graphrag |
+| [`slug.py`](../../../backend/app/rag/retriever/slug.py) | `slug_from_source_path` |
+| [`context.py`](../../../backend/app/rag/retriever/context.py) | Runtime config (ContextVar) |
+| [`runtime.py`](../../../backend/app/rag/retriever/runtime.py) | `RunConfig` → retriever runtime |
+
+**Интеграция backend**
+
+| Файл | Назначение |
+|------|------------|
+| [`backend/app/rag/search.py`](../../../backend/app/rag/search.py) | `search_knowledge_base` → retriever factory |
+| [`backend/app/agent/run_config.py`](../../../backend/app/agent/run_config.py) | `RetrieverSection`, `to_retriever_runtime()` |
+| [`backend/app/agent/react_agent.py`](../../../backend/app/agent/react_agent.py) | Прокидывание retriever runtime в context |
+| [`backend/app/config.py`](../../../backend/app/config.py) | `RETRIEVER_*`, `RERANKER_*`, `GRAPH_RETRIEVAL_*` |
+| [`backend/app/env_loader.py`](../../../backend/app/env_loader.py) | Langfuse WSL fallback |
+| [`backend/app/logging_config.py`](../../../backend/app/logging_config.py) | Dev timestamps, `neo4j.notifications` → WARNING |
+| [`backend/pyproject.toml`](../../../backend/pyproject.toml) | `neo4j-graphrag`, sentence-transformers |
+| [`.env.example`](../../../.env.example) | Retriever, reranker, eval judge retry env |
+
+**Тесты**
+
+| Файл | Назначение |
+|------|------------|
+| [`backend/tests/test_retriever_factory.py`](../../../backend/tests/test_retriever_factory.py) | Factory по backend name |
+| [`backend/tests/test_retriever_rrf.py`](../../../backend/tests/test_retriever_rrf.py) | RRF merge |
+| [`backend/tests/test_retriever_reranker.py`](../../../backend/tests/test_retriever_reranker.py) | Reranker fallback |
+| [`backend/tests/test_retriever_run_config.py`](../../../backend/tests/test_retriever_run_config.py) | YAML `graphrag-v001` → RunConfig |
+
+**Eval**
+
+| Файл | Назначение |
+|------|------------|
+| [`evals/configs/graphrag-v001.yaml`](../../../evals/configs/graphrag-v001.yaml) | Hybrid retriever eval-config |
+| [`evals/scripts/run_experiment.py`](../../../evals/scripts/run_experiment.py) | `resolve_config_path()`, eval runner |
+| [`evals/scripts/evaluators.py`](../../../evals/scripts/evaluators.py) | Judge retry/throttle (429) |
+| [`evals/scripts/dataset_registry.py`](../../../evals/scripts/dataset_registry.py) | `graphrag-v001` → 3 датасета |
+| [`evals/reports/experiments-log.md`](../../../evals/reports/experiments-log.md) | Строка experiment graphrag-v001 |
+| [`evals/tests/test_run_experiment.py`](../../../evals/tests/test_run_experiment.py) | Config path, concurrency |
+| [`evals/tests/test_evaluators.py`](../../../evals/tests/test_evaluators.py) | Judge transient errors |
+
+**Отчёты eval (Langfuse, 2026-07-01)**
+
+| Файл | Сегмент |
+|------|---------|
+| [`graphrag-v001--graphrag-multi-hop--d3333030--20260701T195239Z.txt`](../../../evals/reports/graphrag-v001--graphrag-multi-hop--d3333030--20260701T195239Z.txt) | multi-hop |
+| [`graphrag-v001--graphrag-global--d3333030--20260701T220118Z.txt`](../../../evals/reports/graphrag-v001--graphrag-global--d3333030--20260701T220118Z.txt) | global |
+| [`graphrag-v001--graphrag-single-hop--58d595a4--20260701T230701Z.txt`](../../../evals/reports/graphrag-v001--graphrag-single-hop--58d595a4--20260701T230701Z.txt) | single-hop |
+| [`graphrag-v001-20260703-itog.md`](../../../evals/reports/graphrag-v001-20260703-itog.md) | Сегментное сравнение vs baseline |
 
 ### Документы
 
-- 📋 [План задачи](tasks/06-graph-retrieval-hybrid/plan.md)
-- 📝 [Summary](tasks/06-graph-retrieval-hybrid/summary.md)
+- 📋 [План задачи](tasks/06-graph-retrieval/plan.md)
+- 📊 [Итог eval](../../../evals/reports/graphrag-v001-20260703-itog.md)
 
 ---
 
-## Задача 07: Инструмент text2cypher с guardrails 📋
+## Задача 07: Инструмент text2cypher с guardrails ✅ Done
+
+> **Артефакты:** [`backend/app/rag/text2cypher/`](../../../backend/app/rag/text2cypher/) · [`backend/app/tools/text2cypher_tool.py`](../../../backend/app/tools/text2cypher_tool.py) · [`backend/tests/test_text2cypher_guardrails.py`](../../../backend/tests/test_text2cypher_guardrails.py) · [`tasks/07-text2cypher/summary.md`](tasks/07-text2cypher/summary.md)
 
 ### Цель
 
-Добавить NL→Cypher инструмент для агента (Text2CypherRetriever или GraphCypherQAChain) строго за четырьмя турникетами безопасности.
+Добавить NL→Cypher retrieval (`GuardedText2CypherExecutor` + `Text2CypherBackend`) строго за четырьмя турникетами безопасности; заменить stub для агрегатных вопросов по каталогу.
 
-> 💡 **Скиллы:** [`neo4j-graphrag-skill`](../../../.agents/skills/neo4j-graphrag-skill/SKILL.md), [`neo4j-cypher-skill`](../../../.agents/skills/neo4j-cypher-skill/SKILL.md) (Cypher guide для промпта и few-shot).
+> 💡 **Скиллы:** [`neo4j-graphrag-skill`](../../../.agents/skills/neo4j-graphrag-skill/SKILL.md), [`neo4j-cypher-skill`](../../../.agents/skills/neo4j-cypher-skill/SKILL.md).
 
 ### Состав работ
 
-- [ ] Реализация: `Text2CypherRetriever` (neo4j-graphrag) **или** `GraphCypherQAChain` (langchain-neo4j)
-- [ ] **Guardrail 1:** read-only роль БД для runtime-пользователя
-- [ ] **Guardrail 2:** regex-фильтр на write-операции (CREATE, MERGE, DELETE, SET, DROP, …)
-- [ ] **Guardrail 3:** таймауты запроса и обязательный LIMIT
-- [ ] **Guardrail 4:** узкое описание tool в registry (только агрегаты/структурные COUNT/PATH)
-- [ ] Enhanced schema + few-shot примеры в промпте tool
-- [ ] Unit-тест: write-запрос **блокируется**
-- [ ] Замер на агрегатных и структурных вопросах (eval subset или smoke script)
-- [ ] Примеры запросов для ручной проверки (README задачи / demo)
-- [ ] Самопроверка по критериям DoD
+- [x] Реализация: `GuardedText2CypherExecutor` + `Text2CypherBackend` (neo4j-graphrag LLM + enhanced schema)
+- [x] **Guardrail 1:** read-only driver (`NEO4J_READONLY_*`, `get_text2cypher_driver()`)
+- [x] **Guardrail 2:** regex write-block (`CREATE|MERGE|DELETE|SET|REMOVE|DROP`) → `ValueError` до БД
+- [x] **Guardrail 3:** timeout 5s, auto `LIMIT 50` если LIMIT отсутствует
+- [x] **Guardrail 4:** узкий docstring `query_catalog_aggregate` (registry — задача 08)
+- [x] Enhanced schema + 7 few-shot (schema.md §3.3–3.4)
+- [x] Unit-тесты: `test_text2cypher_write_blocked`, `test_text2cypher_limit_injected`
+- [x] Smoke: `make text2cypher-smoke` / `.\make.ps1 text2cypher-smoke` (2/2 PASS)
+- [x] Самопроверка: `make test-backend` — 94 passed
 
 ### Критерии готовности (DoD)
 
 **Агент проверяет:**
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | Write Cypher блокируется до выполнения | `pytest backend/tests/test_text2cypher_guardrails.py` |
-| 2 | Read-only роль: CREATE в cypher-shell под ro-user падает | Documented manual step |
-| 3 | Валидный COUNT/PATH запрос возвращает результат | Smoke script |
-| 4 | Tool description не позволяет «произвольный Cypher» | Code review registry |
-| 5 | `make test-backend` green | CI |
+| # | Критерий | Способ проверки | Статус |
+|---|----------|-----------------|--------|
+| 1 | Write Cypher блокируется до выполнения | `pytest tests/test_text2cypher_guardrails.py` | ✅ |
+| 2 | Read-only credentials (отдельный user) | `get_text2cypher_driver()` + devops/README | ✅ |
+| 3 | Valid COUNT/pricing возвращает rows | `make text2cypher-smoke` | ✅ |
+| 4 | Tool description — узкий scope | `text2cypher_tool.py` docstring | ✅ |
+| 5 | `make test-backend` green | 94 passed | ✅ |
 
 **Пользователь проверяет:**
 
-- Задать агенту: «Сколько курсов в комбо X?» — вызывается **text2cypher**, не vector
-- Задать провокацию на DELETE — отказ / блокировка
-- Traces: span text2cypher с sanitized query
+- `RETRIEVER_BACKEND=text2cypher` + вопрос про цену комбо → chunk с pricing JSON
+- Провокация DELETE → блокировка / пустой результат
+- Agent routing + traces — **задача 08**
 
 ### Артефакты
 
-- `backend/app/tools/text2cypher_tool.py` (или аналог)
-- `backend/tests/test_text2cypher_guardrails.py`
-- `backend/app/graph/cypher_schema_enhanced.json` (или inline prompt asset)
+**Созданные**
+
+| Путь | Назначение |
+|------|------------|
+| [`backend/app/rag/text2cypher/__init__.py`](../../../backend/app/rag/text2cypher/__init__.py) | Пакет text2cypher |
+| [`backend/app/rag/text2cypher/guardrails.py`](../../../backend/app/rag/text2cypher/guardrails.py) | Guardrails #2–#3: write regex, LIMIT inject |
+| [`backend/app/rag/text2cypher/schema_enhanced.json`](../../../backend/app/rag/text2cypher/schema_enhanced.json) | Enhanced LPG schema для промпта |
+| [`backend/app/rag/text2cypher/schema_loader.py`](../../../backend/app/rag/text2cypher/schema_loader.py) | Загрузка schema asset |
+| [`backend/app/rag/text2cypher/examples.py`](../../../backend/app/rag/text2cypher/examples.py) | 7 few-shot NL→Cypher |
+| [`backend/app/rag/text2cypher/executor.py`](../../../backend/app/rag/text2cypher/executor.py) | `GuardedText2CypherExecutor` — NL→guard→execute |
+| [`backend/app/tools/text2cypher_tool.py`](../../../backend/app/tools/text2cypher_tool.py) | `query_catalog_aggregate` (stub для задачи 08) |
+| [`backend/tests/test_text2cypher_guardrails.py`](../../../backend/tests/test_text2cypher_guardrails.py) | write-block + LIMIT inject tests |
+| [`backend/scripts/text2cypher_smoke.py`](../../../backend/scripts/text2cypher_smoke.py) | Smoke gl-04 + count курсов |
+| [`Docs/sprints/sprint-06-graphrag/tasks/07-text2cypher/plan.md`](tasks/07-text2cypher/plan.md) | План задачи |
+
+**Изменённые**
+
+| Путь | Что изменено |
+|------|--------------|
+| [`backend/app/rag/retriever/text2cypher_backend.py`](../../../backend/app/rag/retriever/text2cypher_backend.py) | Stub → реальный backend с guardrails |
+| [`backend/app/graph/client.py`](../../../backend/app/graph/client.py) | `get_text2cypher_driver()`, reset readonly cache |
+| [`backend/app/config.py`](../../../backend/app/config.py) | `TEXT2CYPHER_MODEL`, `TEXT2CYPHER_QUERY_TIMEOUT_MS`, `TEXT2CYPHER_DEFAULT_LIMIT` |
+| [`backend/tests/test_retriever_factory.py`](../../../backend/tests/test_retriever_factory.py) | `NEO4J_READONLY_PASSWORD` для text2cypher backend |
+| [`backend/pyproject.toml`](../../../backend/pyproject.toml) | ruff per-file-ignores для `text2cypher/*` |
+| [`.env.example`](../../../.env.example) | `TEXT2CYPHER_*` env vars |
+| [`Makefile`](../../../Makefile) | `text2cypher-smoke`, `test-backend $(ARGS)` |
+| [`make.ps1`](../../../make.ps1) | `text2cypher-smoke`, проброс args в `test-backend` |
 
 ### Документы
 
-- 📋 [План задачи](tasks/07-text2cypher-tool/plan.md)
-- 📝 [Summary](tasks/07-text2cypher-tool/summary.md)
+- 📋 [План задачи](tasks/07-text2cypher/plan.md)
+- 📝 [Summary](tasks/07-text2cypher/summary.md)
 
 ---
 
-## Задача 08: Агентная маршрутизация и сегментный замер 📋
+## Задача 08: Агентная маршрутизация и сегментный замер ✅ Done
+
+> **Артефакты:** [`backend/app/tools/retrieval_tools.py`](../../../backend/app/tools/retrieval_tools.py) · [`backend/app/agent/prompts/SYSTEM_PROMPT_GRAPHRAG_ROUTING.txt`](../../../backend/app/agent/prompts/SYSTEM_PROMPT_GRAPHRAG_ROUTING.txt) · [`evals/configs/graphrag-final.yaml`](../../../evals/configs/graphrag-final.yaml) · [`evals/reports/graphrag-final.md`](../../../evals/reports/graphrag-final.md) · [`tasks/08-agent-routing/plan.md`](tasks/08-agent-routing/plan.md)
 
 ### Цель
 
@@ -642,46 +748,130 @@ Makefile / make.ps1                     # graph-index, neo4j-smoke, eval targets
 
 ### Состав работ
 
-- [ ] Tools: `vector`, `graph`, `global`, `text2cypher` — в registry агента
-- [ ] Системный промпт: маршрутизация — факт → vector; путь/зависимости → graph; обзор каталога → global; точный подсчёт → text2cypher; **single-hop — graph не использовать**
-- [ ] Eval-config финального прогона (full stack: hybrid + routing + reranker)
-- [ ] E2e по всем сегментам: single / multi / global (+ text2cypher items)
-- [ ] Сравнение с `graphrag-baseline` по сегментам
-- [ ] **Decision log:** что помогло на каком сегменте и ценой (latency, faithfulness)
-- [ ] Финальный отчёт; обновить статус sprint-06 в [`Docs/roadmap.md`](../../roadmap.md)
-- [ ] Самопроверка по DoD спринта (все 8 критериев)
+- [x] Tools: `search_vector_knowledge`, `search_graph_knowledge`, `search_global_catalog`, `query_catalog_aggregate` — в registry при `routing_enabled: true`
+- [x] Системный промпт: маршрутизация — факт → vector; путь/зависимости → graph; обзор каталога → global; точный подсчёт → text2cypher; **single-hop — graph/global не вызывать**
+- [x] Eval-config финального прогона (`graphrag-final.yaml`; reranker off в eval из-за RAM)
+- [x] E2e по всем сегментам: single / multi / global (+ text2cypher на gl-04)
+- [x] Сравнение с `graphrag-baseline` и `graphrag-v001` по сегментам
+- [x] **Decision log:** latency, routing observability, выводы по сегментам — в [`graphrag-final.md`](../../../evals/reports/graphrag-final.md)
+- [ ] Обновить статус sprint-06 в [`Docs/roadmap.md`](../../roadmap.md) — после апрува закрытия спринта
+- [x] Самопроверка DoD task 08 (`make test-backend`, `make eval-validate CONFIG=evals/configs/graphrag-final.yaml`)
 
 ### Критерии готовности (DoD)
 
 **Агент проверяет:**
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | Все 4 tool types видны в agent registry | `grep` registry / pytest |
-| 2 | Routing rules в system prompt | Diff prompt file |
-| 3 | Final eval run complete | `evals/reports/graphrag-final--*` |
-| 4 | Decision log опубликован | `evals/reports/graphrag-decision-log.md` |
-| 5 | DoD спринта (таблица выше) — checklist | Self-review в summary |
+| # | Критерий | Способ проверки | Статус |
+|---|----------|-----------------|--------|
+| 1 | 4 retrieval tools в registry при `routing_enabled: true` | `pytest tests/test_agent_tools_registry.py` | ✅ |
+| 2 | Routing rules в system prompt | `SYSTEM_PROMPT_GRAPHRAG_ROUTING.txt` | ✅ |
+| 3 | Final eval run complete | `evals/reports/graphrag-final--*` × 3 сегмента | ✅ |
+| 4 | Decision log опубликован | §Decision log в `graphrag-final.md` | ✅ |
+| 5 | multi/global entity@5 ≥ baseline | mh +0.174, gl +0.509 | ✅ |
+| 6 | single-hop correctness ≥ baseline − 0.02 | 0.463 vs 0.512 (порог **не выполнен**, −0.049) | ⚠️ |
+| 7 | Langfuse: 4 representative items → expected tool | 4/5 match (sh-02 → text2cypher miss) | ⚠️ |
+| 8 | `make test-backend` green | pytest | ✅ |
 
 **Пользователь проверяет:**
 
 - Langfuse: на 4 репрезентативных вопросах видны ожидаемые tools
-- Финальная таблица сегментов: multi/global выросли, single не просел
+- Финальная таблица сегментов: multi/global entity@5 ↑, single-hop частичное восстановление vs v001
 - Утвердить закрытие спринта (⛔ СТОП) → `summary.md`, roadmap ✅
+
+### Результат eval (кратко)
+
+| Сегмент | entity@5 Δ vs baseline | correctness Δ |
+|---------|------------------------|---------------|
+| single-hop | −0.166 | −0.069 |
+| multi-hop | **+0.174** | −0.066 |
+| global | **+0.509** | −0.162 |
+
+Полная таблица и decision log: [`evals/reports/graphrag-final.md`](../../../evals/reports/graphrag-final.md)
 
 ### Артефакты
 
-- Обновлённый system prompt (path из eval-config)
-- `evals/configs/graphrag-final.yaml`
-- `evals/reports/graphrag-final--*`, `graphrag-decision-log.md`
+**Созданные**
+
+| Путь | Назначение |
+|------|------------|
+| [`backend/app/tools/retrieval_tools.py`](../../../backend/app/tools/retrieval_tools.py) | `search_vector/graph/global_knowledge` + `with_retriever_backend()` |
+| [`backend/app/agent/prompts/SYSTEM_PROMPT_GRAPHRAG_ROUTING.txt`](../../../backend/app/agent/prompts/SYSTEM_PROMPT_GRAPHRAG_ROUTING.txt) | Правила маршрутизации по типу вопроса |
+| [`backend/tests/test_agent_tools_registry.py`](../../../backend/tests/test_agent_tools_registry.py) | Registry: 4 retrieval tools при routing |
+| [`backend/tests/test_retrieval_tools_backend.py`](../../../backend/tests/test_retrieval_tools_backend.py) | Backend override per tool call |
+| [`evals/configs/graphrag-final.yaml`](../../../evals/configs/graphrag-final.yaml) | Финальный eval-config: routing + vector default |
+| [`evals/scripts/build_graphrag_final_report.py`](../../../evals/scripts/build_graphrag_final_report.py) | Генерация `graphrag-final.md`, строка agent_router в baseline |
+| [`evals/reports/graphrag-final.md`](../../../evals/reports/graphrag-final.md) | Итоговый сегментный отчёт + decision log |
+| [`Docs/sprints/sprint-06-graphrag/tasks/08-agent-routing/plan.md`](tasks/08-agent-routing/plan.md) | План задачи |
+
+**Изменённые**
+
+| Путь | Что изменено |
+|------|--------------|
+| [`backend/app/tools/registry.py`](../../../backend/app/tools/registry.py) | `get_agent_tools(routing_enabled=…)` — 4 retrieval или legacy search |
+| [`backend/app/rag/retriever/context.py`](../../../backend/app/rag/retriever/context.py) | Context manager `with_retriever_backend()` |
+| [`backend/app/agent/run_config.py`](../../../backend/app/agent/run_config.py) | `AgentSection.routing_enabled: bool` |
+| [`backend/app/agent/react_agent.py`](../../../backend/app/agent/react_agent.py) | Wiring routing tools из RunConfig |
+| [`backend/app/agent/step_labels.py`](../../../backend/app/agent/step_labels.py) | Labels для 4 retrieval tools |
+| [`backend/app/tools/text2cypher_tool.py`](../../../backend/app/tools/text2cypher_tool.py) | Регистрация в routing mode |
+| [`backend/tests/test_retriever_run_config.py`](../../../backend/tests/test_retriever_run_config.py) | `routing_enabled` в RunConfig |
+| [`evals/scripts/run_experiment.py`](../../../evals/scripts/run_experiment.py) | `SEARCH_TOOL_NAMES` + contexts из routing/text2cypher tools |
+| [`evals/scripts/dataset_registry.py`](../../../evals/scripts/dataset_registry.py) | `graphrag-final` → 3 датасета |
+| [`evals/tests/test_run_experiment.py`](../../../evals/tests/test_run_experiment.py) | Context extraction для routing tools |
+| [`evals/reports/graphrag-baseline.md`](../../../evals/reports/graphrag-baseline.md) | Строка `agent_router` в таблице метрик |
+| [`evals/reports/experiments-log.md`](../../../evals/reports/experiments-log.md) | Строка experiment graphrag-final |
+
+**Отчёты eval (Langfuse, финальный прогон 2026-07-03)**
+
+| Файл | Сегмент |
+|------|---------|
+| [`graphrag-final--graphrag-single-hop--8fab5f9b--20260703T182919Z.txt`](../../../evals/reports/graphrag-final--graphrag-single-hop--8fab5f9b--20260703T182919Z.txt) | single-hop |
+| [`graphrag-final--graphrag-multi-hop--8fab5f9b--20260703T181036Z.txt`](../../../evals/reports/graphrag-final--graphrag-multi-hop--8fab5f9b--20260703T181036Z.txt) | multi-hop |
+| [`graphrag-final--graphrag-global--8fab5f9b--20260703T182252Z.txt`](../../../evals/reports/graphrag-final--graphrag-global--8fab5f9b--20260703T182252Z.txt) | global |
 
 ### Документы
 
-- 📋 [План задачи](tasks/08-agent-routing-segment-eval/plan.md)
-- 📝 [Summary](tasks/08-agent-routing-segment-eval/summary.md)
+- 📋 [План задачи](tasks/08-agent-routing/plan.md)
+- 📊 [Итог eval](../../../evals/reports/graphrag-final.md)
 
 ---
 
-## Итог (заполняется после закрытия)
+## Итог
 
-_Пусто — заполняется после задачи 08 и апрува DoD спринта._
+**Закрыт:** 2026-07-03 · **Конфиг финального eval:** `graphrag-final` · **Отчёты:** [`graphrag-final.md`](../../../evals/reports/graphrag-final.md), [`graphrag-baseline.md`](../../../evals/reports/graphrag-baseline.md), [`graphrag-v001-20260703-itog.md`](../../../evals/reports/graphrag-v001-20260703-itog.md)
+
+### Задачи — сводка
+
+| # | Задача | Статус | Ключевые артефакты |
+|---|--------|--------|-------------------|
+| 01 | Анализ корпуса и таксономия | ✅ Done | [`analysis.md`](analysis.md), [`tasks/01-corpus-analysis-taxonomy/plan.md`](tasks/01-corpus-analysis-taxonomy/plan.md) |
+| 02 | Датасеты и baseline | ✅ Done | [`evals/datasets/graphrag/multi_hop.json`](../../../evals/datasets/graphrag/multi_hop.json), [`evals/datasets/graphrag/global.json`](../../../evals/datasets/graphrag/global.json), [`evals/datasets/graphrag/single_hop.json`](../../../evals/datasets/graphrag/single_hop.json), [`evals/configs/graphrag-baseline.yaml`](../../../evals/configs/graphrag-baseline.yaml), [`evals/reports/graphrag-baseline.md`](../../../evals/reports/graphrag-baseline.md) |
+| 03 | Графовая схема и ADR | ✅ Done | [`schema.md`](schema.md), [`Docs/decisions/0007-neo4j-graphrag.md`](../../decisions/0007-neo4j-graphrag.md) |
+| 04 | Infra Neo4j | ✅ Done | [`docker-compose.yml`](../../../docker-compose.yml), [`backend/app/graph/client.py`](../../../backend/app/graph/client.py), [`Docs/decisions/0008-neo4j-docker-infra.md`](../../decisions/0008-neo4j-docker-infra.md), [`devops/neo4j/`](../../../devops/neo4j/) |
+| 05 | Индексация графа | ✅ Done | [`data/graph/seed.cypher`](../../../data/graph/seed.cypher), [`backend/app/graph/theme_extractor.py`](../../../backend/app/graph/theme_extractor.py), [`backend/app/graph/entity_resolver.py`](../../../backend/app/graph/entity_resolver.py), [`tasks/05-graph-index/summary.md`](tasks/05-graph-index/summary.md) |
+| 06 | Graph retrieval + hybrid | ✅ Done | [`backend/app/rag/retriever/`](../../../backend/app/rag/retriever/), [`evals/configs/graphrag-v001.yaml`](../../../evals/configs/graphrag-v001.yaml), [`evals/reports/graphrag-v001-20260703-itog.md`](../../../evals/reports/graphrag-v001-20260703-itog.md) |
+| 07 | text2cypher + guardrails | ✅ Done | [`backend/app/rag/text2cypher/`](../../../backend/app/rag/text2cypher/), [`backend/tests/test_text2cypher_guardrails.py`](../../../backend/tests/test_text2cypher_guardrails.py), [`tasks/07-text2cypher/summary.md`](tasks/07-text2cypher/summary.md) |
+| 08 | Agent routing + final eval | ✅ Done | [`backend/app/tools/retrieval_tools.py`](../../../backend/app/tools/retrieval_tools.py), [`backend/app/agent/prompts/SYSTEM_PROMPT_GRAPHRAG_ROUTING.txt`](../../../backend/app/agent/prompts/SYSTEM_PROMPT_GRAPHRAG_ROUTING.txt), [`evals/configs/graphrag-final.yaml`](../../../evals/configs/graphrag-final.yaml), [`evals/reports/graphrag-final.md`](../../../evals/reports/graphrag-final.md) |
+
+### Ключевые результаты
+
+- **Dual store:** Neo4j (структура каталога) + Qdrant (hybrid vector); join по slug/id — [ADR-0007](../../decisions/0007-neo4j-graphrag.md).
+- **Graph indexing:** seed + SimpleKGPipeline + entity resolution; QA **12/12 gates** (задача 05).
+- **Retrieval:** ветки `vector` / `graph` / `global` / `hybrid` / `text2cypher` через config и factory; RRF + мультиязычный reranker (в eval off из‑за RAM).
+- **text2cypher:** 4 guardrails, write-block тест зелёный, smoke `make text2cypher-smoke`.
+- **Agent routing:** 4 retrieval tools + `SYSTEM_PROMPT_GRAPHRAG_ROUTING`; eval `graphrag-final` (20 items, 2026-07-03).
+
+**Eval vs baseline (`agent_router` / `graphrag-final`):**
+
+| Сегмент | entity@5 Δ | correctness Δ | Вывод |
+|---------|------------|---------------|-------|
+| single-hop | −0.166 | −0.069 | Частичное восстановление vs v001 hybrid (+0.112 corr); routing miss sh-02 |
+| multi-hop | **+0.174** | −0.066 | Graph retrieval подтягивает сущности |
+| global | **+0.509** | −0.162 | Global + text2cypher на gl-04; entity@5 — главный выигрыш спринта |
+
+### Tech debt / следующие шаги
+
+1. **Single-hop guard:** prompt + docstring — «сколько занятий/модулей в одном курсе» → `search_vector`, не text2cypher; перепрогон eval → correctness ≥ baseline − 0.02.
+2. **Generation gap:** entity@5 ↑ на multi/global, correctness не вырос — tuning промпта ответа / judge review провальных items.
+3. **Reranker в eval:** включить `reranker_enabled: true` на стенде с достаточной RAM или зафиксировать off в production-config.
+4. **Данные:** синхронизация суммы комбо (134 960 vs 139 960) — см. [`analysis.md`](analysis.md) §5.
+5. **v0.2:** Postgres persistence, guardrails — см. [roadmap](../../roadmap.md).

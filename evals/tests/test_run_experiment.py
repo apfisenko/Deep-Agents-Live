@@ -104,6 +104,22 @@ def test_extract_contexts_from_search_tool() -> None:
     assert contexts == ["chunk one", "chunk two"]
 
 
+def test_extract_contexts_from_routing_tools() -> None:
+    payload = json.dumps([{"text": "graph chunk"}], ensure_ascii=False)
+    assert extract_contexts_from_tool_result("search_graph", payload) == ["graph chunk"]
+    assert extract_contexts_from_tool_result("search_vector", payload) == ["graph chunk"]
+
+
+def test_extract_contexts_from_text2cypher_rows() -> None:
+    payload = json.dumps(
+        {"cypher": "MATCH (n) RETURN n LIMIT 1", "rows": [{"price": 59990}]},
+        ensure_ascii=False,
+    )
+    contexts = extract_contexts_from_tool_result("search_text2cypher", payload)
+    assert len(contexts) == 1
+    assert "59990" in contexts[0]
+
+
 def test_extract_contexts_ignores_other_tools() -> None:
     assert extract_contexts_from_tool_result("list_b2c_products", '[{"name": "x"}]') == []
 

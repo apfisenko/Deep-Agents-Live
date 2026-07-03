@@ -1,0 +1,58 @@
+{
+  "nodes": {
+    "Combo": {
+      "key": "slug",
+      "props": ["name", "priceRub", "sumSeparateRub", "discountPct", "sourcePaths"]
+    },
+    "Course": {
+      "key": "slug",
+      "props": ["stepOrder", "priceRub", "lessonCount", "duration", "legacy", "sourcePaths"]
+    },
+    "Module": {
+      "key": ["courseSlug", "moduleNumber"],
+      "props": ["title", "theoryPracticeRatio"]
+    },
+    "Theme": {
+      "key": "canonicalName",
+      "props": ["name", "aliases", "context"]
+    },
+    "Audience": {
+      "key": "slug",
+      "props": ["name", "description"]
+    },
+    "Format": {
+      "key": "slug",
+      "props": ["name"]
+    },
+    "Level": {
+      "key": "slug",
+      "props": ["name"]
+    }
+  },
+  "relationships": [
+    {"type": "INCLUDES", "from": "Combo", "to": "Course", "props": ["order"]},
+    {"type": "RECOMMENDED_BEFORE", "from": "Course", "to": "Course", "props": ["order"]},
+    {"type": "HAS_MODULE", "from": "Course", "to": "Module"},
+    {"type": "COVERS", "from": ["Course", "Module"], "to": "Theme"},
+    {"type": "REQUIRES", "from": "Theme", "to": "Theme", "props": ["strength"]},
+    {"type": "TARGETS", "from": "Course", "to": "Audience"},
+    {"type": "HAS_FORMAT", "from": "Course", "to": "Format"},
+    {"type": "HAS_LEVEL", "from": "Course", "to": "Level"}
+  ],
+  "forbidden_labels": ["Entity", "RELATED_TO", "HAS"],
+  "canonical": {
+    "comboSlug": "ai-agents-combo",
+    "courses": [
+      "ai-coding-intensive-cursor",
+      "ai-driven-fullstack",
+      "ai-coding-agents-base",
+      "deep-agents-advanced"
+    ]
+  },
+  "rules": [
+    "READ-ONLY: only MATCH/RETURN aggregates (count, sum, collect)",
+    "RECOMMENDED_BEFORE direction: early course -> late course",
+    "Prices stored as integer priceRub (RUB)",
+    "Do not query descriptions or FAQ — structural props only"
+  ]
+}

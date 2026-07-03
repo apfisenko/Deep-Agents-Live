@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from app.config import Settings, get_settings
 from app.rag.retriever.context import get_retriever_runtime_config
 from app.rag.retriever.global_backend import GlobalBackend
@@ -11,7 +13,7 @@ from app.rag.retriever.protocol import RetrieverBackend
 from app.rag.retriever.text2cypher_backend import Text2CypherBackend
 from app.rag.retriever.vector_backend import VectorBackend
 
-_BACKENDS: dict[str, type] = {
+_BACKENDS: dict[str, Callable[[Settings], RetrieverBackend]] = {
     "vector": VectorBackend,
     "graph": GraphBackend,
     "global": GlobalBackend,

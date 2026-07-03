@@ -40,6 +40,7 @@ def test_factory_returns_expected_backend(monkeypatch: pytest.MonkeyPatch) -> No
     assert isinstance(backend, HybridBackend)
 
     monkeypatch.setenv("RETRIEVER_BACKEND", "text2cypher")
+    monkeypatch.setenv("NEO4J_READONLY_PASSWORD", "text2cypher-dev-password")
     clear_settings_cache()
     backend = get_retriever_backend(get_settings())
     assert isinstance(backend, Text2CypherBackend)

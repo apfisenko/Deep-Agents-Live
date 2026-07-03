@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import types
 from typing import Any
 
 from neo4j_graphrag.experimental.components.kg_writer import Neo4jWriter
@@ -118,10 +119,11 @@ def build_catalog_kg_writer(driver: Any, *, neo4j_database: str) -> Neo4jWriter:
     original_upsert = writer._upsert_nodes  # noqa: SLF001
 
     def upsert_nodes(
+        self: Neo4jWriter,
         nodes: list[Neo4jNode],
         lexical_graph_config: LexicalGraphConfig,
     ) -> None:
-        _catalog_upsert_nodes(writer, original_upsert, nodes, lexical_graph_config)
+        _catalog_upsert_nodes(self, original_upsert, nodes, lexical_graph_config)
 
-    writer._upsert_nodes = upsert_nodes  # noqa: SLF001
+    object.__setattr__(writer, "_upsert_nodes", types.MethodType(upsert_nodes, writer))
     return writer

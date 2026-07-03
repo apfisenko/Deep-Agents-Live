@@ -17,6 +17,9 @@ logger = logging.getLogger(__name__)
 _driver: Driver | None = None
 _driver_key: tuple[str, str, str] | None = None
 
+_readonly_driver: Driver | None = None
+_readonly_driver_key: tuple[str, str, str] | None = None
+
 _DEFAULT_BOLT_PORT = 7687
 _CONNECT_TIMEOUT_SEC = 10.0
 _PROBE_TIMEOUT_SEC = 3.0
@@ -100,13 +103,43 @@ def get_neo4j_driver(
     return _driver
 
 
+def get_text2cypher_driver(settings: object | None = None) -> Driver:
+    """Return cached Neo4j driver for text2cypher (Guardrail #1: readonly credentials)."""
+    global _readonly_driver, _readonly_driver_key
+
+    if settings is not None:
+        uri = getattr(settings, "neo4j_uri", "")
+        user = getattr(settings, "neo4j_readonly_user", "text2cypher")
+        password = getattr(settings, "neo4j_readonly_password", "")
+    else:
+        uri = ""
+        user = "text2cypher"
+        password = ""
+
+    if not uri or not password:
+        msg = "Neo4j readonly connection settings are required for text2cypher"
+        raise ValueError(msg)
+
+    key = (uri, user, password)
+    if _readonly_driver is None or _readonly_driver_key != key:
+        if _readonly_driver is not None:
+            _readonly_driver.close()
+        _readonly_driver = create_driver(uri, user, password)
+        _readonly_driver_key = key
+    return _readonly_driver
+
+
 def reset_neo4j_driver() -> None:
-    """Close cached driver (tests)."""
-    global _driver, _driver_key
+    """Close cached drivers (tests)."""
+    global _driver, _driver_key, _readonly_driver, _readonly_driver_key
     if _driver is not None:
         _driver.close()
+    if _readonly_driver is not None:
+        _readonly_driver.close()
     _driver = None
     _driver_key = None
+    _readonly_driver = None
+    _readonly_driver_key = None
 
 
 def verify_connectivity(uri: str, user: str, password: str) -> None:

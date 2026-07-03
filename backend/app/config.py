@@ -82,7 +82,7 @@ class Settings(BaseSettings):
     rrf_weight_global: float = Field(default=1.2, validation_alias="RRF_WEIGHT_GLOBAL")
     reranker_enabled: bool = Field(default=True, validation_alias="RERANKER_ENABLED")
     reranker_model: str = Field(
-        default="BAAI/bge-reranker-v2-m3",
+        default="jinaai/jina-reranker-v2-base-multilingual",
         validation_alias="RERANKER_MODEL",
     )
     reranker_candidate_k: int = Field(default=15, validation_alias="RERANKER_CANDIDATE_K")
@@ -92,6 +92,18 @@ class Settings(BaseSettings):
         validation_alias="GRAPH_RETRIEVAL_COMBO_SLUG",
     )
     graph_retrieval_anchor_k: int = Field(default=8, validation_alias="GRAPH_RETRIEVAL_ANCHOR_K")
+    text2cypher_model: str = Field(
+        default="openai/gpt-4o-mini",
+        validation_alias="TEXT2CYPHER_MODEL",
+    )
+    text2cypher_query_timeout_ms: int = Field(
+        default=5000,
+        validation_alias="TEXT2CYPHER_QUERY_TIMEOUT_MS",
+    )
+    text2cypher_default_limit: int = Field(
+        default=50,
+        validation_alias="TEXT2CYPHER_DEFAULT_LIMIT",
+    )
     llm_timeout_sec: int = Field(default=60, validation_alias="LLM_TIMEOUT_SEC")
     embedding_timeout_sec: int = Field(default=30, validation_alias="EMBEDDING_TIMEOUT_SEC")
     llm_max_tokens: int = Field(default=2048, validation_alias="LLM_MAX_TOKENS")

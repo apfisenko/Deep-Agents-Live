@@ -3,7 +3,7 @@
 	up down ps status logs compose docker migrate migrate-new ci compose-dev \
 	check-health check-reindex check-chat check-chat-stream check-langfuse check-traces check-telegram check-api \
 	check-rag-search-e2e check-rag-audience-filter \
-	graph-up graph-down graph-status graph-shell graph-init-readonly graph-index graph-qa \
+	graph-up graph-down graph-status graph-shell graph-init-readonly graph-index graph-qa text2cypher-smoke \
 	chat-telegram chat-stream langfuse-upload-dataset \
 	eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare
 
@@ -35,7 +35,7 @@ help:
 	@echo "  format         - ruff format backend"
 	@echo "  typecheck      - mypy + tsc"
 	@echo "  test           - backend + frontend tests"
-	@echo "  test-backend   - pytest backend"
+	@echo "  test-backend   - pytest backend (optional ARGS, e.g. ARGS=\"tests/test_foo.py -v\")"
 	@echo "  test-frontend  - vitest frontend"
 	@echo "  test-bot       - pytest bot"
 	@echo "  index          - index data/ into vector DB (Qdrant); ARGS=\"--force\" to reindex all"
@@ -48,6 +48,7 @@ help:
 	@echo "  graph-init-readonly - create text2cypher read-only user (devops/README.md)"
 	@echo "  graph-index    - seed Neo4j catalog from data/graph/seed.cypher; ARGS=\"--full\" for full pipeline"
 	@echo "  graph-qa       - gates + graph-qa.cypher report; ARGS=\"--gates-only\" to skip report"
+	@echo "  text2cypher-smoke - NL text2cypher smoke (Neo4j + readonly user required)"
 	@echo "  ps / status    - docker compose ps (WSL)"
 	@echo "  logs           - docker compose logs (SVC=, TAIL=50)"
 	@echo "  compose        - docker compose <ARGS>  e.g. make compose ARGS=\"logs -f langfuse-web\""
@@ -117,7 +118,7 @@ typecheck:
 test: test-backend test-frontend test-bot
 
 test-backend:
-	cd $(BACKEND_DIR) && uv run pytest
+	cd $(BACKEND_DIR) && uv run pytest $(ARGS)
 
 test-frontend:
 	cd $(FRONTEND_DIR) && pnpm test
@@ -155,6 +156,9 @@ graph-index:
 
 graph-qa:
 	cd $(BACKEND_DIR) && uv run python -m app.graph.qa_cli $(ARGS)
+
+text2cypher-smoke:
+	cd $(BACKEND_DIR) && uv run python scripts/text2cypher_smoke.py
 
 ps status:
 	$(call DOCKER_WSL,docker compose ps)

@@ -48,7 +48,7 @@ def extract_pdf_text(file_path: Path, settings: Settings) -> str:
 
 
 def _extract_page_text(page: fitz.Page, settings: Settings) -> str:
-    text = page.get_text().strip()
+    text = str(page.get_text()).strip()
     if len(text) >= settings.pdf_ocr_min_chars:
         return text
     if not settings.pdf_ocr_enabled:
@@ -73,7 +73,7 @@ def _ocr_page_tesseract(page: fitz.Page, settings: Settings) -> str:
             dpi=settings.pdf_ocr_dpi,
             full=True,
         )
-        return page.get_text(textpage=textpage).strip()
+        return str(page.get_text(textpage=textpage)).strip()
     except Exception as exc:
         logger.debug(
             "Tesseract OCR unavailable for page",

@@ -197,6 +197,8 @@ class QdrantVectorIndexStore:
             return False
         if isinstance(vectors, dict):
             return len(vectors) == 1 and next(iter(vectors.values())).size == vector_size
+        if vectors is None:
+            return False
         return vectors.size == vector_size
 
     def upsert_document(self, doc_id: str, chunks: list[StoredChunk]) -> None:
@@ -271,17 +273,19 @@ class QdrantVectorIndexStore:
     ) -> list[SearchHit]:
         """Semantic or hybrid search with optional audience filter."""
         ensure_langfuse_client(self._settings)
-        hybrid = self._settings.hybrid_search_enabled and query_sparse is not None
-        span_kwargs = {
-            "collection": self._collection,
-            "top_k": top_k,
-            "segment_filter": segment_filter,
-            "hybrid": hybrid,
-            "embedding_dim": len(query_embedding),
-        }
+        sparse_query = query_sparse
+        hybrid = self._settings.hybrid_search_enabled and sparse_query is not None
 
         def finish(*, hits: list[SearchHit] | None = None, error: str | None = None) -> None:
-            _record_qdrant_search_span(**span_kwargs, hits=hits, error=error)
+            _record_qdrant_search_span(
+                collection=self._collection,
+                top_k=top_k,
+                segment_filter=segment_filter,
+                hybrid=hybrid,
+                embedding_dim=len(query_embedding),
+                hits=hits,
+                error=error,
+            )
 
         try:
             client = self._connect(fail_fast=True)
@@ -300,7 +304,7 @@ class QdrantVectorIndexStore:
         query_filter = _audience_filter(segment_filter)
 
         try:
-            if hybrid:
+            if self._settings.hybrid_search_enabled and sparse_query is not None:
                 response = client.query_points(
                     collection_name=self._collection,
                     prefetch=[
@@ -311,7 +315,7 @@ class QdrantVectorIndexStore:
                             limit=self._settings.hybrid_prefetch_limit,
                         ),
                         Prefetch(
-                            query=to_qdrant_sparse(query_sparse),
+                            query=to_qdrant_sparse(sparse_query),
                             using=SPARSE_VECTOR_NAME,
                             filter=query_filter,
                             limit=self._settings.hybrid_prefetch_limit,

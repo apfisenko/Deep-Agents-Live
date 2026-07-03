@@ -4,7 +4,18 @@ from unittest.mock import patch
 
 import pytest
 from app.exceptions import ProviderUnavailableError
-from app.integrations.qdrant_url import ensure_qdrant_url, resolve_qdrant_url
+from app.integrations.qdrant_url import (
+    ensure_qdrant_url,
+    reset_qdrant_url_cache,
+    resolve_qdrant_url,
+)
+
+
+@pytest.fixture(autouse=True)
+def _clear_qdrant_url_cache() -> None:
+    reset_qdrant_url_cache()
+    yield
+    reset_qdrant_url_cache()
 
 
 def test_resolve_qdrant_url_uses_wsl_ip_when_localhost_unhealthy() -> None:

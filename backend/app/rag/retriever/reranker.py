@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from concurrent.futures import ThreadPoolExecutor, wait
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from app.rag.retriever.protocol import Chunk
 
@@ -47,7 +47,7 @@ def _load_cross_encoder(model_name: str) -> CrossEncoder:
         raise
 
     _loaded_models[model_name] = model
-    return model
+    return cast("CrossEncoder", model)
 
 
 def _mark_reranker_failed(model_name: str, exc: BaseException) -> None:
@@ -80,7 +80,7 @@ def rerank_chunks(
 
     def predict() -> list[float]:
         model = _load_cross_encoder(model_name)
-        scores = model.predict(pairs, show_progress_bar=False)
+        scores = model.predict(pairs, show_progress_bar=False)  # type: ignore[arg-type]
         return [float(score) for score in scores]
 
     try:

@@ -79,7 +79,7 @@ ignore = [
 "app/rag/sparse_embed.py" = ["PLC0415"]
 "app/rag/retriever/*.py" = ["TC001", "BLE001"]
 "app/rag/retriever/reranker.py" = ["TC001", "BLE001", "PLC0415"]
-"scripts/**/*.py" = ["T201", "PLR2004", "INP001", "TRY003", "EM102", "B007", "S607", "E402"]
+"scripts/**/*.py" = ["T201", "PLR2004", "INP001", "TRY003", "EM102", "B007", "S607", "E402", "BLE001"]
 "tests/**/*.py" = ["S101", "PLR2004", "PLC0415", "ARG001", "ANN001", "ANN202"]
 "app/api/routers/chat.py" = ["ANN202", "ANN001"]
 "app/integrations/langfuse.py" = ["PLC0415", "S310"]
@@ -89,6 +89,9 @@ ignore = [
 "app/graph/index_cli.py" = ["TRY400"]
 "app/graph/qa_cli.py" = ["T201", "PLR2004", "TRY400", "TRY300"]
 "app/graph/theme_extractor.py" = ["TC001"]
+"app/rag/text2cypher/*.py" = ["TC001", "BLE001"]
+"app/rag/retriever/text2cypher_backend.py" = ["TC001", "BLE001"]
+"app/tools/text2cypher_tool.py" = ["TC001"]
 
 [tool.mypy]
 python_version = "3.11"

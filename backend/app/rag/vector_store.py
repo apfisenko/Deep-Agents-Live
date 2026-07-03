@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import math
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from app.config import Settings, get_settings
 from app.rag.qdrant_store import QdrantVectorIndexStore
 from app.rag.search_hit import SearchHit
 from app.rag.store import StoredChunk, get_store
+
+if TYPE_CHECKING:
+    from app.rag.sparse_embed import EncodedSparseVector
 
 
 class VectorIndexStore(Protocol):
@@ -24,7 +27,7 @@ class VectorIndexStore(Protocol):
         *,
         top_k: int = 5,
         segment_filter: str | None = None,
-        query_sparse: object | None = None,
+        query_sparse: EncodedSparseVector | None = None,
     ) -> list[SearchHit]: ...
 
 
@@ -53,7 +56,7 @@ class InMemoryVectorIndexStore:
         *,
         top_k: int = 5,
         segment_filter: str | None = None,
-        query_sparse: object | None = None,
+        query_sparse: EncodedSparseVector | None = None,
     ) -> list[SearchHit]:
         _ = query_sparse
         store = get_store()

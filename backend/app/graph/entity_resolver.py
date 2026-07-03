@@ -9,6 +9,7 @@ from typing import Any
 import yaml
 from neo4j import Driver, RoutingControl
 
+from app.graph.theme_extractor import prune_orphan_themes
 from app.paths import GRAPH_THEME_ALIASES_YAML
 
 logger = logging.getLogger(__name__)
@@ -111,15 +112,18 @@ def sanitize_theme_nodes(driver: Driver, *, database: str) -> None:
             DELETE r
             WITH t, canon
             OPTIONAL MATCH (t)-[r2:COVERS]->(tgt)
-            FOREACH (_ IN CASE WHEN r2 IS NULL THEN [] ELSE [1] END | MERGE (canon)-[:COVERS]->(tgt))
+            FOREACH (_ IN CASE WHEN r2 IS NULL THEN [] ELSE [1] END |
+              MERGE (canon)-[:COVERS]->(tgt))
             DELETE r2
             WITH t, canon
             OPTIONAL MATCH (t)-[r3:REQUIRES]->(pre)
-            FOREACH (_ IN CASE WHEN r3 IS NULL THEN [] ELSE [1] END | MERGE (canon)-[:REQUIRES]->(pre))
+            FOREACH (_ IN CASE WHEN r3 IS NULL THEN [] ELSE [1] END |
+              MERGE (canon)-[:REQUIRES]->(pre))
             DELETE r3
             WITH t, canon
             OPTIONAL MATCH (post)-[r4:REQUIRES]->(t)
-            FOREACH (_ IN CASE WHEN r4 IS NULL THEN [] ELSE [1] END | MERGE (post)-[:REQUIRES]->(canon))
+            FOREACH (_ IN CASE WHEN r4 IS NULL THEN [] ELSE [1] END |
+              MERGE (post)-[:REQUIRES]->(canon))
             DELETE r4
             DETACH DELETE t
             """,
@@ -195,7 +199,12 @@ def _link_orphan_themes_from_requires(driver: Driver, *, database: str) -> None:
     )
 
 
-def run_fuzzy_theme_resolution(driver: Driver, *, database: str, threshold: float = 0.88) -> None:
+def run_fuzzy_theme_resolution(
+    _driver: Driver,
+    *,
+    _database: str,
+    threshold: float = 0.88,
+) -> None:
     """Fuzzy merge for remaining Theme duplicates (rapidfuzz).
 
     Skipped for catalog graph: FuzzyMatchResolver targets pipeline ``__Entity__`` nodes,
@@ -209,13 +218,11 @@ def run_fuzzy_theme_resolution(driver: Driver, *, database: str, threshold: floa
 
 def run_entity_resolution(driver: Driver, *, database: str) -> None:
     """Full entity resolution: sanitize + Course guard + alias merge + fuzzy pass."""
-    from app.graph.theme_extractor import prune_orphan_themes
-
     sanitize_theme_nodes(driver, database=database)
     guard_course_duplicates(driver, database=database)
     aliases = load_theme_aliases()
     merged = merge_theme_aliases(driver, database=database, aliases=aliases)
     logger.info("Merged %d theme alias duplicate(s)", merged)
-    run_fuzzy_theme_resolution(driver, database=database)
+    run_fuzzy_theme_resolution(driver, _database=database)
     _link_orphan_themes_from_requires(driver, database=database)
     prune_orphan_themes(driver, database=database)

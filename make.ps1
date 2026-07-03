@@ -197,7 +197,7 @@ function Show-Help {
     Write-Host "  format         - ruff format backend"
     Write-Host "  typecheck      - mypy + tsc"
     Write-Host "  test           - backend + frontend + bot tests"
-    Write-Host "  test-backend   - pytest backend"
+    Write-Host "  test-backend   - pytest backend (optional extra args after target)"
     Write-Host "  test-frontend  - vitest frontend"
     Write-Host "  test-bot       - pytest bot"
     Write-Host "  index          - index data/ into vector DB (Qdrant); --force to reindex all"
@@ -210,6 +210,7 @@ function Show-Help {
     Write-Host "  graph-init-readonly - create text2cypher read-only user"
     Write-Host "  graph-index    - seed Neo4j from data/graph/seed.cypher; --full for full pipeline"
     Write-Host "  graph-qa       - gates + graph-qa.cypher report; --gates-only to skip report"
+    Write-Host "  text2cypher-smoke - NL text2cypher smoke (Neo4j + readonly user required)"
     Write-Host "  ps / status    - docker compose ps (WSL)"
     Write-Host "  logs           - docker compose logs [--tail N] [service]"
     Write-Host "  compose        - docker compose <args>"
@@ -533,7 +534,12 @@ switch ($Target) {
     "test-backend" {
         Push-Location $BackendDir
         try {
-            uv run pytest
+            if ($DockerArgs.Count -gt 0) {
+                uv run pytest @DockerArgs
+            } else {
+                uv run pytest
+            }
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         } finally {
             Pop-Location
         }
@@ -592,6 +598,16 @@ switch ($Target) {
     }
     "graph-qa" {
         Invoke-GraphCli -Module "app.graph.qa_cli" -ExtraArgs $DockerArgs
+    }
+    "text2cypher-smoke" {
+        Push-Location $BackendDir
+        try {
+            $env:NEO4J_URI = Resolve-Neo4jUriForWindows
+            uv run python scripts/text2cypher_smoke.py @DockerArgs
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        } finally {
+            Pop-Location
+        }
     }
     "ps" {
         Invoke-WslDocker "docker compose ps"

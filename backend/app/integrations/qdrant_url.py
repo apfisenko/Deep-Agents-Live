@@ -20,6 +20,13 @@ _resolved_urls: dict[tuple[str, bool], str] = {}
 _wsl_fallback_logged = False
 
 
+def reset_qdrant_url_cache() -> None:
+    """Clear resolved URL cache (tests)."""
+    global _wsl_fallback_logged
+    _resolved_urls.clear()
+    _wsl_fallback_logged = False
+
+
 def resolve_qdrant_url(url: str, *, fail_fast: bool = False) -> str:
     """Pick a reachable Qdrant base URL; on Windows prefer WSL IP over dead localhost."""
     cache_key = (url.rstrip("/"), fail_fast)

@@ -1,7 +1,7 @@
 # Roadmap — Deep-Agents-Live
 
 > **Vision:** [concept/vision.md](concept/vision.md)
-> **Последнее обновление:** 2026-06-28 (sprint-06 graphrag 🚧 In Progress)
+> **Последнее обновление:** 2026-07-03 (sprint-06 graphrag ✅ Done)
 
 ---
 
@@ -47,7 +47,7 @@
 | 03 | web-widget | Next.js виджет по design-reference, SSE-клиент | ✅ | [sprint-03-web-widget](sprints/sprint-03-web-widget/README.md) |
 | 04 | telegram-e2e | Bot в `frontend/bot`, Langfuse wiring, e2e воронка, CI smoke | ✅ | [sprint-04-telegram-e2e](sprints/sprint-04-telegram-e2e/README.md) |
 | 05 | vector-db | Перевести RAG-слой с in-memory FAISS на выбранную векторную БД | ✅ | [sprint-05-vector-db](sprints/sprint-05-vector-db/README.md) |
-| 06 | graphrag | Граф знаний Neo4j + graph/global retrieval, hybrid с reranker, text2cypher | 🚧 | [sprint-06-graphrag](sprints/sprint-06-graphrag/README.md) · [schema](sprints/sprint-06-graphrag/schema.md) · [ADR-0007](decisions/0007-neo4j-graphrag.md) |
+| 06 | graphrag | Граф знаний Neo4j + graph/global retrieval, hybrid с reranker, text2cypher | ✅ | [sprint-06-graphrag](sprints/sprint-06-graphrag/README.md) · [schema](sprints/sprint-06-graphrag/schema.md) · [ADR-0007](decisions/0007-neo4j-graphrag.md) · [eval final](../evals/reports/graphrag-final.md) |
 
 ---
 
@@ -115,4 +115,5 @@
 | 2026-06-26 | Закрыт sprint-05 vector-db: Qdrant ADR, infra, offline index, retriever, baseline eval |
 | 2026-06-28 | Открыт sprint-06 graphrag: Neo4j, graph retrieval, hybrid + reranker, text2cypher |
 | 2026-06-28 | Sprint-06 задача 03: [`schema.md`](sprints/sprint-06-graphrag/schema.md), [ADR-0007](decisions/0007-neo4j-graphrag.md) |
+| 2026-07-03 | Закрыт sprint-06 graphrag: Neo4j KG, graph/global/hybrid retrieval, text2cypher guardrails, agent routing; eval [`graphrag-final`](../evals/reports/graphrag-final.md) (entity@5 multi +0.17, global +0.51 vs baseline) |
 
