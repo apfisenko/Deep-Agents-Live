@@ -1,0 +1,21 @@
+Local multimodal eval run: multimodal-d-jina-multivector--multimodal-s4-multi--692bad51--20260705T214518Z
+6 items
+collection=multimodal_d_jina
+indexer=D_jina_multivector
+embedding_model=jina-embeddings-v4
+corpus_dir=data/multimodal-rag
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 0.786
+  • avg_gold_page_set_recall_at_5: 0.667
+  • avg_mrr: 0.833
+  • avg_ndcg_at_5: 0.820
+
+Items:
+s4-01	0.714	1.000	1.000	0.000	nan	[28, 39, 32, 34, 29]	
+s4-02	1.000	1.000	1.000	1.000	nan	[45, 46, 20, 61, 18]	
+s4-03	1.000	1.000	1.000	1.000	nan	[43, 26, 16, 40, 4]	
+s4-04	0.000	0.000	0.000	0.000	nan	[18, 45, 46, 30, 35]	
+s4-05	1.000	0.920	1.000	1.000	nan	[15, 3, 1, 48, 33]	
+s4-06	1.000	1.000	1.000	1.000	nan	[3, 41, 26, 50, 43]	

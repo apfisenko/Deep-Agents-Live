@@ -1,0 +1,24 @@
+Local multimodal eval run: multimodal-d-jina-multivector--multimodal-s3-layout--692bad51--20260705T214511Z
+10 items
+collection=multimodal_d_jina
+indexer=D_jina_multivector
+embedding_model=jina-embeddings-v4
+corpus_dir=data/multimodal-rag
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 1.000
+  • avg_mrr: 0.900
+  • avg_ndcg_at_5: 0.926
+
+Items:
+s3-01	1.000	1.000	1.000	nan	nan	[15, 3, 1, 48, 26]	
+s3-02	1.000	1.000	1.000	nan	nan	[15, 3, 1, 50, 26]	
+s3-03	1.000	0.631	0.500	nan	nan	[28, 50, 41, 40, 38]	
+s3-04	1.000	0.631	0.500	nan	nan	[28, 50, 40, 63, 17]	
+s3-05	1.000	1.000	1.000	nan	nan	[40, 28, 39, 37, 34]	
+s3-06	1.000	1.000	1.000	nan	nan	[40, 37, 16, 31, 38]	
+s3-07	1.000	1.000	1.000	nan	nan	[38, 60, 41, 16, 26]	
+s3-08	1.000	1.000	1.000	nan	nan	[38, 50, 41, 21, 26]	
+s3-09	1.000	1.000	1.000	nan	nan	[4, 59, 1, 25, 62]	
+s3-10	1.000	1.000	1.000	nan	nan	[32, 28, 39, 40, 37]	

@@ -1,0 +1,9 @@
+{
+  "collection": "multimodal_d_jina",
+  "build_time_s": 28.43,
+  "index_size_mb": 13.406,
+  "est_cost_usd": 0.0,
+  "api_calls": 0,
+  "chunks": 66,
+  "is_multivector": true
+}

@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import logging
 import time
 import uuid
 from collections.abc import Callable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
+import httpx
 from qdrant_client import QdrantClient
+from qdrant_client.http.exceptions import ResponseHandlingException
 from qdrant_client.models import (
     Distance,
     HnswConfigDiff,
@@ -17,12 +21,56 @@ from qdrant_client.models import (
     VectorParams,
 )
 
-from app.config import Settings
+if TYPE_CHECKING:
+    from app.config import Settings
+
 from app.integrations.qdrant_url import resolve_qdrant_url
 from app.rag.embed.jina_multivector import DEFAULT_MULTIVECTOR_DIM
 from app.rag.indexers.cost import IndexCost
 from app.rag.indexers.slide_embed import format_context
 from app.rag.indexers.slide_image_embed import load_slide_pngs
+
+logger = logging.getLogger(__name__)
+
+QDRANT_UPSERT_TIMEOUT_SEC = 300
+QDRANT_UPSERT_MAX_ATTEMPTS = 5
+
+
+QDRANT_UPSERT_RETRY_ERRORS = (httpx.HTTPError, ResponseHandlingException, OSError)
+
+
+def _make_qdrant_client(settings: Settings) -> QdrantClient:
+    return QdrantClient(
+        url=resolve_qdrant_url(settings.qdrant_url),
+        api_key=settings.qdrant_api_key or None,
+        timeout=QDRANT_UPSERT_TIMEOUT_SEC,
+    )
+
+
+def _upsert_points_with_retry(
+    settings: Settings,
+    collection: str,
+    points: list[PointStruct],
+) -> QdrantClient:
+    last_error: Exception | None = None
+    client = _make_qdrant_client(settings)
+    for attempt in range(1, QDRANT_UPSERT_MAX_ATTEMPTS + 1):
+        try:
+            client.upsert(collection_name=collection, points=points)
+        except QDRANT_UPSERT_RETRY_ERRORS as exc:
+            last_error = exc
+            logger.warning(
+                "Qdrant upsert failed",
+                extra={"collection": collection, "points": len(points), "attempt": attempt},
+            )
+            if attempt >= QDRANT_UPSERT_MAX_ATTEMPTS:
+                break
+            time.sleep(min(2**attempt, 30))
+            client = _make_qdrant_client(settings)
+        else:
+            return client
+    msg = f"Qdrant upsert failed after {QDRANT_UPSERT_MAX_ATTEMPTS} attempts ({len(points)} points)"
+    raise RuntimeError(msg) from last_error
 
 
 def multivector_collection_size_mb(client: QdrantClient, collection: str) -> float:
@@ -60,6 +108,46 @@ def multivector_collection_size_mb(client: QdrantClient, collection: str) -> flo
     return round(bytes_estimate / (1024 * 1024), 3)
 
 
+def _ensure_multivector_collection(
+    client: QdrantClient,
+    collection: str,
+    *,
+    vector_dim: int,
+) -> None:
+    if client.collection_exists(collection):
+        return
+    client.create_collection(
+        collection_name=collection,
+        vectors_config=VectorParams(
+            size=vector_dim,
+            distance=Distance.COSINE,
+            multivector_config=MultiVectorConfig(
+                comparator=MultiVectorComparator.MAX_SIM,
+            ),
+            hnsw_config=HnswConfigDiff(m=0),
+        ),
+    )
+
+
+def _point_for_slide(
+    slide_no: int,
+    source_path: str,
+    vectors: list[list[float]],
+) -> PointStruct:
+    chunk_id = f"multimodal/slide-{slide_no:02d}"
+    return PointStruct(
+        id=str(uuid.uuid5(uuid.NAMESPACE_URL, chunk_id)),
+        vector=vectors,
+        payload={
+            "source_path": source_path,
+            "slide_number": slide_no,
+            "audience": "b2b",
+            "text": format_context(slide_no, "[jina-multivector]"),
+            "multivector_patches": len(vectors),
+        },
+    )
+
+
 def upsert_slide_multivectors_to_qdrant(
     *,
     slides: list[tuple[int, Path, str]],
@@ -71,53 +159,25 @@ def upsert_slide_multivectors_to_qdrant(
     est_cost_usd: float,
     vector_dim: int = DEFAULT_MULTIVECTOR_DIM,
 ) -> IndexCost:
-    client = QdrantClient(
-        url=resolve_qdrant_url(settings.qdrant_url),
-        api_key=settings.qdrant_api_key or None,
-    )
+    client = _make_qdrant_client(settings)
     started = time.perf_counter()
     if force and client.collection_exists(collection):
         client.delete_collection(collection)
 
-    multivectors: list[list[list[float]]] = []
-    for _slide_no, path, _source in slides:
-        multivectors.append(embed_fn(path))
+    _ensure_multivector_collection(client, collection, vector_dim=vector_dim)
 
-    if not multivectors or not multivectors[0]:
-        msg = "No multivector embeddings produced"
-        raise RuntimeError(msg)
+    total = len(slides)
+    upserted = 0
+    for index, (slide_no, path, source_path) in enumerate(slides, start=1):
+        vectors = embed_fn(path)
+        if not vectors:
+            msg = f"No multivector embeddings for slide-{slide_no:02d}"
+            raise RuntimeError(msg)
+        point = _point_for_slide(slide_no, source_path, vectors)
+        client = _upsert_points_with_retry(settings, collection, [point])
+        upserted += 1
+        print(f"  qdrant upsert {index}/{total}: slide-{slide_no:02d}", flush=True)  # noqa: T201
 
-    if not client.collection_exists(collection):
-        client.create_collection(
-            collection_name=collection,
-            vectors_config=VectorParams(
-                size=vector_dim,
-                distance=Distance.COSINE,
-                multivector_config=MultiVectorConfig(
-                    comparator=MultiVectorComparator.MAX_SIM,
-                ),
-                hnsw_config=HnswConfigDiff(m=0),
-            ),
-        )
-
-    points: list[PointStruct] = []
-    for (slide_no, _path, source_path), vectors in zip(slides, multivectors, strict=True):
-        chunk_id = f"multimodal/slide-{slide_no:02d}"
-        points.append(
-            PointStruct(
-                id=str(uuid.uuid5(uuid.NAMESPACE_URL, chunk_id)),
-                vector=vectors,
-                payload={
-                    "source_path": source_path,
-                    "slide_number": slide_no,
-                    "audience": "b2b",
-                    "text": format_context(slide_no, "[jina-multivector]"),
-                    "multivector_patches": len(vectors),
-                },
-            ),
-        )
-
-    client.upsert(collection_name=collection, points=points)
     elapsed = round(time.perf_counter() - started, 2)
     return IndexCost(
         collection=collection,
@@ -125,7 +185,7 @@ def upsert_slide_multivectors_to_qdrant(
         index_size_mb=multivector_collection_size_mb(client, collection),
         api_calls=api_calls,
         est_cost_usd=round(est_cost_usd, 6),
-        chunks=len(points),
+        chunks=upserted,
         is_multivector=True,
     )
 

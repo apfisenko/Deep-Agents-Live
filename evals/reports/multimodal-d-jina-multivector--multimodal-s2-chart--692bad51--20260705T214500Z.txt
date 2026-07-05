@@ -1,0 +1,25 @@
+Local multimodal eval run: multimodal-d-jina-multivector--multimodal-s2-chart--692bad51--20260705T214500Z
+11 items
+collection=multimodal_d_jina
+indexer=D_jina_multivector
+embedding_model=jina-embeddings-v4
+corpus_dir=data/multimodal-rag
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 1.000
+  • avg_mrr: 1.000
+  • avg_ndcg_at_5: 1.000
+
+Items:
+s2-01	1.000	1.000	1.000	nan	nan	[10, 11, 59, 63, 64]	
+s2-02	1.000	1.000	1.000	nan	nan	[10, 49, 11, 61, 43]	
+s2-03	1.000	1.000	1.000	nan	nan	[10, 11, 49, 9, 6]	
+s2-04	1.000	1.000	1.000	nan	nan	[11, 24, 12, 10, 16]	
+s2-05	1.000	1.000	1.000	nan	nan	[11, 62, 53, 54, 58]	
+s2-06	1.000	1.000	1.000	nan	nan	[11, 52, 22, 42, 57]	
+s2-07	1.000	1.000	1.000	nan	nan	[9, 59, 56, 23, 43]	
+s2-08	1.000	1.000	1.000	nan	nan	[9, 49, 42, 47, 24]	
+s2-09	1.000	1.000	1.000	nan	nan	[49, 11, 10, 32, 51]	
+s2-10	1.000	1.000	1.000	nan	nan	[8, 49, 4, 53, 54]	
+s2-11	1.000	1.000	1.000	nan	nan	[11, 49, 10, 18, 56]	

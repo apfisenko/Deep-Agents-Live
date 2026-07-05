@@ -1,0 +1,17 @@
+Local multimodal eval run: multimodal-d-jina-multivector--multimodal-s5-unanswerable--692bad51--20260705T214714Z
+6 items
+collection=multimodal_d_jina
+indexer=D_jina_multivector
+embedding_model=jina-embeddings-v4
+corpus_dir=data/multimodal-rag
+top_k=5
+
+Average Scores:
+
+Items:
+s5-01	nan	nan	nan	nan	nan	[1, 6, 49, 5, 2]	
+s5-02	nan	nan	nan	nan	nan	[51, 43, 63, 21, 59]	
+s5-03	nan	nan	nan	nan	nan	[58, 63, 60, 56, 6]	
+s5-04	nan	nan	nan	nan	nan	[1, 63, 34, 41, 31]	
+s5-05	nan	nan	nan	nan	nan	[18, 46, 60, 31, 33]	
+s5-06	nan	nan	nan	nan	nan	[2, 16, 53, 52, 27]	

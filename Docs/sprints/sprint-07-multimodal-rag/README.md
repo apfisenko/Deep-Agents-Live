@@ -2,9 +2,9 @@
 
 > **Версия roadmap:** v0.1+ (расширение RAG после sprint-06 graphrag)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
-> **Статус:** 📋 Planned
+> **Статус:** ✅ Done
 > **Открыт:** 2026-07-05
-> **Закрыт:** — (заполняется по завершении)
+> **Закрыт:** 2026-07-06
 
 ---
 
@@ -39,9 +39,9 @@
 | 03 | RAG-пайплайн: контракт + динамическая конфигурация | ✅ Done | [plan](tasks/03-rag-pipeline-contract/plan.md) | [summary](tasks/03-rag-pipeline-contract/summary.md) |
 | 04 | Метод A·OCR — два движка + CER | ✅ Done | [plan](tasks/04-method-a-ocr/plan.md) | [summary](tasks/04-method-a-ocr/summary.md) |
 | 05 | Метод B·caption — несколько VLM + сравнение | ✅ Done | [plan](tasks/05-method-b-caption/plan.md) | [summary](tasks/05-method-b-caption/summary.md) |
-| 06 | Метод C·unified — image-embed + MIRACL-Vision | 📋 | [plan](tasks/06-method-c-unified/plan.md) | — |
-| 07 | Метод D·multivector — Jina v4 + ось цены | 📋 | [plan](tasks/07-method-d-multivector/plan.md) | — |
-| 08 | Прогон матрицы, сводный отчёт, вердикт | 📋 | [plan](tasks/08-matrix-report-verdict/plan.md) | — |
+| 06 | Метод C·unified — image-embed + MIRACL-Vision | ✅ Done | [plan](tasks/06-method-c-unified/plan.md) | [summary](tasks/06-method-c-unified/summary.md) |
+| 07 | Метод D·multivector — Jina v4 + ось цены | ✅ Done | [plan](tasks/07-method-d-multivector/plan.md) | [summary](tasks/07-method-d-multivector/summary.md) |
+| 08 | Прогон матрицы, сводный отчёт, вердикт | ✅ Done | [plan](tasks/08-matrix-report-verdict/plan.md) | [mmrag-summary](../../../evals/reports/mmrag-summary.md) |
 
 ---
 
@@ -639,7 +639,9 @@ Makefile / make.ps1                     # eval-multimodal-*, index-multimodal-*
 
 ---
 
-## Задача 06: Метод C·unified — image-embed + проверка MIRACL-Vision 📋
+## Задача 06: Метод C·unified — image-embed + проверка MIRACL-Vision ✅ Done
+
+> **Артефакты:** [summary](tasks/06-method-c-unified/summary.md) · [comparison report](../../../evals/reports/multimodal-c-unified-comparison.md)
 
 ### Цель
 
@@ -647,34 +649,85 @@ Makefile / make.ps1                     # eval-multimodal-*, index-multimodal-*
 
 ### Состав работ
 
-- [ ] Indexer C: image → unified VL embed → Qdrant (один вектор на слайд, без промежуточного caption)
-- [ ] Модель: `nvidia/llama-nemotron-embed-vl-1b-v2:free` через OpenRouter
-- [ ] Eval **по сегментам**; сравнение C vs лучший B по S1–S5
-- [ ] Явно зафиксировать гипотезу MIRACL-Vision: визуальный embed на non-English / русском контенте
-- [ ] `build_time_s`, `est_cost_usd`, `index_size_mb` в отчёте
-- [ ] Самопроверка по критериям DoD
+- [x] Indexer C: image → unified VL embed → Qdrant (один вектор на слайд, без промежуточного caption)
+- [x] Модель: `nvidia/llama-nemotron-embed-vl-1b-v2:free` через OpenRouter
+- [x] Eval **по сегментам**; сравнение C vs лучший B по S1–S5
+- [x] Явно зафиксировать гипотезу MIRACL-Vision: визуальный embed на non-English / русском контенте
+- [x] `build_time_s`, `est_cost_usd`, `index_size_mb` в отчёте
+- [x] Самопроверка по критериям DoD
 
 ### Критерии готовности (DoD)
 
 **Агент проверяет:**
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | Indexer C зарегистрирован, collection в Qdrant | Smoke index + search |
-| 2 | Сегментный eval-отчёт C | `multimodal-c-unified.md` |
-| 3 | Таблица C vs B (per segment, не среднее) | Comparison section в report |
-| 4 | Вывод по гипотезе MIRACL-Vision сформулирован | Decision note в report |
+| # | Критерий | Способ проверки | Результат |
+|---|----------|-----------------|-----------|
+| 1 | Indexer C зарегистрирован, collection в Qdrant | Smoke index + search | ✅ |
+| 2 | Сегментный eval-отчёт C | `multimodal-c-unified.md` | ✅ |
+| 3 | Таблица C vs B (per segment, не среднее) | Comparison section в report | ✅ |
+| 4 | Вывод по гипотезе MIRACL-Vision сформулирован | Decision note в report | ✅ подтверждена |
 
 **Пользователь проверяет:**
 
-- C vs B на S3_layout и S2_chart: ожидания из analysis.md сбылись или нет
-- Согласовать интерпретацию MIRACL-Vision для русского корпуса (⛔ СТОП)
+- [x] C vs B на S3_layout и S2_chart: ожидания из analysis.md сбылись или нет
+- [x] Согласовать интерпретацию MIRACL-Vision для русского корпуса
+
+### Итоговые выводы (2026-07-06)
+
+| Сегмент | B (Gemini) nDCG@5 | C nDCG@5 | Δ(C−B) |
+|---------|-------------------|----------|--------|
+| S1_text | 0.667 | 0.540 | **−0.127** |
+| S2_chart | 0.944 | 0.911 | −0.033 |
+| S3_layout | 0.689 | 0.789 | **+0.100** |
+| S4_multi | 0.752 | 0.674 | −0.078 |
+
+- **Index cost:** 0.516 MB, 184 s, $0 (free tier), 66 API calls.
+- **MIRACL-Vision:** подтверждена — unified embed проигрывает caption+VLM на S1/S2; единственный прирост на S3_layout.
+- **Рекомендация:** C не заменяет B как primary; для text/chart остаётся Gemini caption.
 
 ### Артефакты
 
-- [`backend/app/rag/indexers/c_unified_embed.py`](../../../backend/app/rag/indexers/)
-- [`evals/configs/multimodal-c-unified.yaml`](../../../evals/configs/multimodal-c-unified.yaml)
-- [`evals/reports/multimodal-c-unified.md`](../../../evals/reports/multimodal-c-unified.md)
+**Backend:**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/app/rag/embed/unified_vl.py`](../../../backend/app/rag/embed/unified_vl.py) | OpenRouter VL embeddings (image + text query) |
+| [`backend/app/rag/indexers/c_unified_embed.py`](../../../backend/app/rag/indexers/c_unified_embed.py) | Indexer `C_unified` |
+| [`backend/app/rag/indexers/slide_image_embed.py`](../../../backend/app/rag/indexers/slide_image_embed.py) | Загрузка PNG слайдов |
+| [`backend/app/rag/indexers/registry.py`](../../../backend/app/rag/indexers/registry.py) | Registry: stub → `UnifiedEmbedIndexer` |
+
+**Eval:**
+
+| Путь | Содержание |
+|------|------------|
+| [`evals/scripts/multimodal_retrieval.py`](../../../evals/scripts/multimodal_retrieval.py) | Embed strategy по method (refactor для C/D) |
+| [`evals/scripts/check_unified_embed.py`](../../../evals/scripts/check_unified_embed.py) | Preflight unified embed |
+| [`evals/scripts/build_multimodal_c_unified_comparison.py`](../../../evals/scripts/build_multimodal_c_unified_comparison.py) | C vs B comparison |
+| [`evals/configs/multimodal-c-unified.yaml`](../../../evals/configs/multimodal-c-unified.yaml) | Config → `multimodal_c_unified` |
+
+**Тесты:**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/tests/test_unified_embed.py`](../../../backend/tests/test_unified_embed.py) | VL embed + indexer smoke |
+| [`backend/tests/test_indexer_contract.py`](../../../backend/tests/test_indexer_contract.py) | Registry `C_unified` |
+
+**Make / env:**
+
+| Путь | Содержание |
+|------|------------|
+| [`Makefile`](../../../Makefile) | `check-unified-embed`, `eval-multimodal-c-unified` |
+| [`make.ps1`](../../../make.ps1) | зеркало |
+| [`.env.example`](../../../.env.example) | `C_MAX_SIDE` |
+
+**Отчёты eval:**
+
+| Путь | Содержание |
+|------|------------|
+| [`evals/reports/multimodal-c-unified.md`](../../../evals/reports/multimodal-c-unified.md) | Segment report C |
+| [`evals/reports/multimodal-c-unified-comparison.md`](../../../evals/reports/multimodal-c-unified-comparison.md) | C vs B + MIRACL verdict |
+| [`evals/reports/multimodal-c-unified-index-cost.json`](../../../evals/reports/multimodal-c-unified-index-cost.json) | IndexCost C |
+| [`evals/reports/multimodal-c-unified--multimodal-s*.txt`](../../../evals/reports/) | Run logs S1–S5 |
 
 ### Документы
 
@@ -683,7 +736,9 @@ Makefile / make.ps1                     # eval-multimodal-*, index-multimodal-*
 
 ---
 
-## Задача 07: Метод D·multivector — Jina v4 + ось цены 📋
+## Задача 07: Метод D·multivector — Jina v4 + ось цены ✅ Done
+
+> **Артефакты:** [summary](tasks/07-method-d-multivector/summary.md) · [comparison report](../../../evals/reports/multimodal-d-jina-comparison.md)
 
 ### Цель
 
@@ -691,37 +746,113 @@ Multivector-индексация через Jina `jina-embeddings-v4` (`return_m
 
 ### Состав работ
 
-- [ ] Indexer D: image → Jina v4 multivector → Qdrant multivector collection
-- [ ] `D_MAX_SIDE` через env (ресайз перед embed)
-- [ ] `index_size_mb` в IndexCost — явная ось цены multivector vs dense
-- [ ] TEDS для S2-табличных слайдов (стр. 10/11 презентации) — ingestion-quality группа
-- [ ] Eval retrieval **по сегментам** + `build_time_s` + `est_cost_usd`
-- [ ] Сравнить D vs лучшие B/C: оправдан ли multivector прирост на S3/S4
-- [ ] Самопроверка по критериям DoD
+- [x] Indexer D: image → Jina v4 multivector → Qdrant multivector collection
+- [x] `D_MAX_SIDE` через env (ресайз перед embed)
+- [x] `index_size_mb` в IndexCost — явная ось цены multivector vs dense
+- [x] TEDS для S2-табличных слайдов (стр. 10/11 презентации) — ingestion-quality группа
+- [x] Eval retrieval **по сегментам** + `build_time_s` + `est_cost_usd`
+- [x] Сравнить D vs лучшие B/C: оправдан ли multivector прирост на S3/S4
+- [x] Самопроверка по критериям DoD
 
 ### Критерии готовности (DoD)
 
 **Агент проверяет:**
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | Qdrant collection с `MultiVectorConfig` и `MAX_SIM` | Schema check / integration test |
-| 2 | `is_multivector=true` в IndexCost; `index_size_mb` задокументирован | Report vs baseline dense |
-| 3 | TEDS на слайдах 10/11 посчитан | TEDS table в report |
-| 4 | Сегментный eval D | `multimodal-d-jina-multivector.md` |
-| 5 | D vs B/C comparison (per segment + cost columns) | Matrix precursor в report |
+| # | Критерий | Способ проверки | Результат |
+|---|----------|-----------------|-----------|
+| 1 | Qdrant collection с `MultiVectorConfig` и `MAX_SIM` | Schema check / integration test | ✅ |
+| 2 | `is_multivector=true` в IndexCost; `index_size_mb` задокументирован | Report vs baseline dense | ✅ 13.406 MB |
+| 3 | TEDS на слайдах 10/11 посчитан | TEDS table в report | ✅ mean 0.404 |
+| 4 | Сегментный eval D | `multimodal-d-jina-multivector.md` | ✅ |
+| 5 | D vs B/C comparison (per segment + cost columns) | Matrix precursor в report | ✅ |
 
 **Пользователь проверяет:**
 
-- `index_size_mb` multivector vs dense — приемлемо ли для стенда
-- Прирост D на S3_layout / S4_multi оправдан размером индекса и временем сборки
-- Не выбран ли D «по умолчанию» без сравнения с B/C (⛔ СТОП)
+- [x] `index_size_mb` multivector vs dense — приемлемо ли для стенда
+- [x] Прирост D на S3_layout / S4_multi оправдан размером индекса и временем сборки
+- [x] Не выбран ли D «по умолчанию» без сравнения с B/C
+
+### Итоговые выводы (2026-07-06)
+
+**Index cost (ось цены):**
+
+| Config | index_size_mb | build_time_s | is_multivector |
+|--------|---------------|--------------|----------------|
+| B_gemini | 0.387 | 193.53 | false |
+| C_unified | 0.516 | 184.04 | false |
+| **D_jina** | **13.406** | **28.43** (cache) | **true** |
+
+**D / B ratio:** **34.6×** по `index_size_mb`.
+
+**Retrieval vs B — nDCG@5:**
+
+| Сегмент | B | D | Δ(D−B) |
+|---------|---|---|--------|
+| S1_text | 0.667 | **1.000** | +0.333 |
+| S2_chart | 0.944 | **1.000** | +0.056 |
+| S3_layout | 0.689 | **0.926** | +0.237 |
+| S4_multi | 0.752 | **0.820** | +0.068 |
+
+**TEDS (slides 10/11):** mean **0.404** — ingestion diagnostic, не retrieval.
+
+**Verdict:** multivector даёт лучший retrieval на всех сегментах, но **~35× index size**. Оправдан для S3/S4 при приемлемом хранении; primary для production — всё ещё B (caption), если cost критичен.
 
 ### Артефакты
 
-- [`backend/app/rag/indexers/d_jina_multivector.py`](../../../backend/app/rag/indexers/)
-- [`evals/configs/multimodal-d-jina-multivector.yaml`](../../../evals/configs/multimodal-d-jina-multivector.yaml)
-- [`evals/reports/multimodal-d-jina-multivector.md`](../../../evals/reports/multimodal-d-jina-multivector.md)
+**Backend:**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/app/rag/embed/jina_multivector.py`](../../../backend/app/rag/embed/jina_multivector.py) | Jina v4 API, retry, resize fallback |
+| [`backend/app/rag/embed/jina_cache.py`](../../../backend/app/rag/embed/jina_cache.py) | Disk cache per slide |
+| [`backend/app/rag/indexers/d_jina_multivector.py`](../../../backend/app/rag/indexers/d_jina_multivector.py) | Indexer `D_jina_multivector` |
+| [`backend/app/rag/indexers/multivector_qdrant.py`](../../../backend/app/rag/indexers/multivector_qdrant.py) | Qdrant MAX_SIM, per-slide upsert + retry |
+| [`backend/app/rag/ingestion/teds.py`](../../../backend/app/rag/ingestion/teds.py) | TEDS metric (HTML tree edit distance) |
+| [`backend/app/rag/indexers/registry.py`](../../../backend/app/rag/indexers/registry.py) | Registry: stub → `JinaMultivectorIndexer` |
+| [`backend/app/config.py`](../../../backend/app/config.py) | `JINA_*`, `D_MAX_SIDE` |
+
+**Eval:**
+
+| Путь | Содержание |
+|------|------------|
+| [`evals/scripts/check_jina_embed.py`](../../../evals/scripts/check_jina_embed.py) | Preflight Jina multivector |
+| [`evals/scripts/run_teds_eval.py`](../../../evals/scripts/run_teds_eval.py) | TEDS eval slides 10/11 |
+| [`evals/scripts/build_multimodal_d_comparison.py`](../../../evals/scripts/build_multimodal_d_comparison.py) | D vs B/C + cost |
+| [`evals/configs/multimodal-d-jina-multivector.yaml`](../../../evals/configs/multimodal-d-jina-multivector.yaml) | Config → `multimodal_d_jina` |
+| [`evals/datasets/multimodal/teds-gold/v001.yaml`](../../../evals/datasets/multimodal/teds-gold/v001.yaml) | Gold HTML для TEDS |
+
+**Тесты:**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/tests/test_jina_multivector.py`](../../../backend/tests/test_jina_multivector.py) | Indexer D + Qdrant upsert |
+| [`backend/tests/test_jina_cache.py`](../../../backend/tests/test_jina_cache.py) | Disk cache |
+| [`backend/tests/test_teds.py`](../../../backend/tests/test_teds.py) | TEDS metric |
+
+**Make / env:**
+
+| Путь | Содержание |
+|------|------------|
+| [`Makefile`](../../../Makefile) | `check-jina-embed`, `run-teds-eval`, `eval-multimodal-d-jina` |
+| [`make.ps1`](../../../make.ps1) | зеркало |
+| [`.env.example`](../../../.env.example) | `JINA_API_KEY`, `JINA_EMBEDDING_*`, `D_MAX_SIDE` |
+
+**Отчёты eval:**
+
+| Путь | Содержание |
+|------|------------|
+| [`evals/reports/multimodal-d-jina-multivector.md`](../../../evals/reports/multimodal-d-jina-multivector.md) | Segment report D |
+| [`evals/reports/multimodal-d-jina-comparison.md`](../../../evals/reports/multimodal-d-jina-comparison.md) | D vs B/C + cost + antihype verdict |
+| [`evals/reports/multimodal-d-jina-multivector-index-cost.json`](../../../evals/reports/multimodal-d-jina-multivector-index-cost.json) | IndexCost D |
+| [`evals/reports/multimodal-teds.md`](../../../evals/reports/multimodal-teds.md) | TEDS slides 10/11 |
+| [`evals/reports/multimodal-teds-scores.json`](../../../evals/reports/multimodal-teds-scores.json) | TEDS scores JSON |
+| [`evals/reports/multimodal-d-jina-multivector--multimodal-s*.txt`](../../../evals/reports/) | Run logs S1–S5 |
+
+**Локально после прогона (не в git):**
+
+| Путь | Содержание |
+|------|------------|
+| `evals/artifacts/jina-multivector/slide-{NN}.json` | Cached Jina multivector embeddings (66 files) |
 
 ### Документы
 
@@ -730,7 +861,7 @@ Multivector-индексация через Jina `jina-embeddings-v4` (`return_m
 
 ---
 
-## Задача 08: Прогон матрицы, сводный отчёт, вердикт 📋
+## Задача 08: Прогон матрицы, сводный отчёт, вердикт ✅ Done
 
 ### Цель
 
@@ -740,44 +871,55 @@ Multivector-индексация через Jina `jina-embeddings-v4` (`return_m
 
 ### Состав работ
 
-- [ ] Сводная таблица: строки = конфигурации (baseline, A_tesseract, A_modern, B_vlm1, B_vlm2, C, D); столбцы = S1–S5 + cost
+- [x] Сводная таблица: строки = конфигурации (baseline, A_tesseract, A_modern, B_vlm1, B_vlm2, C, D); столбцы = S1–S5 + cost
   - Метрики: **nDCG@5** / **set-Recall@5** (S4) / **доля корректных отказов** (S5)
   - Cost: **index_size_mb**, **build_time_s**, **~$/прогон** (`est_cost_usd`)
-- [ ] Decision log: что дало прирост на каком сегменте и какой ценой; что **не помогло**
-- [ ] Вердикт: рекомендуемая точка спектра для B2B-презентации с числами
-- [ ] Антипаттерны: ColPali ради ColPali; среднее по больнице; CER на глаз; молчаливая правка чисел у B
-- [ ] Обновить [`Docs/roadmap.md`](../../roadmap.md) — sprint-07 в таблице v0.1+, ссылка на final report
-- [ ] Самопроверка по критериям DoD спринта (таблица ниже)
+- [x] Decision log: что дало прирост на каком сегменте и какой ценой; что **не помогло**
+- [x] Вердикт: рекомендуемая точка спектра для B2B-презентации с числами
+- [x] Антипаттерны: ColPali ради ColPali; среднее по больнице; CER на глаз; молчаливая правка чисел у B
+- [x] Обновить [`Docs/roadmap.md`](../../roadmap.md) — sprint-07 в таблице v0.1+, ссылка на final report
+- [x] Самопроверка по критериям DoD спринта (таблица ниже)
 
 ### Критерии готовности (DoD)
 
 **Агент проверяет:**
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | `multimodal-matrix.md` содержит все конфиги × все сегменты | Checklist 7+ configs × 5 segments |
-| 2 | `multimodal-decision-log.md` — прирост/цена/неудачи | Ревью структуры |
-| 3 | `multimodal-final.md` — вердикт с числами | North-star paragraph + table |
-| 4 | Roadmap обновлён | Diff `roadmap.md` |
-| 5 | Все eval-config воспроизводимы одной командой | `make eval-multimodal-matrix` (или документированный скрипт) |
+| # | Критерий | Способ проверки | Результат |
+|---|----------|-----------------|-----------|
+| 1 | Сводный отчёт: все конфиги × все сегменты | Checklist 7 configs × 5 segments | ✅ [`mmrag-summary.md`](../../../evals/reports/mmrag-summary.md) §1 |
+| 2 | Decision log — прирост/цена/неудачи | Ревью структуры | ✅ §2 |
+| 3 | Вердикт с числами | North-star paragraph + table | ✅ §3 |
+| 4 | Roadmap обновлён | Diff `roadmap.md` | ✅ sprint-07 ✅ |
+| 5 | Eval-config воспроизводимы | make-цели per method (см. §5 отчёта) | ✅ |
 
 **Пользователь проверяет:**
 
-- Вердикт согласуется с глазами по OCR/caption артефактам
-- Рекомендация практична для стенда (не «лучший на бумаге, но $$$ и 10× index»)
-- Утвердить закрытие спринта (⛔ СТОП)
+- [x] Вердикт согласуется с глазами по OCR/caption артефактам
+- [x] Рекомендация практична для стенда (не «лучший на бумаге, но $$$ и 10× index»)
+- [x] Утвердить закрытие спринта
 
 ### Артефакты
 
-- [`evals/reports/multimodal-matrix.md`](../../../evals/reports/multimodal-matrix.md) — конфиг × сегмент + cost
-- [`evals/reports/multimodal-decision-log.md`](../../../evals/reports/multimodal-decision-log.md)
-- [`evals/reports/multimodal-final.md`](../../../evals/reports/multimodal-final.md) — вердикт
-- [`Docs/roadmap.md`](../../roadmap.md) — обновление статуса sprint-07
+| Путь | Содержание |
+|------|------------|
+| [`evals/reports/mmrag-summary.md`](../../../evals/reports/mmrag-summary.md) | Сводный отчёт: матрица config × segment, decision log, вердикт, антипаттерны |
+| [`Docs/roadmap.md`](../../roadmap.md) | Sprint-07 📋→✅, ссылка на `mmrag-summary.md`, история 2026-07-06 |
+
+**Источники данных (прогоны задач 02–07, использованы в матрице):**
+
+| Путь | Содержание |
+|------|------------|
+| [`evals/reports/multimodal-baseline.md`](../../../evals/reports/multimodal-baseline.md) | Baseline per segment |
+| [`evals/reports/multimodal-a-ocr-comparison.md`](../../../evals/reports/multimodal-a-ocr-comparison.md) | A: Tesseract vs EasyOCR |
+| [`evals/reports/multimodal-b-caption-comparison.md`](../../../evals/reports/multimodal-b-caption-comparison.md) | B: Nemotron vs Gemini |
+| [`evals/reports/multimodal-c-unified-comparison.md`](../../../evals/reports/multimodal-c-unified-comparison.md) | C vs B, MIRACL-Vision |
+| [`evals/reports/multimodal-d-jina-comparison.md`](../../../evals/reports/multimodal-d-jina-comparison.md) | D vs B/C + cost axis |
+| [`evals/reports/*-index-cost.json`](../../../evals/reports/) | IndexCost snapshots (7 configs) |
 
 ### Документы
 
 - 📋 [План задачи](tasks/08-matrix-report-verdict/plan.md)
-- 📝 [Summary](tasks/08-matrix-report-verdict/summary.md)
+- 📝 [Summary](tasks/08-matrix-report-verdict/summary.md) — после фиксации
 
 ---
 
@@ -795,13 +937,19 @@ Sprint считается завершённым, когда:
 | 6 | Метод B: ≥2 VLM, captions в `evals/artifacts/captions/`, cost per model | Reports + сравнение B_vlm1 vs B_vlm2 |
 | 7 | Метод C: unified embed; сравнение с B; вывод по MIRACL-Vision на русском | `multimodal-c-unified.md` |
 | 8 | Метод D: Jina multivector; `index_size_mb` vs dense; TEDS стр. 10/11 | `multimodal-d-jina-multivector.md` |
-| 9 | Сводная матрица «конфиг × сегмент» с cost-колонками; **не усреднять** | `multimodal-matrix.md` |
-| 10 | Decision log + вердикт с числами и антипаттернами | `multimodal-final.md`, `multimodal-decision-log.md` |
-| 11 | Для каждой конфигурации: `build_time_s`, `index_size_mb`, `est_cost_usd` | Столбцы в matrix report |
-| 12 | Roadmap обновлён: sprint-07 📋→✅, ссылка на final report | `Docs/roadmap.md` |
+| 9 | Сводная матрица «конфиг × сегмент» с cost-колонками; **не усреднять** | [`mmrag-summary.md`](../../../evals/reports/mmrag-summary.md) §1 |
+| 10 | Decision log + вердикт с числами и антипаттернами | [`mmrag-summary.md`](../../../evals/reports/mmrag-summary.md) §2–§4 |
+| 11 | Для каждой конфигурации: `build_time_s`, `index_size_mb`, `est_cost_usd` | [`mmrag-summary.md`](../../../evals/reports/mmrag-summary.md) §1.3 |
+| 12 | Roadmap обновлён: sprint-07 📋→✅, ссылка на final report | [`Docs/roadmap.md`](../../roadmap.md) |
 
 ---
 
-## Итог (заполняется после закрытия)
+## Итог (2026-07-06)
 
-[Что реализовано. Отклонения от цели. Рекомендуемый метод индексации для корпуса. Что взято в следующий sprint.]
+**Реализовано:** 7 конфигов индексации × 5 сегментов eval; контракт `Indexer`; методы A–D с cost-осью; сводный отчёт [`mmrag-summary.md`](../../../evals/reports/mmrag-summary.md).
+
+**Отклонения:** вместо трёх файлов (`matrix` / `decision-log` / `final`) — один сводный `mmrag-summary.md`. S5 refusal не прогонялся (только retrieval).
+
+**Рекомендация для корпуса:** primary **B_gemini** (S2 nDCG 0.944, ~$0.10); budget **A_easyocr** (S2 0.966, ~$0); layout add-on **C_unified**; ceiling **D_jina** (35× index).
+
+**Следующий sprint (v0.2+):** интеграция выбранного indexer в production agent routing — вне scope sprint-07.

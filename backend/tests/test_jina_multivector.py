@@ -63,8 +63,12 @@ def test_jina_indexer_builds_multivector(tmp_path: Path) -> None:
         patch("app.rag.indexers.d_jina_multivector.get_settings_or_raise") as mock_settings,
         patch("app.rag.indexers.d_jina_multivector.JinaMultivectorEmbedder") as mock_cls,
         patch("app.rag.indexers.d_jina_multivector._repo_root", return_value=tmp_path),
-        patch("app.rag.indexers.multivector_qdrant.QdrantClient", return_value=mock_client),
+        patch("app.rag.indexers.multivector_qdrant._make_qdrant_client", return_value=mock_client),
         patch("app.rag.indexers.multivector_qdrant.resolve_qdrant_url", return_value="http://localhost:6333"),
+        patch(
+            "app.rag.indexers.multivector_qdrant.multivector_collection_size_mb",
+            return_value=12.5,
+        ),
     ):
         mock_settings.return_value.d_max_side = 768
         mock_cls.return_value.embed_image.side_effect = fake_embed_image
@@ -79,4 +83,4 @@ def test_jina_indexer_builds_multivector(tmp_path: Path) -> None:
     assert cost.chunks == 66
     assert cost.is_multivector is True
     mock_client.create_collection.assert_called_once()
-    mock_client.upsert.assert_called_once()
+    assert mock_client.upsert.call_count == 66

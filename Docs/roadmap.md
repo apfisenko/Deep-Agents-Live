@@ -1,7 +1,7 @@
 # Roadmap — Deep-Agents-Live
 
 > **Vision:** [concept/vision.md](concept/vision.md)
-> **Последнее обновление:** 2026-07-05 (sprint-07 multimodal-rag 📋 Planned)
+> **Последнее обновление:** 2026-07-06 (sprint-07 multimodal-rag ✅ Done)
 
 ---
 
@@ -48,7 +48,7 @@
 | 04 | telegram-e2e | Bot в `frontend/bot`, Langfuse wiring, e2e воронка, CI smoke | ✅ | [sprint-04-telegram-e2e](sprints/sprint-04-telegram-e2e/README.md) |
 | 05 | vector-db | Перевести RAG-слой с in-memory FAISS на выбранную векторную БД | ✅ | [sprint-05-vector-db](sprints/sprint-05-vector-db/README.md) |
 | 06 | graphrag | Граф знаний Neo4j + graph/global retrieval, hybrid с reranker, text2cypher | ✅ | [sprint-06-graphrag](sprints/sprint-06-graphrag/README.md) · [schema](sprints/sprint-06-graphrag/schema.md) · [ADR-0007](decisions/0007-neo4j-graphrag.md) · [eval final](../evals/reports/graphrag-final.md) |
-| 07 | multimodal-rag | Мультимодальная индексация B2B-презентации (66 PNG): OCR / caption / unified / multivector; сегментный eval и матрица «метод × цена» | 📋 | [sprint-07-multimodal-rag](sprints/sprint-07-multimodal-rag/README.md) |
+| 07 | multimodal-rag | Мультимодальная индексация B2B-презентации (66 PNG): OCR / caption / unified / multivector; сегментный eval и матрица «метод × цена» | ✅ | [sprint-07-multimodal-rag](sprints/sprint-07-multimodal-rag/README.md) · [eval final](../evals/reports/mmrag-summary.md) |
 
 ---
 
@@ -118,4 +118,5 @@
 | 2026-06-28 | Sprint-06 задача 03: [`schema.md`](sprints/sprint-06-graphrag/schema.md), [ADR-0007](decisions/0007-neo4j-graphrag.md) |
 | 2026-07-03 | Закрыт sprint-06 graphrag: Neo4j KG, graph/global/hybrid retrieval, text2cypher guardrails, agent routing; eval [`graphrag-final`](../evals/reports/graphrag-final.md) (entity@5 multi +0.17, global +0.51 vs baseline) |
 | 2026-07-05 | Открыт sprint-07 multimodal-rag: B2B-презентация 66 PNG, 5 методов индексации, сегментный eval S1–S5; [`README`](sprints/sprint-07-multimodal-rag/README.md) |
+| 2026-07-06 | Закрыт sprint-07 multimodal-rag: 7 конфигов × 5 сегментов, primary **B_gemini** (~$0.10, S2 nDCG 0.944); eval [`mmrag-summary`](../evals/reports/mmrag-summary.md) |
 
