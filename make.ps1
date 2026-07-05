@@ -254,6 +254,15 @@ function Show-Help {
     Write-Host "  ocr-multimodal-tesseract - OCR slides via docker/ocr (WSL)"
     Write-Host "  ocr-multimodal-modern    - EasyOCR slides via docker/ocr (WSL)"
     Write-Host "  eval-multimodal-a-ocr    - full method A eval (OCR WSL + index/eval Windows)"
+    Write-Host "  check-vlm-models         - OpenRouter VLM catalog check"
+    Write-Host "  caption-multimodal-nemotron - VLM captions (free nemotron)"
+    Write-Host "  caption-multimodal-gemini     - VLM captions (gemini-2.5-flash)"
+    Write-Host "  eval-multimodal-b-caption     - full method B eval + comparison"
+    Write-Host "  check-unified-embed           - OpenRouter unified VL embed preflight"
+    Write-Host "  eval-multimodal-c-unified     - full method C eval + MIRACL comparison"
+    Write-Host "  check-jina-embed              - Jina v4 multivector preflight"
+    Write-Host "  run-teds-eval                 - TEDS on slides 10/11"
+    Write-Host "  eval-multimodal-d-jina        - full method D eval + cost comparison"
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  .\make.ps1 ps"
@@ -521,6 +530,127 @@ function Invoke-EvalMultimodalAOcr {
         uv run python scripts/run_ocr_cer.py --markdown
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         uv run python scripts/build_multimodal_ocr_comparison.py
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-CheckVlmModels {
+    Push-Location $BackendDir
+    try {
+        uv run python ../evals/scripts/check_vlm_models.py
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-CaptionMultimodal {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("nemotron", "gemini")]
+        [string]$Variant
+    )
+    Invoke-CheckVlmModels
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $model = if ($Variant -eq "nemotron") {
+        "nvidia/nemotron-nano-12b-v2-vl:free"
+    } else {
+        "google/gemini-2.5-flash"
+    }
+    $outDir = if ($Variant -eq "nemotron") {
+        "evals/artifacts/captions/nemotron-nano-12b-v2-vl"
+    } else {
+        "evals/artifacts/captions/gemini-2.5-flash"
+    }
+    Push-Location $BackendDir
+    try {
+        uv run python ../evals/scripts/run_multimodal_caption.py --model $model --out-dir $outDir
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-EvalMultimodalBCaption {
+    Invoke-CaptionMultimodal -Variant nemotron
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Invoke-CaptionMultimodal -Variant gemini
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $env:CONFIG = "evals/configs/multimodal-b-caption-nemotron.yaml"
+    Invoke-EvalMultimodal
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $env:CONFIG = "evals/configs/multimodal-b-caption-gemini.yaml"
+    Invoke-EvalMultimodal
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Push-Location (Join-Path $RepoRoot "evals")
+    try {
+        uv run python scripts/audit_caption_numbers.py --markdown
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        uv run python scripts/build_multimodal_caption_comparison.py
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-CheckUnifiedEmbed {
+    Push-Location $BackendDir
+    try {
+        uv run python ../evals/scripts/check_unified_embed.py --probe
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-EvalMultimodalCUnified {
+    Invoke-CheckUnifiedEmbed
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $env:CONFIG = "evals/configs/multimodal-c-unified.yaml"
+    Invoke-EvalMultimodal
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Push-Location (Join-Path $RepoRoot "evals")
+    try {
+        uv run python scripts/build_multimodal_c_unified_comparison.py
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-CheckJinaEmbed {
+    Push-Location $BackendDir
+    try {
+        uv run python ../evals/scripts/check_jina_embed.py --probe
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-RunTedsEval {
+    Push-Location $BackendDir
+    try {
+        uv run python ../evals/scripts/run_teds_eval.py --markdown
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-EvalMultimodalDJina {
+    Invoke-CheckJinaEmbed
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $env:CONFIG = "evals/configs/multimodal-d-jina-multivector.yaml"
+    Invoke-EvalMultimodal
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Invoke-RunTedsEval
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Push-Location (Join-Path $RepoRoot "evals")
+    try {
+        uv run python scripts/build_multimodal_d_comparison.py
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     } finally {
         Pop-Location
@@ -844,6 +974,15 @@ switch ($Target) {
     "ocr-multimodal-tesseract" { Invoke-OcrMultimodal -Engine tesseract }
     "ocr-multimodal-modern" { Invoke-OcrMultimodal -Engine modern }
     "eval-multimodal-a-ocr" { Invoke-EvalMultimodalAOcr }
+    "check-vlm-models" { Invoke-CheckVlmModels }
+    "caption-multimodal-nemotron" { Invoke-CaptionMultimodal -Variant nemotron }
+    "caption-multimodal-gemini" { Invoke-CaptionMultimodal -Variant gemini }
+    "eval-multimodal-b-caption" { Invoke-EvalMultimodalBCaption }
+    "check-unified-embed" { Invoke-CheckUnifiedEmbed }
+    "eval-multimodal-c-unified" { Invoke-EvalMultimodalCUnified }
+    "check-jina-embed" { Invoke-CheckJinaEmbed }
+    "run-teds-eval" { Invoke-RunTedsEval }
+    "eval-multimodal-d-jina" { Invoke-EvalMultimodalDJina }
     default {
         Write-Error "Unknown target: $Target. Run: .\make.ps1 help"
     }

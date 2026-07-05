@@ -1,0 +1,9 @@
+{
+  "collection": "multimodal_b_nemotron",
+  "build_time_s": 128.76,
+  "index_size_mb": 0.387,
+  "est_cost_usd": 0.002,
+  "api_calls": 67,
+  "chunks": 66,
+  "is_multivector": false
+}

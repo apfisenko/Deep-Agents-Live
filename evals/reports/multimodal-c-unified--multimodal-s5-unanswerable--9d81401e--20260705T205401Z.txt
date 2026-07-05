@@ -1,0 +1,17 @@
+Local multimodal eval run: multimodal-c-unified--multimodal-s5-unanswerable--9d81401e--20260705T205401Z
+6 items
+collection=multimodal_c_unified
+indexer=C_unified
+embedding_model=nvidia/llama-nemotron-embed-vl-1b-v2:free
+corpus_dir=data/multimodal-rag
+top_k=5
+
+Average Scores:
+
+Items:
+s5-01	nan	nan	nan	nan	nan	[2, 4, 60, 38, 1]	
+s5-02	nan	nan	nan	nan	nan	[51, 50, 61, 63, 10]	
+s5-03	nan	nan	nan	nan	nan	[63, 16, 58, 5, 11]	
+s5-04	nan	nan	nan	nan	nan	[1, 63, 12, 18, 53]	
+s5-05	nan	nan	nan	nan	nan	[61, 43, 33, 16, 21]	
+s5-06	nan	nan	nan	nan	nan	[2, 44, 13, 1, 21]	

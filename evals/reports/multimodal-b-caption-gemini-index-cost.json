@@ -1,0 +1,9 @@
+{
+  "collection": "multimodal_b_gemini",
+  "build_time_s": 193.53,
+  "index_size_mb": 0.387,
+  "est_cost_usd": 0.098649,
+  "api_calls": 67,
+  "chunks": 66,
+  "is_multivector": false
+}

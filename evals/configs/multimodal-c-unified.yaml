@@ -1,6 +1,6 @@
-# Sprint-07 method C: unified VL embed (task 06 placeholder).
+# Sprint-07 method C: unified VL embed (OpenRouter).
 config_id: multimodal-c-unified
-comment: "Stub config — indexer implemented in task 06"
+comment: "Method C — unified image-embed, one vector per slide"
 
 benchmark_only: false
 
@@ -9,6 +9,7 @@ indexer:
   corpus_dir: data/multimodal-rag
   options:
     embed_model: nvidia/llama-nemotron-embed-vl-1b-v2:free
+    max_side: 1536
 
 agent:
   impl: langchain-react

@@ -1,0 +1,16 @@
+Local multimodal eval run: multimodal-b-caption-nemotron--multimodal-s5-unanswerable--9d81401e--20260705T195409Z
+6 items
+collection=multimodal_b_nemotron
+indexer=B_caption
+corpus_dir=evals/artifacts/captions/nemotron-nano-12b-v2-vl
+top_k=5
+
+Average Scores:
+
+Items:
+s5-01	nan	nan	nan	nan	nan	[11, 6, 43, 12, 45]	
+s5-02	nan	nan	nan	nan	nan	[58, 8, 59, 63, 12]	
+s5-03	nan	nan	nan	nan	nan	[16, 63, 52, 60, 44]	
+s5-04	nan	nan	nan	nan	nan	[63, 16, 52, 45, 23]	
+s5-05	nan	nan	nan	nan	nan	[27, 59, 52, 30, 16]	
+s5-06	nan	nan	nan	nan	nan	[16, 52, 27, 8, 63]	

@@ -17,6 +17,7 @@ for path in (BACKEND_DIR, SCRIPTS_DIR):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
+from env_loader import load_repo_env
 from multimodal_config import MultimodalEvalConfig
 
 SEGMENT_SUFFIXES: dict[str, str] = {
@@ -189,6 +190,7 @@ def main() -> int:
         help="Output markdown path (default: evals/reports/<config_id>.md)",
     )
     args = parser.parse_args()
+    load_repo_env()
     cfg = MultimodalEvalConfig.from_yaml_path(Path(args.config))
     out_path = Path(args.out) if args.out else REPORTS_DIR / f"{cfg.config_id}.md"
     out_path.write_text(build_markdown(cfg), encoding="utf-8")

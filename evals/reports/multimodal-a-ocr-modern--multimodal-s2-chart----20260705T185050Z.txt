@@ -1,0 +1,24 @@
+Local multimodal eval run: multimodal-a-ocr-modern--multimodal-s2-chart----20260705T185050Z
+11 items
+collection=multimodal_a_modern
+indexer=A_ocr_modern
+corpus_dir=evals/artifacts/ocr/modern
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 1.000
+  • avg_mrr: 0.955
+  • avg_ndcg_at_5: 0.966
+
+Items:
+s2-01	1.000	1.000	1.000	nan	nan	[10, 63, 59, 27, 52]	
+s2-02	1.000	1.000	1.000	nan	nan	[10, 62, 18, 56, 63]	
+s2-03	1.000	1.000	1.000	nan	nan	[10, 11, 5, 49, 18]	
+s2-04	1.000	1.000	1.000	nan	nan	[11, 60, 10, 12, 62]	
+s2-05	1.000	1.000	1.000	nan	nan	[11, 53, 60, 12, 63]	
+s2-06	1.000	1.000	1.000	nan	nan	[11, 10, 9, 52, 63]	
+s2-07	1.000	1.000	1.000	nan	nan	[9, 49, 11, 15, 7]	
+s2-08	1.000	1.000	1.000	nan	nan	[9, 10, 15, 18, 62]	
+s2-09	1.000	1.000	1.000	nan	nan	[49, 32, 11, 33, 10]	
+s2-10	1.000	1.000	1.000	nan	nan	[8, 13, 18, 4, 12]	
+s2-11	1.000	0.631	0.500	nan	nan	[10, 11, 13, 63, 12]	

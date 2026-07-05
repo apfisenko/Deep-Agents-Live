@@ -1,14 +1,17 @@
-# Sprint-07 method B: VLM caption (gemini) → e5 (task 05 placeholder).
+# Sprint-07 method B: VLM caption (gemini) → e5 (task 05).
 config_id: multimodal-b-caption-gemini
-comment: "Stub config — indexer implemented in task 05"
+comment: "VLM caption google/gemini-2.5-flash → e5"
 
 benchmark_only: false
 
 indexer:
   method: B_caption
-  corpus_dir: evals/artifacts/captions/gemini-2.5-flash-lite
+  corpus_dir: evals/artifacts/captions/gemini-2.5-flash
   options:
-    vlm_model: google/gemini-2.5-flash-lite
+    vlm_model: google/gemini-2.5-flash
+    slide_dir: data/multimodal-rag
+    caption_max_side: 1536
+    caption_concurrency: 3
 
 agent:
   impl: langchain-react

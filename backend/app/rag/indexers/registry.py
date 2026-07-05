@@ -11,9 +11,9 @@ INDEXER_REGISTRY: dict[str, str] = {
     "baseline": "app.rag.indexers.baseline:BaselineTextIndexer",
     "A_ocr_tesseract": "app.rag.indexers.a_ocr_tesseract:TesseractOcrIndexer",
     "A_ocr_modern": "app.rag.indexers.a_ocr_modern:ModernOcrIndexer",
-    "B_caption": "stub:05",
-    "C_unified": "stub:06",
-    "D_jina_multivector": "stub:07",
+    "B_caption": "app.rag.indexers.b_caption:CaptionIndexer",
+    "C_unified": "app.rag.indexers.c_unified_embed:UnifiedEmbedIndexer",
+    "D_jina_multivector": "app.rag.indexers.d_jina_multivector:JinaMultivectorIndexer",
 }
 
 

@@ -1,0 +1,22 @@
+Local multimodal eval run: multimodal-a-ocr-modern--multimodal-s1-text--9d81401e--20260705T185031Z
+9 items
+collection=multimodal_a_modern
+indexer=A_ocr_modern
+corpus_dir=evals/artifacts/ocr/modern
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 1.000
+  • avg_mrr: 0.889
+  • avg_ndcg_at_5: 0.918
+
+Items:
+s1-01	1.000	0.631	0.500	nan	nan	[6, 22, 25, 7, 34]	
+s1-02	1.000	1.000	1.000	nan	nan	[6, 22, 12, 28, 35]	
+s1-03	1.000	1.000	1.000	nan	nan	[17, 64, 19, 34, 43]	
+s1-04	1.000	1.000	1.000	nan	nan	[14, 48, 56, 41, 39]	
+s1-05	1.000	1.000	1.000	nan	nan	[64, 3, 15, 37, 32]	
+s1-06	1.000	0.631	0.500	nan	nan	[9, 47, 10, 15, 16]	
+s1-07	1.000	1.000	1.000	nan	nan	[16, 10, 63, 13, 52]	
+s1-08	1.000	1.000	1.000	nan	nan	[13, 52, 16, 10, 63]	
+s1-09	1.000	1.000	1.000	nan	nan	[27, 13, 16, 52, 10]	

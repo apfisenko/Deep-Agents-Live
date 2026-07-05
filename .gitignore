@@ -36,6 +36,8 @@ data/leads.txt
 
 # OCR artifacts (generated locally; gold YAML + reports are committed)
 evals/artifacts/ocr/
+evals/artifacts/captions/
+evals/artifacts/jina-multivector/
 
 evals/.env
 frontend/node_modules

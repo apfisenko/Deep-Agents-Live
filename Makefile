@@ -7,7 +7,10 @@
 	chat-telegram chat-stream langfuse-upload-dataset \
 	eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare \
 	index-multimodal eval-multimodal index-multimodal-baseline eval-multimodal-baseline \
-	ocr-multimodal-tesseract ocr-multimodal-modern eval-multimodal-a-ocr
+	ocr-multimodal-tesseract ocr-multimodal-modern eval-multimodal-a-ocr \
+	check-vlm-models caption-multimodal-nemotron caption-multimodal-gemini eval-multimodal-b-caption \
+	check-unified-embed eval-multimodal-c-unified \
+	check-jina-embed run-teds-eval eval-multimodal-d-jina
 
 BACKEND_DIR := backend
 FRONTEND_DIR := frontend
@@ -271,3 +274,40 @@ eval-multimodal-a-ocr: ocr-multimodal-tesseract ocr-multimodal-modern
 	$(MAKE) eval-multimodal CONFIG=evals/configs/multimodal-a-ocr-modern.yaml
 	cd $(EVALS_DIR) && uv run python scripts/run_ocr_cer.py --markdown
 	cd $(EVALS_DIR) && uv run python scripts/build_multimodal_ocr_comparison.py
+
+check-vlm-models:
+	cd $(BACKEND_DIR) && uv run python ../evals/scripts/check_vlm_models.py
+
+caption-multimodal-nemotron: check-vlm-models
+	cd $(BACKEND_DIR) && uv run python ../evals/scripts/run_multimodal_caption.py \
+		--model nvidia/nemotron-nano-12b-v2-vl:free \
+		--out-dir evals/artifacts/captions/nemotron-nano-12b-v2-vl
+
+caption-multimodal-gemini: check-vlm-models
+	cd $(BACKEND_DIR) && uv run python ../evals/scripts/run_multimodal_caption.py \
+		--model google/gemini-2.5-flash \
+		--out-dir evals/artifacts/captions/gemini-2.5-flash
+
+eval-multimodal-b-caption: caption-multimodal-nemotron caption-multimodal-gemini
+	$(MAKE) eval-multimodal CONFIG=evals/configs/multimodal-b-caption-nemotron.yaml
+	$(MAKE) eval-multimodal CONFIG=evals/configs/multimodal-b-caption-gemini.yaml
+	cd $(EVALS_DIR) && uv run python scripts/audit_caption_numbers.py --markdown
+	cd $(EVALS_DIR) && uv run python scripts/build_multimodal_caption_comparison.py
+
+check-unified-embed:
+	cd $(BACKEND_DIR) && uv run python ../evals/scripts/check_unified_embed.py --probe
+
+eval-multimodal-c-unified: check-unified-embed
+	$(MAKE) eval-multimodal CONFIG=evals/configs/multimodal-c-unified.yaml
+	cd $(EVALS_DIR) && uv run python scripts/build_multimodal_c_unified_comparison.py
+
+check-jina-embed:
+	cd $(BACKEND_DIR) && uv run python ../evals/scripts/check_jina_embed.py --probe
+
+run-teds-eval:
+	cd $(BACKEND_DIR) && uv run python ../evals/scripts/run_teds_eval.py --markdown
+
+eval-multimodal-d-jina: check-jina-embed
+	$(MAKE) eval-multimodal CONFIG=evals/configs/multimodal-d-jina-multivector.yaml
+	$(MAKE) run-teds-eval
+	cd $(EVALS_DIR) && uv run python scripts/build_multimodal_d_comparison.py

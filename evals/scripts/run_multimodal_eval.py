@@ -24,7 +24,6 @@ for path in (BACKEND_DIR, SCRIPTS_DIR):
 from qdrant_client import QdrantClient
 
 from app.config import get_settings
-from app.integrations.openrouter import embed_query
 from app.integrations.qdrant_url import resolve_qdrant_url
 from dataset_registry import MULTIMODAL_DATASET_SLUGS, resolve_dataset_target, slug_to_run_suffix
 from env_loader import load_repo_env
@@ -35,6 +34,7 @@ from multimodal_metrics import (
     segment_retrieval_metrics,
     unanswerable_refusal_score,
 )
+from multimodal_retrieval import retrieve_pages
 
 TOP_K = 5
 
@@ -82,10 +82,6 @@ def manifest_to_experiment_items(manifest_path: Path) -> list[dict[str, Any]]:
     return items
 
 
-def _e5_query(text: str) -> str:
-    return f"query: {text}"
-
-
 @dataclass(frozen=True)
 class ItemRun:
     item_id: str
@@ -93,33 +89,6 @@ class ItemRun:
     metrics: dict[str, float]
     retrieved_pages: list[int]
     answer_preview: str = ""
-
-
-def retrieve_pages(
-    client: QdrantClient,
-    collection: str,
-    query: str,
-    *,
-    top_k: int = TOP_K,
-) -> tuple[list[int], list[str]]:
-    settings = get_settings()
-    vector = embed_query(_e5_query(query), settings)
-    response = client.query_points(
-        collection_name=collection,
-        query=vector,
-        limit=top_k,
-        with_payload=True,
-    )
-    contexts: list[str] = []
-    pages: list[int] = []
-    for hit in response.points:
-        payload = hit.payload or {}
-        slide_no = int(payload.get("slide_number", 0))
-        text = str(payload.get("text", ""))
-        contexts.append(text)
-        if slide_no and slide_no not in pages:
-            pages.append(slide_no)
-    return pages, contexts
 
 
 async def evaluate_generation_item(
@@ -194,7 +163,15 @@ async def run_dataset(
         question = item["input"]["message"]
         print(f"  item {index}/{len(items)}: {item_id}")
 
-        retrieved_pages, contexts = retrieve_pages(client, collection, question)
+        retrieved_pages, contexts = retrieve_pages(
+            client,
+            collection,
+            question,
+            method=config.indexer.method,
+            embedding_model=config.vector_db.embedding_model,
+            top_k=TOP_K,
+            settings=settings,
+        )
         metrics = segment_retrieval_metrics(segment, retrieved_pages, gold_pages, k=TOP_K)
 
         answer_preview = ""
@@ -246,6 +223,7 @@ async def run_dataset(
         f"{len(items)} items",
         f"collection={collection}",
         f"indexer={config.indexer.method}",
+        f"embedding_model={config.vector_db.embedding_model}",
         f"corpus_dir={config.indexer.corpus_dir}",
         f"top_k={TOP_K}",
         "",

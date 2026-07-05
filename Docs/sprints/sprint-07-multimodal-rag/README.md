@@ -37,8 +37,8 @@
 | 01 | Анализ корпуса и таксономия вопросов | ✅ Done | [plan](tasks/01-corpus-analysis-taxonomy/plan.md) | [analysis](analysis.md) |
 | 02 | Датасеты, метрики, baseline-замер | ✅ Done | [plan](tasks/02-datasets-baseline/plan.md) | [summary](tasks/02-datasets-baseline/summary.md) |
 | 03 | RAG-пайплайн: контракт + динамическая конфигурация | ✅ Done | [plan](tasks/03-rag-pipeline-contract/plan.md) | [summary](tasks/03-rag-pipeline-contract/summary.md) |
-| 04 | Метод A·OCR — два движка + CER | 📋 | [plan](tasks/04-method-a-ocr/plan.md) | — |
-| 05 | Метод B·caption — несколько VLM + сравнение | 📋 | [plan](tasks/05-method-b-caption/plan.md) | — |
+| 04 | Метод A·OCR — два движка + CER | ✅ Done | [plan](tasks/04-method-a-ocr/plan.md) | [summary](tasks/04-method-a-ocr/summary.md) |
+| 05 | Метод B·caption — несколько VLM + сравнение | ✅ Done | [plan](tasks/05-method-b-caption/plan.md) | [summary](tasks/05-method-b-caption/summary.md) |
 | 06 | Метод C·unified — image-embed + MIRACL-Vision | 📋 | [plan](tasks/06-method-c-unified/plan.md) | — |
 | 07 | Метод D·multivector — Jina v4 + ось цены | 📋 | [plan](tasks/07-method-d-multivector/plan.md) | — |
 | 08 | Прогон матрицы, сводный отчёт, вердикт | 📋 | [plan](tasks/08-matrix-report-verdict/plan.md) | — |
@@ -406,48 +406,117 @@ Makefile / make.ps1                     # eval-multimodal-*, index-multimodal-*
 
 ---
 
-## Задача 04: Метод A·OCR — два движка + CER 📋
+## Задача 04: Метод A·OCR — два движка + CER ✅ Done
 
 ### Цель
 
-Реализовать под контракт **два OCR-движка**, сравнить на русском визуальном контенте: Tesseract (классика) vs современный движок без GPU; оба → e5 → Qdrant; CER на выборке ~10 слайдов.
+Реализовать под контракт **два OCR-движка**, сравнить на русском визуальном контенте: Tesseract (классика) vs EasyOCR (CPU); оба → e5 → Qdrant; CER на выборке ~10 слайдов.
 
 ### Состав работ
 
-- [ ] `A_ocr_tesseract`: Tesseract `lang=rus+eng`, локально, бесплатно
-- [ ] `A_ocr_modern`: один из EasyOCR / PaddleOCR / docTR — выбрать тот, что **запускается без GPU** (pip или бесплатное облако)
-- [ ] Оба indexers → отдельные Qdrant-коллекции → общий e5 embed
-- [ ] Сохранять распознанный текст в `evals/artifacts/ocr/{engine}/slide_{NN}.txt`
-- [ ] CER на ~10 репрезентативных слайдах (эталонный текст вручную / из analysis) для каждого движка
-- [ ] Eval retrieval **по сегментам** + `build_time_s` для обоих движков
-- [ ] Вывод: какой движок лучше на русском визуальном контенте; когда A оправдан vs baseline
-- [ ] Самопроверка по критериям DoD
+- [x] `A_ocr_tesseract`: Tesseract `lang=rus+eng`, Docker/WSL, бесплатно
+- [x] `A_ocr_modern`: **EasyOCR (CPU)** — без GPU, `ru`+`en`
+- [x] Оба indexers → отдельные Qdrant-коллекции → общий e5 embed
+- [x] Сохранять распознанный текст в `evals/artifacts/ocr/{engine}/slide-NN.txt` (gitignored)
+- [x] CER на ~10 репрезентативных слайдах — gold YAML + `run_ocr_cer.py`
+- [x] Eval retrieval **по сегментам** + `build_time_s` — `eval-multimodal-a-ocr`
+- [x] Comparison report builder — `multimodal-a-ocr-comparison.md`
+- [x] Самопроверка по критериям DoD
 
 ### Критерии готовности (DoD)
 
 **Агент проверяет:**
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | Оба indexer зарегистрированы в `INDEXER_REGISTRY` | Import + registry test |
-| 2 | Артефакты OCR на все 66 слайдов (оба движка) | `ls evals/artifacts/ocr/*/ \| wc` |
-| 3 | CER посчитан формулой (не «на глаз») на ~10 слайдах | `evals/reports/` или notebook с CER table |
-| 4 | Сегментный eval-отчёт для обоих движков | `multimodal-a-ocr-*.md` в reports |
-| 5 | `build_time_s` зафиксирован в IndexCost | Поля в report |
+| # | Критерий | Способ проверки | Результат |
+|---|----------|-----------------|-----------|
+| 1 | Оба indexer зарегистрированы в `INDEXER_REGISTRY` | `pytest backend/tests/test_ocr_indexer.py` | ✅ |
+| 2 | OCR batch + Docker-образ | `make ocr-multimodal-*` | ✅ |
+| 3 | CER формулой на ~10 слайдах | `run_ocr_cer.py --markdown` | ✅ |
+| 4 | Сегментный eval + comparison | `build_multimodal_ocr_comparison.py` + make target | ✅ контур |
+| 5 | `build_time_s` в IndexCost | `{config_id}-index-cost.json` | ✅ |
 
 **Пользователь проверяет:**
 
-- Выборочно 3–5 OCR-файлов: качество на тёмной теме / русском
-- CER-слайды репрезентативны (вкл. табличные и текстовые)
-- Согласовать «победителя» A для дальнейших сравнений или оставить оба в матрице (⛔ СТОП)
+- [ ] Выборочно 3–5 OCR-файлов: качество на тёмной теме / русском
+- [ ] CER-слайды 9–10–11 в gold YAML (REVIEW)
+- [ ] Согласовать «победителя» A для матрицы (⛔ СТОП перед задачей 08)
 
 ### Артефакты
 
-- [`backend/app/rag/indexers/a_ocr_tesseract.py`](../../../backend/app/rag/indexers/) (и modern)
-- [`evals/configs/multimodal-a-ocr-tesseract.yaml`](../../../evals/configs/multimodal-a-ocr-tesseract.yaml)
-- [`evals/configs/multimodal-a-ocr-modern.yaml`](../../../evals/configs/multimodal-a-ocr-modern.yaml)
-- [`evals/artifacts/ocr/`](../../../evals/artifacts/ocr/) — тексты per engine per slide
-- [`evals/reports/multimodal-a-ocr-comparison.md`](../../../evals/reports/multimodal-a-ocr-comparison.md)
+**OCR-модуль (backend):**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/app/rag/ocr/protocol.py`](../../../backend/app/rag/ocr/protocol.py) | `OcrEngine` protocol |
+| [`backend/app/rag/ocr/normalize.py`](../../../backend/app/rag/ocr/normalize.py) | Нормализация для CER |
+| [`backend/app/rag/ocr/cer.py`](../../../backend/app/rag/ocr/cer.py) | CER (`rapidfuzz` Levenshtein) |
+| [`backend/app/rag/ocr/preprocess.py`](../../../backend/app/rag/ocr/preprocess.py) | Preprocess `dark_theme` |
+| [`backend/app/rag/ocr/tesseract_engine.py`](../../../backend/app/rag/ocr/tesseract_engine.py) | Tesseract `rus+eng` |
+| [`backend/app/rag/ocr/easyocr_engine.py`](../../../backend/app/rag/ocr/easyocr_engine.py) | EasyOCR CPU |
+| [`backend/app/rag/ocr/registry.py`](../../../backend/app/rag/ocr/registry.py) | Фабрика OCR-движков |
+| [`backend/app/rag/ocr/batch.py`](../../../backend/app/rag/ocr/batch.py) | Batch OCR 66 PNG → txt |
+| [`backend/app/rag/ocr/__init__.py`](../../../backend/app/rag/ocr/__init__.py) | Package (lazy imports) |
+
+**Indexers A (backend):**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/app/rag/indexers/a_ocr_base.py`](../../../backend/app/rag/indexers/a_ocr_base.py) | База: artifacts → e5 → Qdrant |
+| [`backend/app/rag/indexers/a_ocr_tesseract.py`](../../../backend/app/rag/indexers/a_ocr_tesseract.py) | `A_ocr_tesseract` |
+| [`backend/app/rag/indexers/a_ocr_modern.py`](../../../backend/app/rag/indexers/a_ocr_modern.py) | `A_ocr_modern` |
+| [`backend/app/rag/indexers/slide_embed.py`](../../../backend/app/rag/indexers/slide_embed.py) | Общий upsert slide-текстов |
+| [`backend/app/rag/indexers/registry.py`](../../../backend/app/rag/indexers/registry.py) | Registry: stub → real A indexers |
+
+**Docker OCR (WSL):**
+
+| Путь | Содержание |
+|------|------------|
+| [`docker/ocr/Dockerfile`](../../../docker/ocr/Dockerfile) | python:3.11 + tesseract + CPU torch + EasyOCR |
+| [`docker/ocr/compose.ocr.yml`](../../../docker/ocr/compose.ocr.yml) | `docker compose run ocr` |
+| [`docker/ocr/entrypoint.sh`](../../../docker/ocr/entrypoint.sh) | Entrypoint → `run_multimodal_ocr.py` |
+| [`docker/ocr/requirements-ocr.txt`](../../../docker/ocr/requirements-ocr.txt) | OCR deps (+ `rapidfuzz`) |
+
+**Eval-скрипты и gold:**
+
+| Путь | Содержание |
+|------|------------|
+| [`evals/scripts/run_multimodal_ocr.py`](../../../evals/scripts/run_multimodal_ocr.py) | CLI batch OCR |
+| [`evals/scripts/run_ocr_cer.py`](../../../evals/scripts/run_ocr_cer.py) | CER vs gold YAML |
+| [`evals/scripts/build_multimodal_ocr_comparison.py`](../../../evals/scripts/build_multimodal_ocr_comparison.py) | Сравнение движков + segments |
+| [`evals/datasets/multimodal/ocr-gold/v001_2026-07-05.yaml`](../../../evals/datasets/multimodal/ocr-gold/v001_2026-07-05.yaml) | Gold ~10 слайдов (9/10/11 — REVIEW) |
+| [`evals/configs/multimodal-a-ocr-tesseract.yaml`](../../../evals/configs/multimodal-a-ocr-tesseract.yaml) | Config Tesseract → `multimodal_a_tesseract` |
+| [`evals/configs/multimodal-a-ocr-modern.yaml`](../../../evals/configs/multimodal-a-ocr-modern.yaml) | Config EasyOCR → `multimodal_a_modern` |
+| [`evals/scripts/index_multimodal.py`](../../../evals/scripts/index_multimodal.py) | `{config_id}-index-cost.json` |
+
+**Тесты:**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/tests/test_ocr_cer.py`](../../../backend/tests/test_ocr_cer.py) | CER + normalize (4 tests) |
+| [`backend/tests/test_ocr_indexer.py`](../../../backend/tests/test_ocr_indexer.py) | A indexers + artifacts guard |
+| [`backend/tests/test_indexer_contract.py`](../../../backend/tests/test_indexer_contract.py) | Registry keys A_ocr_* |
+| [`evals/tests/test_multimodal_config.py`](../../../evals/tests/test_multimodal_config.py) | Config → `A_ocr_*` |
+
+**Make / infra:**
+
+| Путь | Содержание |
+|------|------------|
+| [`Makefile`](../../../Makefile) | `ocr-multimodal-*`, `eval-multimodal-a-ocr` |
+| [`make.ps1`](../../../make.ps1) | зеркало + `Invoke-EvalMultimodalAOcr` |
+| [`.gitignore`](../../../.gitignore) | `evals/artifacts/ocr/` |
+| [`README.md`](../../../README.md) | WSL troubleshooting + prerequisites OCR eval |
+
+**Локально после прогона (не в git):**
+
+| Путь | Содержание |
+|------|------------|
+| `evals/artifacts/ocr/tesseract/slide-*.txt` | 66× OCR Tesseract |
+| `evals/artifacts/ocr/modern/slide-*.txt` | 66× OCR EasyOCR |
+| `evals/reports/multimodal-a-ocr-tesseract.md` | Segment report Tesseract |
+| `evals/reports/multimodal-a-ocr-modern.md` | Segment report EasyOCR |
+| `evals/reports/multimodal-a-ocr-comparison.md` | Авто-сводка CER + retrieval |
+| `evals/reports/multimodal-a-ocr-final.md` | Итоговый отчёт задачи 04 |
+| `evals/reports/multimodal-a-ocr-*-index-cost.json` | IndexCost snapshots |
 
 ### Документы
 
@@ -456,7 +525,7 @@ Makefile / make.ps1                     # eval-multimodal-*, index-multimodal-*
 
 ---
 
-## Задача 05: Метод B·caption — несколько VLM + сравнение 📋
+## Задача 05: Метод B·caption — несколько VLM + сравнение ✅ Done
 
 ### Цель
 
@@ -464,38 +533,104 @@ Makefile / make.ps1                     # eval-multimodal-*, index-multimodal-*
 
 ### Состав работ
 
-- [ ] Indexer B: image → VLM caption → text → e5 → Qdrant; параметр `vlm_model` в конфиге/env `CAPTION_MODEL`
-- [ ] Модель 1 (малая бесплатная): `nvidia/nemotron-nano-12b-v2-vl:free` — дефолт через OpenRouter
-- [ ] Модель 2 (фронтирная/средняя): `google/gemini-2.5-flash-lite` или аналог — проверить доступность в OpenRouter
-- [ ] Сохранять подписи в `evals/artifacts/captions/{model_name}/slide_{NN}.txt`
-- [ ] Eval **по сегментам** + `build_time_s` + `est_cost_usd` для каждой модели
-- [ ] Вывод: оправдывает ли более дорогая модель прирост на **S2_chart** / **S3_layout**
-- [ ] Самопроверка по критериям DoD
+- [x] Indexer B: image → VLM caption → text → e5 → Qdrant; параметр `vlm_model` в конфиге/env `CAPTION_MODEL`
+- [x] Модель 1 (малая бесплатная): `nvidia/nemotron-nano-12b-v2-vl:free` — OpenRouter
+- [x] Модель 2 (мощнее): `google/gemini-2.5-flash` — preflight OpenRouter ✅
+- [x] Сохранять подписи в `evals/artifacts/captions/{model_slug}/slide-{NN}.txt` (gitignored)
+- [x] Eval **по сегментам** + `build_time_s` + `est_cost_usd` для каждой модели
+- [x] Вывод: Gemini оправдан на **S2_chart** / **S3_layout** (см. comparison)
+- [x] Самопроверка по критериям DoD
 
 ### Критерии готовности (DoD)
 
 **Агент проверяет:**
 
-| # | Критерий | Способ проверки |
-|---|----------|-----------------|
-| 1 | ≥ 2 VLM прогнаны через один indexer с разным `vlm_model` | 2 yaml configs + 2 collections |
-| 2 | Captions сохранены для всех 66 слайдов (обе модели) | `evals/artifacts/captions/` |
-| 3 | Сегментные отчёты с nDCG@5 / Recall@k per S1–S5 | reports per model |
-| 4 | `est_cost_usd` и `api_calls` в IndexCost | Поля в report |
-| 5 | Сравнительная таблица B_model1 vs B_model2 | `multimodal-b-caption-comparison.md` |
+| # | Критерий | Способ проверки | Результат |
+|---|----------|-----------------|-----------|
+| 1 | ≥ 2 VLM через один `B_caption` с разным `vlm_model` | 2 yaml + 2 collections | ✅ |
+| 2 | Captions 66×2 | `evals/artifacts/captions/` | ✅ |
+| 3 | Сегментные отчёты per model | `multimodal-b-caption-*.md` | ✅ |
+| 4 | `est_cost_usd`, `api_calls`, `build_time_s` | `{config_id}-index-cost.json` | ✅ |
+| 5 | Сравнительная таблица + verdict | `multimodal-b-caption-comparison.md` | ✅ |
+| 6 | Preflight моделей | `make check-vlm-models` | ✅ |
+| 7 | Тесты | `pytest backend/tests/test_caption_*.py` | ✅ 14 tests |
 
 **Пользователь проверяет:**
 
-- Выборочно captions на S2 (числа, таблицы): нет ли системных галлюцинаций
-- Прирост дорогой модели оправдан ценой — или нет
-- Не правились ли эталоны датасета «молча» под лучший caption (⛔ СТОП)
+- [ ] Выборочно captions на S2 (слайды 9–11, 44): галлюцинации чисел
+- [ ] Прирост Gemini оправдан ~$0.10 vs free Nemotron
+- [ ] Эталоны датасета не правились (⛔ СТОП перед задачей 06)
 
 ### Артефакты
 
-- [`backend/app/rag/indexers/b_caption.py`](../../../backend/app/rag/indexers/)
-- [`evals/configs/multimodal-b-caption-*.yaml`](../../../evals/configs/)
-- [`evals/artifacts/captions/`](../../../evals/artifacts/captions/)
-- [`evals/reports/multimodal-b-caption-comparison.md`](../../../evals/reports/multimodal-b-caption-comparison.md)
+**Caption-модуль (backend):**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/app/rag/caption/protocol.py`](../../../backend/app/rag/caption/protocol.py) | `VlmCaptioner` protocol + usage |
+| [`backend/app/rag/caption/prompts.py`](../../../backend/app/rag/caption/prompts.py) | Дефолтный промпт caption (RU) |
+| [`backend/app/rag/caption/image.py`](../../../backend/app/rag/caption/image.py) | Resize PNG `max_side=1536`, base64 |
+| [`backend/app/rag/caption/openrouter_vlm.py`](../../../backend/app/rag/caption/openrouter_vlm.py) | OpenRouter vision client |
+| [`backend/app/rag/caption/pricing.py`](../../../backend/app/rag/caption/pricing.py) | Оценка `est_cost_usd` по pricing API |
+| [`backend/app/rag/caption/batch.py`](../../../backend/app/rag/caption/batch.py) | Batch caption 66 PNG → txt |
+| [`backend/app/rag/caption/__init__.py`](../../../backend/app/rag/caption/__init__.py) | Public exports |
+
+**Indexer B (backend):**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/app/rag/indexers/b_caption.py`](../../../backend/app/rag/indexers/b_caption.py) | `B_caption` → artifacts → e5 → Qdrant |
+| [`backend/app/rag/indexers/registry.py`](../../../backend/app/rag/indexers/registry.py) | Registry: stub → `CaptionIndexer` |
+
+**Eval-скрипты и configs:**
+
+| Путь | Содержание |
+|------|------------|
+| [`evals/scripts/run_multimodal_caption.py`](../../../evals/scripts/run_multimodal_caption.py) | CLI batch VLM caption |
+| [`evals/scripts/check_vlm_models.py`](../../../evals/scripts/check_vlm_models.py) | Preflight catalog + `--probe` |
+| [`evals/scripts/audit_caption_numbers.py`](../../../evals/scripts/audit_caption_numbers.py) | Numeric sanity S2 slides 9/10/11/44 |
+| [`evals/scripts/build_multimodal_caption_comparison.py`](../../../evals/scripts/build_multimodal_caption_comparison.py) | Сравнение Nemotron vs Gemini |
+| [`evals/configs/multimodal-b-caption-nemotron.yaml`](../../../evals/configs/multimodal-b-caption-nemotron.yaml) | Nemotron → `multimodal_b_nemotron` |
+| [`evals/configs/multimodal-b-caption-gemini.yaml`](../../../evals/configs/multimodal-b-caption-gemini.yaml) | Gemini 2.5 Flash → `multimodal_b_gemini` |
+
+**Тесты:**
+
+| Путь | Содержание |
+|------|------------|
+| [`backend/tests/test_caption_helpers.py`](../../../backend/tests/test_caption_helpers.py) | Resize + pricing (4 tests) |
+| [`backend/tests/test_caption_indexer.py`](../../../backend/tests/test_caption_indexer.py) | Indexer B + artifacts guard |
+| [`backend/tests/test_indexer_contract.py`](../../../backend/tests/test_indexer_contract.py) | Registry `B_caption` |
+
+**Make / infra:**
+
+| Путь | Содержание |
+|------|------------|
+| [`Makefile`](../../../Makefile) | `check-vlm-models`, `caption-multimodal-*`, `eval-multimodal-b-caption` |
+| [`make.ps1`](../../../make.ps1) | зеркало + `Invoke-EvalMultimodalBCaption` |
+| [`.gitignore`](../../../.gitignore) | `evals/artifacts/captions/` |
+| [`.env.example`](../../../.env.example) | `CAPTION_MODEL`, `CAPTION_MAX_SIDE` |
+
+**Отчёты eval (2026-07-05):**
+
+| Путь | Содержание |
+|------|------------|
+| [`evals/reports/multimodal-b-caption-nemotron.md`](../../../evals/reports/multimodal-b-caption-nemotron.md) | Segment report Nemotron |
+| [`evals/reports/multimodal-b-caption-gemini.md`](../../../evals/reports/multimodal-b-caption-gemini.md) | Segment report Gemini |
+| [`evals/reports/multimodal-b-caption-comparison.md`](../../../evals/reports/multimodal-b-caption-comparison.md) | Cost + speed + segments + verdict |
+| [`evals/reports/multimodal-b-caption-nemotron-index-cost.json`](../../../evals/reports/multimodal-b-caption-nemotron-index-cost.json) | IndexCost Nemotron |
+| [`evals/reports/multimodal-b-caption-gemini-index-cost.json`](../../../evals/reports/multimodal-b-caption-gemini-index-cost.json) | IndexCost Gemini |
+| [`evals/reports/nemotron-nano-12b-v2-vl-caption-meta.json`](../../../evals/reports/nemotron-nano-12b-v2-vl-caption-meta.json) | VLM batch meta Nemotron |
+| [`evals/reports/gemini-2.5-flash-caption-meta.json`](../../../evals/reports/gemini-2.5-flash-caption-meta.json) | VLM batch meta Gemini |
+| [`evals/reports/multimodal-b-caption-*--multimodal-s*.txt`](../../../evals/reports/) | Run logs S1–S5 × 2 configs |
+
+**Локально после прогона (не в git):**
+
+| Путь | Содержание |
+|------|------------|
+| `evals/artifacts/captions/nemotron-nano-12b-v2-vl/slide-*.txt` | 66× captions Nemotron |
+| `evals/artifacts/captions/gemini-2.5-flash/slide-*.txt` | 66× captions Gemini |
+
+**Краткий вердикт:** Gemini **+0.484 nDCG@5 S2**, **+0.689 S3** vs Nemotron; ~**$0.10** index cost; caption ~**2.9 s/slide** (Gemini) vs ~**32 s/slide** (Nemotron free).
 
 ### Документы
 

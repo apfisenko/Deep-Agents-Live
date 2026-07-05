@@ -1,6 +1,6 @@
-# Sprint-07 method B: VLM caption (nemotron) → e5 (task 05 placeholder).
+# Sprint-07 method B: VLM caption (nemotron) → e5 (task 05).
 config_id: multimodal-b-caption-nemotron
-comment: "Stub config — indexer implemented in task 05"
+comment: "VLM caption nvidia/nemotron-nano-12b-v2-vl:free → e5"
 
 benchmark_only: false
 
@@ -9,6 +9,9 @@ indexer:
   corpus_dir: evals/artifacts/captions/nemotron-nano-12b-v2-vl
   options:
     vlm_model: nvidia/nemotron-nano-12b-v2-vl:free
+    slide_dir: data/multimodal-rag
+    caption_max_side: 1536
+    caption_concurrency: 3
 
 agent:
   impl: langchain-react

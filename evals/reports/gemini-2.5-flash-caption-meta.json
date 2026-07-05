@@ -1,0 +1,12 @@
+{
+  "model_id": "google/gemini-2.5-flash",
+  "slide_dir": "C:\\FISENKO\\AI\\Deep-Agents-Live\\data\\multimodal-rag",
+  "out_dir": "C:\\FISENKO\\AI\\Deep-Agents-Live\\evals\\artifacts\\captions\\gemini-2.5-flash",
+  "slides_processed": 66,
+  "caption_wall_time_s": 188.1,
+  "vlm_api_calls": 66,
+  "prompt_tokens": 124806,
+  "completion_tokens": 23683,
+  "est_vlm_cost_usd": 0.096649,
+  "sec_per_slide": 2.85
+}

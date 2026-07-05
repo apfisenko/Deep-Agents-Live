@@ -1,0 +1,32 @@
+version: v001
+comment: Gold HTML tables for TEDS on slides 10 and 11 (method D diagnostic)
+
+slides:
+  - slide_number: 10
+    gold_html: |
+      <table>
+        <tr><td colspan="2">Как компании уже используют ИИ-агентов</td></tr>
+        <tr><td>72%</td><td>компаний активно используют или тестируют ИИ-агентов</td></tr>
+        <tr><td colspan="2">Какие отделы внедряют ИИ-агентов?</td></tr>
+        <tr><td>Поддержка клиентов</td><td>49%</td></tr>
+        <tr><td>Операции</td><td>47%</td></tr>
+        <tr><td>Разработка</td><td>35%</td></tr>
+        <tr><td>Маркетинг</td><td>31%</td></tr>
+        <tr><td>HR</td><td>30%</td></tr>
+        <tr><td>84%</td><td>планируют увеличить инвестиции в 2026</td></tr>
+      </table>
+
+  - slide_number: 11
+    gold_html: |
+      <table>
+        <tr><td colspan="2">Цифры РФ — СберАналитика</td></tr>
+        <tr><td>39%</td><td>компаний уже используют ИИ</td></tr>
+        <tr><td colspan="2">Где автоматизируют?</td></tr>
+        <tr><td>Документооборот</td><td>70%</td></tr>
+        <tr><td>Продажи</td><td>55%</td></tr>
+        <tr><td>HR</td><td>45%</td></tr>
+        <tr><td>Поддержка</td><td>40%</td></tr>
+        <tr><td>Ускорение процессов</td><td>45%</td></tr>
+        <tr><td>Снижение ФОТ</td><td>30–40%</td></tr>
+        <tr><td>Рост выручки</td><td>25%</td></tr>
+      </table>

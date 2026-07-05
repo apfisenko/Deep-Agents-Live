@@ -117,6 +117,20 @@ class Settings(BaseSettings):
         default="Deep-Agents-Live",
         validation_alias="OPENROUTER_APP_TITLE",
     )
+    caption_model: str = Field(
+        default="nvidia/nemotron-nano-12b-v2-vl:free",
+        validation_alias="CAPTION_MODEL",
+    )
+    caption_max_side: int = Field(default=1536, validation_alias="CAPTION_MAX_SIDE")
+    c_max_side: int = Field(default=1536, validation_alias="C_MAX_SIDE")
+    d_max_side: int = Field(default=768, validation_alias="D_MAX_SIDE")
+    jina_api_key: str = Field(default="", validation_alias="JINA_API_KEY")
+    jina_embedding_timeout_sec: int = Field(
+        default=180,
+        validation_alias="JINA_EMBEDDING_TIMEOUT_SEC",
+    )
+    jina_embedding_retries: int = Field(default=5, validation_alias="JINA_EMBEDDING_RETRIES")
+    jina_request_delay_sec: float = Field(default=2.5, validation_alias="JINA_REQUEST_DELAY_SEC")
 
     langfuse_enabled: bool = Field(default=False, validation_alias="LANGFUSE_ENABLED")
     langfuse_public_key: str = Field(default="", validation_alias="LANGFUSE_PUBLIC_KEY")

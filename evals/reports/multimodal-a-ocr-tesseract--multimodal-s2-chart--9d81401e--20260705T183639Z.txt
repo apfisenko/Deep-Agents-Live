@@ -1,0 +1,24 @@
+Local multimodal eval run: multimodal-a-ocr-tesseract--multimodal-s2-chart--9d81401e--20260705T183639Z
+11 items
+collection=multimodal_a_tesseract
+indexer=A_ocr_tesseract
+corpus_dir=evals/artifacts/ocr/tesseract
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 1.000
+  • avg_mrr: 0.955
+  • avg_ndcg_at_5: 0.966
+
+Items:
+s2-01	1.000	1.000	1.000	nan	nan	[10, 63, 59, 27, 52]	
+s2-02	1.000	1.000	1.000	nan	nan	[10, 18, 63, 59, 60]	
+s2-03	1.000	1.000	1.000	nan	nan	[10, 11, 49, 18, 5]	
+s2-04	1.000	1.000	1.000	nan	nan	[11, 60, 12, 5, 10]	
+s2-05	1.000	1.000	1.000	nan	nan	[11, 60, 53, 12, 6]	
+s2-06	1.000	1.000	1.000	nan	nan	[11, 52, 10, 60, 9]	
+s2-07	1.000	1.000	1.000	nan	nan	[9, 11, 29, 49, 23]	
+s2-08	1.000	1.000	1.000	nan	nan	[9, 11, 10, 18, 42]	
+s2-09	1.000	1.000	1.000	nan	nan	[49, 32, 11, 33, 10]	
+s2-10	1.000	1.000	1.000	nan	nan	[8, 18, 13, 4, 12]	
+s2-11	1.000	0.631	0.500	nan	nan	[10, 11, 18, 60, 5]	

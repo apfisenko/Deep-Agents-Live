@@ -1,0 +1,23 @@
+Local multimodal eval run: multimodal-b-caption-nemotron--multimodal-s3-layout--9d81401e--20260705T195350Z
+10 items
+collection=multimodal_b_nemotron
+indexer=B_caption
+corpus_dir=evals/artifacts/captions/nemotron-nano-12b-v2-vl
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 0.000
+  • avg_mrr: 0.000
+  • avg_ndcg_at_5: 0.000
+
+Items:
+s3-01	0.000	0.000	0.000	nan	nan	[1, 48, 17, 41, 3]	
+s3-02	0.000	0.000	0.000	nan	nan	[1, 17, 23, 41, 55]	
+s3-03	0.000	0.000	0.000	nan	nan	[16, 43, 3, 8, 41]	
+s3-04	0.000	0.000	0.000	nan	nan	[8, 23, 30, 52, 63]	
+s3-05	0.000	0.000	0.000	nan	nan	[31, 25, 3, 14, 43]	
+s3-06	0.000	0.000	0.000	nan	nan	[31, 25, 23, 5, 66]	
+s3-07	0.000	0.000	0.000	nan	nan	[12, 11, 55, 23, 16]	
+s3-08	0.000	0.000	0.000	nan	nan	[41, 23, 16, 25, 1]	
+s3-09	0.000	0.000	0.000	nan	nan	[16, 52, 45, 48, 23]	
+s3-10	0.000	0.000	0.000	nan	nan	[41, 14, 1, 30, 48]	

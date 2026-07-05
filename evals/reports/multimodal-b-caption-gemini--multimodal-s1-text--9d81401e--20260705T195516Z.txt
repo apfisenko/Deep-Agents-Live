@@ -1,0 +1,22 @@
+Local multimodal eval run: multimodal-b-caption-gemini--multimodal-s1-text--9d81401e--20260705T195516Z
+9 items
+collection=multimodal_b_gemini
+indexer=B_caption
+corpus_dir=evals/artifacts/captions/gemini-2.5-flash
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 0.667
+  • avg_mrr: 0.667
+  • avg_ndcg_at_5: 0.667
+
+Items:
+s1-01	1.000	1.000	1.000	nan	nan	[22, 45, 46, 25, 42]	
+s1-02	1.000	1.000	1.000	nan	nan	[6, 9, 49, 27, 11]	
+s1-03	1.000	1.000	1.000	nan	nan	[17, 34, 25, 15, 19]	
+s1-04	1.000	1.000	1.000	nan	nan	[14, 56, 39, 48, 11]	
+s1-05	1.000	1.000	1.000	nan	nan	[64, 15, 39, 32, 59]	
+s1-06	0.000	0.000	0.000	nan	nan	[9, 65, 1, 42, 62]	
+s1-07	0.000	0.000	0.000	nan	nan	[63, 10, 62, 11, 15]	
+s1-08	0.000	0.000	0.000	nan	nan	[63, 52, 62, 10, 53]	
+s1-09	1.000	1.000	1.000	nan	nan	[27, 10, 63, 52, 9]	

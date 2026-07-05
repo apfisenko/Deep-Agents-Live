@@ -1,0 +1,9 @@
+{
+  "collection": "multimodal_c_unified",
+  "build_time_s": 184.04,
+  "index_size_mb": 0.516,
+  "est_cost_usd": 0.0,
+  "api_calls": 66,
+  "chunks": 66,
+  "is_multivector": false
+}

@@ -1,0 +1,24 @@
+Local multimodal eval run: multimodal-c-unified--multimodal-s3-layout--9d81401e--20260705T205348Z
+10 items
+collection=multimodal_c_unified
+indexer=C_unified
+embedding_model=nvidia/llama-nemotron-embed-vl-1b-v2:free
+corpus_dir=data/multimodal-rag
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 0.900
+  • avg_mrr: 0.750
+  • avg_ndcg_at_5: 0.789
+
+Items:
+s3-01	1.000	0.631	0.500	nan	nan	[3, 15, 37, 32, 48]	
+s3-02	1.000	0.631	0.500	nan	nan	[3, 15, 32, 64, 17]	
+s3-03	1.000	0.631	0.500	nan	nan	[32, 50, 15, 26, 40]	
+s3-04	0.000	0.000	0.000	nan	nan	[65, 28, 15, 40, 1]	
+s3-05	1.000	1.000	1.000	nan	nan	[40, 37, 39, 41, 28]	
+s3-06	1.000	1.000	1.000	nan	nan	[40, 16, 15, 50, 43]	
+s3-07	1.000	1.000	1.000	nan	nan	[38, 15, 12, 40, 50]	
+s3-08	1.000	1.000	1.000	nan	nan	[38, 26, 41, 32, 37]	
+s3-09	1.000	1.000	1.000	nan	nan	[4, 13, 3, 27, 41]	
+s3-10	1.000	1.000	1.000	nan	nan	[32, 39, 40, 28, 16]	

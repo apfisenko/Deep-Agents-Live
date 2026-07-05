@@ -1,0 +1,16 @@
+Local multimodal eval run: multimodal-a-ocr-modern--multimodal-s5-unanswerable--9d81401e--20260705T185128Z
+6 items
+collection=multimodal_a_modern
+indexer=A_ocr_modern
+corpus_dir=evals/artifacts/ocr/modern
+top_k=5
+
+Average Scores:
+
+Items:
+s5-01	nan	nan	nan	nan	nan	[11, 44, 43, 60, 7]	
+s5-02	nan	nan	nan	nan	nan	[10, 51, 18, 62, 50]	
+s5-03	nan	nan	nan	nan	nan	[63, 62, 60, 10, 18]	
+s5-04	nan	nan	nan	nan	nan	[63, 1, 50, 26, 18]	
+s5-05	nan	nan	nan	nan	nan	[27, 32, 16, 52, 49]	
+s5-06	nan	nan	nan	nan	nan	[16, 52, 13, 10, 2]	

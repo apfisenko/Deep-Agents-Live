@@ -1,0 +1,12 @@
+{
+  "model_id": "nvidia/nemotron-nano-12b-v2-vl:free",
+  "slide_dir": "C:\\FISENKO\\AI\\Deep-Agents-Live\\data\\multimodal-rag",
+  "out_dir": "C:\\FISENKO\\AI\\Deep-Agents-Live\\evals\\artifacts\\captions\\nemotron-nano-12b-v2-vl",
+  "slides_processed": 66,
+  "caption_wall_time_s": 2988.32,
+  "vlm_api_calls": 66,
+  "prompt_tokens": 82416,
+  "completion_tokens": 74179,
+  "est_vlm_cost_usd": 0.0,
+  "sec_per_slide": 45.28
+}

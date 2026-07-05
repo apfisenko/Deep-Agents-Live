@@ -6,11 +6,9 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from app.rag.indexers import (
     INDEXER_REGISTRY,
     IndexCost,
-    StubIndexer,
     make_indexer,
 )
 
@@ -62,14 +60,26 @@ def test_make_indexer_baseline_returns_baseline_class() -> None:
     assert indexer.method == "baseline"
 
 
-def test_make_indexer_stub_raises_not_implemented() -> None:
+def test_make_indexer_caption_returns_caption_class() -> None:
+    from app.rag.indexers.b_caption import CaptionIndexer
+
     indexer = make_indexer("B_caption")
-    assert isinstance(indexer, StubIndexer)
-    with pytest.raises(NotImplementedError, match="task 05"):
-        indexer.build_index(
-            corpus_dir=Path("evals/artifacts/captions/nemotron"),
-            collection="multimodal_b_nemotron",
-        )
+    assert isinstance(indexer, CaptionIndexer)
+    assert indexer.method == "B_caption"
+
+
+def test_make_indexer_unified_returns_unified_class() -> None:
+    from app.rag.indexers.c_unified_embed import UnifiedEmbedIndexer
+
+    indexer = make_indexer("C_unified")
+    assert isinstance(indexer, UnifiedEmbedIndexer)
+
+
+def test_make_indexer_jina_returns_jina_class() -> None:
+    from app.rag.indexers.d_jina_multivector import JinaMultivectorIndexer
+
+    indexer = make_indexer("D_jina_multivector")
+    assert isinstance(indexer, JinaMultivectorIndexer)
 
 
 def test_make_indexer_unknown_method() -> None:
