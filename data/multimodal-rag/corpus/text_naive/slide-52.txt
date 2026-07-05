@@ -1,0 +1,3 @@
+# slide-52
+source: slide-52.png
+title: Раздел — ИИ-ассистенты с поиском

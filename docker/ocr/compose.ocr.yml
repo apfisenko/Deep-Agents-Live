@@ -1,0 +1,13 @@
+services:
+  ocr:
+    build:
+      context: ../..
+      dockerfile: docker/ocr/Dockerfile
+    volumes:
+      - ../..:/work
+    environment:
+      SLIDE_DIR: ${SLIDE_DIR:-data/multimodal-rag}
+      OUT_DIR: ${OUT_DIR:-evals/artifacts/ocr/tesseract}
+      ENGINE: ${ENGINE:-tesseract}
+      SLIDES: ${SLIDES:-}
+      PREPROCESS: ${PREPROCESS:-dark_theme}

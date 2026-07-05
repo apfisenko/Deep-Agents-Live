@@ -1,0 +1,3 @@
+# slide-50
+source: slide-50.png
+title: За диалогом — production-система (айсберг)

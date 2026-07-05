@@ -1,0 +1,14 @@
+Local multimodal baseline run: multimodal-baseline--multimodal-s5-unanswerable--35842351--20260705T152142Z
+6 items
+collection=multimodal_baseline
+top_k=5
+
+Average Scores:
+
+Items:
+s5-01	nan	nan	nan	nan	nan	[51, 6, 45, 12, 5]	
+s5-02	nan	nan	nan	nan	nan	[59, 61, 63, 33, 52]	
+s5-03	nan	nan	nan	nan	nan	[63, 52, 62, 38, 35]	
+s5-04	nan	nan	nan	nan	nan	[63, 38, 41, 26, 52]	
+s5-05	nan	nan	nan	nan	nan	[60, 61, 18, 59, 62]	
+s5-06	nan	nan	nan	nan	nan	[52, 18, 62, 63, 59]	

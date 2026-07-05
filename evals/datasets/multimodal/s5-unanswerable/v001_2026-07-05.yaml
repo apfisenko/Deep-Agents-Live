@@ -1,0 +1,108 @@
+dataset: s5-unanswerable
+group: multimodal
+version: v001
+created: '2026-07-05'
+description: Multimodal RAG S5_unanswerable items (M06 presentation)
+items:
+- id: s5-01
+  input:
+    message: Какая выручка LLMStart за 2025?
+    channel: web
+  expected_output:
+    answer: В презентации нет данных о выручке.
+  metadata:
+    segment: b2b
+    multimodal_segment: S5_unanswerable
+    intent: s5_unanswerable
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages: []
+    facts: &id001
+    - нет в презентации
+    required_entities: *id001
+- id: s5-02
+  input:
+    message: Сколько стоит Deep Agents?
+    channel: web
+  expected_output:
+    answer: В презентации нет цены Deep Agents.
+  metadata:
+    segment: b2b
+    multimodal_segment: S5_unanswerable
+    intent: s5_unanswerable
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages: []
+    facts: &id002
+    - нет в презентации
+    required_entities: *id002
+- id: s5-03
+  input:
+    message: Сколько сотрудников в ITone?
+    channel: web
+  expected_output:
+    answer: В презентации нет данных о численности ITone.
+  metadata:
+    segment: b2b
+    multimodal_segment: S5_unanswerable
+    intent: s5_unanswerable
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages: []
+    facts: &id003
+    - нет в презентации
+    required_entities: *id003
+- id: s5-04
+  input:
+    message: В каком городе следующая конференция 1С?
+    channel: web
+  expected_output:
+    answer: В презентации не указан город следующей конференции.
+  metadata:
+    segment: b2b
+    multimodal_segment: S5_unanswerable
+    intent: s5_unanswerable
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages: []
+    facts: &id004
+    - нет в презентации
+    required_entities: *id004
+- id: s5-05
+  input:
+    message: Какая модель ИИ использовалась в кейсе РЖД?
+    channel: web
+  expected_output:
+    answer: В презентации не названа модель ИИ для кейса РЖД.
+  metadata:
+    segment: b2b
+    multimodal_segment: S5_unanswerable
+    intent: s5_unanswerable
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages: []
+    facts: &id005
+    - нет в презентации
+    required_entities: *id005
+- id: s5-06
+  input:
+    message: Какой опыт в ИИ у коллеги Александра?
+    channel: web
+  expected_output:
+    answer: В презентации нет данных об опыте коллеги Александра.
+  metadata:
+    segment: b2b
+    multimodal_segment: S5_unanswerable
+    intent: s5_unanswerable
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages: []
+    facts: &id006
+    - нет в презентации
+    required_entities: *id006

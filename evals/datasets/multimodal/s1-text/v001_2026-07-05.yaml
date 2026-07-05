@@ -1,0 +1,175 @@
+dataset: s1-text
+group: multimodal
+version: v001
+created: '2026-07-05'
+description: Multimodal RAG S1_text items (M06 presentation)
+items:
+- id: s1-01
+  input:
+    message: Как звучит правило 10x?
+    channel: web
+  expected_output:
+    answer: ИИ не умножает бизнес — делает ИИ.
+  metadata:
+    segment: b2b
+    multimodal_segment: S1_text
+    intent: s1_text
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 22
+    facts: &id001
+    - не умножает бизнес
+    - делает ИИ
+    required_entities: *id001
+- id: s1-02
+  input:
+    message: Главный тезис новой логики роста?
+    channel: web
+  expected_output:
+    answer: Минимум headcount — максимум compute.
+  metadata:
+    segment: b2b
+    multimodal_segment: S1_text
+    intent: s1_text
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 6
+    facts: &id002
+    - минимум headcount
+    - максимум compute
+    required_entities: *id002
+- id: s1-03
+  input:
+    message: Вождению или сборке учимся, и вывод?
+    channel: web
+  expected_output:
+    answer: Каждую задачу — сначала через ИИ.
+  metadata:
+    segment: b2b
+    multimodal_segment: S1_text
+    intent: s1_text
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 17
+    facts: &id003
+    - каждую задачу
+    - сначала через ИИ
+    required_entities: *id003
+- id: s1-04
+  input:
+    message: Кто победит — громкий или системный?
+    channel: web
+  expected_output:
+    answer: Не громкий — а системный.
+  metadata:
+    segment: b2b
+    multimodal_segment: S1_text
+    intent: s1_text
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 14
+    facts: &id004
+    - не громкий
+    - системный
+    required_entities: *id004
+- id: s1-05
+  input:
+    message: Три способа двигаться вперёд?
+    channel: web
+  expected_output:
+    answer: Тренинги / трансформация / разработка под ключ.
+  metadata:
+    segment: b2b
+    multimodal_segment: S1_text
+    intent: s1_text
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 64
+    facts: &id005
+    - тренинги
+    - трансформация
+    - разработка под ключ
+    required_entities: *id005
+- id: s1-06
+  input:
+    message: Чем AI является между идеей и реализацией?
+    channel: web
+  expected_output:
+    answer: Мультипликатор, убирает барьер.
+  metadata:
+    segment: b2b
+    multimodal_segment: S1_text
+    intent: s1_text
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 47
+    facts: &id006
+    - мультипликатор
+    - убирает барьер
+    required_entities: *id006
+- id: s1-07
+  input:
+    message: Как воспринимать ИИ на ступени 1?
+    channel: web
+  expected_output:
+    answer: Способный новый сотрудник.
+  metadata:
+    segment: b2b
+    multimodal_segment: S1_text
+    intent: s1_text
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 16
+    facts: &id007
+    - способный новый сотрудник
+    required_entities: *id007
+- id: s1-08
+  input:
+    message: Во что превращается 1С-специалист с ИИ?
+    channel: web
+  expected_output:
+    answer: Отраслевой AI-эксперт.
+  metadata:
+    segment: b2b
+    multimodal_segment: S1_text
+    intent: s1_text
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 13
+    facts: &id008
+    - отраслевой AI-эксперт
+    required_entities: *id008
+- id: s1-09
+  input:
+    message: Что отделяет кандидата без ИИ от с ИИ?
+    channel: web
+  expected_output:
+    answer: Уже не тот кандидат.
+  metadata:
+    segment: b2b
+    multimodal_segment: S1_text
+    intent: s1_text
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 27
+    facts: &id009
+    - уже не тот кандидат
+    required_entities: *id009

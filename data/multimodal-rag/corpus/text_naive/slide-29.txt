@@ -1,0 +1,3 @@
+# slide-29
+source: slide-29.png
+title: Коттер 1+2 — Срочность и коалиция

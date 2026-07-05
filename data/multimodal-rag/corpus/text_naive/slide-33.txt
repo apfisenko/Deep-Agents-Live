@@ -1,0 +1,3 @@
+# slide-33
+source: slide-33.png
+title: Кейс — Банк, AI-стратегия

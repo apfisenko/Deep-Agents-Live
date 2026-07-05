@@ -1,0 +1,3 @@
+# slide-38
+source: slide-38.png
+title: Корпоративная ИИ-платформа

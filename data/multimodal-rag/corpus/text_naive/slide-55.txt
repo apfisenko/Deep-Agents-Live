@@ -1,0 +1,3 @@
+# slide-55
+source: slide-55.png
+title: Раздел — Прикладные ассистенты

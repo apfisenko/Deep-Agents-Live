@@ -1,0 +1,3 @@
+# slide-57
+source: slide-57.png
+title: Кейс — Новостное агентство

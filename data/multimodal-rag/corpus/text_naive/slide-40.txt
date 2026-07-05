@@ -1,0 +1,3 @@
+# slide-40
+source: slide-40.png
+title: Коттер 8 — Культура

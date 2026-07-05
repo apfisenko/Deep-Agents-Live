@@ -1,0 +1,3 @@
+# slide-62
+source: slide-62.png
+title: Кейс — ИИ-менеджеры по продажам

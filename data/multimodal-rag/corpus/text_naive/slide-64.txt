@@ -1,0 +1,3 @@
+# slide-64
+source: slide-64.png
+title: Как двигаться вперёд

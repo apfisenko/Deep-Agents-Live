@@ -55,6 +55,7 @@
 | G6 Follow-up / nurture | 3/5 | `e2e/e2e-qa` (isolated turns только) |
 | G7 B2B сегментация | 1/5 | `behavior/segment-routing` |
 | **GraphRAG** single / multi / global (каталог B2C) | sprint-06 | `graphrag/single-hop`, `graphrag/multi-hop`, `graphrag/global` — маршруты retrieval: [`schema.md`](../sprints/sprint-06-graphrag/schema.md) §3 |
+| **Multimodal RAG** S1–S5 (B2B-презентация 66 PNG) | sprint-07 | `multimodal/s1-text` … `multimodal/s5-unanswerable` — [`analysis.md`](../sprints/sprint-07-multimodal-rag/analysis.md) |
 
 ---
 
@@ -222,6 +223,26 @@
 **Baseline-отчёт:** [`evals/reports/graphrag-baseline.md`](../../evals/reports/graphrag-baseline.md).
 
 **LPG-схема и boundary:** [`schema.md`](../sprints/sprint-06-graphrag/schema.md) · **ADR:** [`0007-neo4j-graphrag.md`](../decisions/0007-neo4j-graphrag.md).
+
+---
+
+### multimodal/s1-text · s2-chart · s3-layout · s4-multi · s5-unanswerable
+
+*Sprint-07: 42 items; источник [`data/multimodal-rag/dataset/v001_2026-06-18.yaml`](../../data/multimodal-rag/dataset/v001_2026-06-18.yaml).*
+
+| Slug | Сегмент | Items | Что проверяет |
+|------|---------|------:|---------------|
+| `multimodal/s1-text` | S1_text | 9 | Текст-в-тексте |
+| `multimodal/s2-chart` | S2_chart | 11 | Чтение чартов (пиксели) |
+| `multimodal/s3-layout` | S3_layout | 10 | Схема / layout |
+| `multimodal/s4-multi` | S4_multi | 6 | Multi-slide агрегация |
+| `multimodal/s5-unanswerable` | S5_unanswerable | 6 | Ненаходимое (ловушка) |
+
+**Схема item:** `gold_pages[]` (1–66; S5 = `[]`); `multimodal_segment`; `facts[]` / `required_entities[]`.
+
+**Eval-config:** [`multimodal-baseline.yaml`](../../evals/configs/multimodal-baseline.yaml) · отчёт [`multimodal-baseline.md`](../../evals/reports/multimodal-baseline.md).
+
+**Сравнение per segment** — union average запрещён.
 
 ---
 

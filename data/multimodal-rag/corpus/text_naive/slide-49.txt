@@ -1,0 +1,3 @@
+# slide-49
+source: slide-49.png
+title: Ловушка пилота — 88%

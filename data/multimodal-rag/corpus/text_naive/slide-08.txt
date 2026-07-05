@@ -1,0 +1,3 @@
+# slide-08
+source: slide-08.png
+title: Цитата Amodei

@@ -1,0 +1,3 @@
+# slide-28
+source: slide-28.png
+title: Ступень 3 — Вводный (Коттер)

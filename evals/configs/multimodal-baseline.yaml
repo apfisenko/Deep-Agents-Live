@@ -1,0 +1,51 @@
+# Sprint-07 multimodal baseline: naive text → e5 → Qdrant (retrieval per segment).
+config_id: multimodal-baseline
+comment: "Sprint-07 task 02: naive text corpus, dense retrieval, segment metrics S1–S5"
+
+benchmark_only: false
+
+indexer:
+  method: baseline
+  corpus_dir: data/multimodal-rag/corpus/text_naive
+
+agent:
+  impl: langchain-react
+  api_url: ${BACKEND_URL}/api/v1/chat
+
+retrieval:
+  backend: qdrant
+
+vector_db:
+  engine: qdrant
+  server_image: qdrant/qdrant:v1.18.1
+  client: qdrant-client==1.18.0
+  collection: multimodal_baseline
+  embedding_model: intfloat/multilingual-e5-large
+  chunk_size: 800
+  chunk_overlap: 0
+  top_k: 5
+  langfuse_dataset: multimodal_baseline_v001
+
+model:
+  provider: openrouter
+  name: ${LLM_MODEL}
+  temperature: ${LLM_TEMPERATURE}
+
+judge:
+  provider: openrouter
+  name: ${EVAL_JUDGE_MODEL}
+  temperature: ${EVAL_JUDGE_TEMPERATURE}
+
+prompt:
+  source: file
+  path: ${SYSTEM_PROMPT_PATH}
+  name: SYSTEM_PROMPT_SEARCH_FALLBACK
+
+datasets:
+  s1-text: v001
+  s2-chart: v001
+  s3-layout: v001
+  s4-multi: v001
+  s5-unanswerable: v001
+
+extra_evaluators: []

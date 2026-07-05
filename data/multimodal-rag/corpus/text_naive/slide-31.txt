@@ -1,0 +1,3 @@
+# slide-31
+source: slide-31.png
+title: Кейс — Айтон

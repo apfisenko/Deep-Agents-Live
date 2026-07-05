@@ -1,0 +1,309 @@
+dataset: m06-presentation
+group: mmrag
+version: v001
+created: "2026-06-18"
+description: >
+  M06 Multimodal RAG: 42 вопроса по презентации «Дорожная карта AI-first» (66 слайдов).
+  Сегменты S1–S5 из анализа корпуса. Ground truth — слайды + speaker notes.
+
+items:
+  # --- S1 · текст-в-тексте (9) ---
+  - id: s1-01
+    segment: S1_text
+    question: "Как звучит правило 10x?"
+    gold_pages: [22]
+    reference_answer: "ИИ не умножает бизнес — делает ИИ."
+    required_facts: ["не умножает бизнес", "делает ИИ"]
+
+  - id: s1-02
+    segment: S1_text
+    question: "Главный тезис новой логики роста?"
+    gold_pages: [6]
+    reference_answer: "Минимум headcount — максимум compute."
+    required_facts: ["минимум headcount", "максимум compute"]
+
+  - id: s1-03
+    segment: S1_text
+    question: "Вождению или сборке учимся, и вывод?"
+    gold_pages: [17]
+    reference_answer: "Каждую задачу — сначала через ИИ."
+    required_facts: ["каждую задачу", "сначала через ИИ"]
+
+  - id: s1-04
+    segment: S1_text
+    question: "Кто победит — громкий или системный?"
+    gold_pages: [14]
+    reference_answer: "Не громкий — а системный."
+    required_facts: ["не громкий", "системный"]
+
+  - id: s1-05
+    segment: S1_text
+    question: "Три способа двигаться вперёд?"
+    gold_pages: [64]
+    reference_answer: "Тренинги / трансформация / разработка под ключ."
+    required_facts: ["тренинги", "трансформация", "разработка под ключ"]
+
+  - id: s1-06
+    segment: S1_text
+    question: "Чем AI является между идеей и реализацией?"
+    gold_pages: [47]
+    reference_answer: "Мультипликатор, убирает барьер."
+    required_facts: ["мультипликатор", "убирает барьер"]
+
+  - id: s1-07
+    segment: S1_text
+    question: "Как воспринимать ИИ на ступени 1?"
+    gold_pages: [16]
+    reference_answer: "Способный новый сотрудник."
+    required_facts: ["способный новый сотрудник"]
+
+  - id: s1-08
+    segment: S1_text
+    question: "Во что превращается 1С-специалист с ИИ?"
+    gold_pages: [13]
+    reference_answer: "Отраслевой AI-эксперт."
+    required_facts: ["отраслевой AI-эксперт"]
+
+  - id: s1-09
+    segment: S1_text
+    question: "Что отделяет кандидата без ИИ от с ИИ?"
+    gold_pages: [27]
+    reference_answer: "Уже не тот кандидат."
+    required_facts: ["уже не тот кандидат"]
+
+  # --- S2 · чтение чарта (11) ---
+  - id: s2-01
+    segment: S2_chart
+    question: "Какой отдел чаще всего внедряет ИИ-агентов и сколько %?"
+    gold_pages: [10]
+    reference_answer: "Поддержка клиентов, 49%."
+    required_facts: ["Поддержка клиентов", "49%"]
+
+  - id: s2-02
+    segment: S2_chart
+    question: "Какой % компаний использует или тестирует агентов?"
+    gold_pages: [10]
+    reference_answer: "72%."
+    required_facts: ["72%"]
+
+  - id: s2-03
+    segment: S2_chart
+    question: "Какой % компаний планирует рост инвестиций в 2026?"
+    gold_pages: [10]
+    reference_answer: "84%."
+    required_facts: ["84%"]
+
+  - id: s2-04
+    segment: S2_chart
+    question: "Где в РФ автоматизируют сильнее всего и какой %?"
+    gold_pages: [11]
+    reference_answer: "Документооборот, 70%."
+    required_facts: ["Документооборот", "70%"]
+
+  - id: s2-05
+    segment: S2_chart
+    question: "На сколько снижается ФОТ на поддержке в РФ?"
+    gold_pages: [11]
+    reference_answer: "−30–40%."
+    required_facts: ["−30–40%", "30-40%"]
+
+  - id: s2-06
+    segment: S2_chart
+    question: "Насколько быстрее выполняются задачи с ИИ в РФ?"
+    gold_pages: [11]
+    reference_answer: "45%."
+    required_facts: ["45%"]
+
+  - id: s2-07
+    segment: S2_chart
+    question: "В каком году кривая автономности достигает 100%?"
+    gold_pages: [9]
+    reference_answer: "2028."
+    required_facts: ["2028"]
+
+  - id: s2-08
+    segment: S2_chart
+    question: "Какой % кода написан AI в Google Q4 2025?"
+    gold_pages: [9]
+    reference_answer: "~50%."
+    required_facts: ["50%"]
+
+  - id: s2-09
+    segment: S2_chart
+    question: "Какой % компаний не вышел за рамки пилота?"
+    gold_pages: [49]
+    reference_answer: "88%."
+    required_facts: ["88%"]
+
+  - id: s2-10
+    segment: S2_chart
+    question: "Какой % начинающих исчезает с рынка за 1–5 лет?"
+    gold_pages: [8]
+    reference_answer: "50%."
+    required_facts: ["50%"]
+
+  - id: s2-11
+    segment: S2_chart
+    question: "В скольких % компаний РФ уже есть ИИ?"
+    gold_pages: [11]
+    reference_answer: "39%."
+    required_facts: ["39%"]
+
+  # --- S3 · схема / расположение (10) ---
+  - id: s3-01
+    segment: S3_layout
+    question: "Что на верхней ступени дорожной карты из 5?"
+    gold_pages: [15]
+    reference_answer: "Промышленный уровень — production."
+    required_facts: ["промышленный", "production"]
+
+  - id: s3-02
+    segment: S3_layout
+    question: "Что на первой (нижней) ступени дорожной карты?"
+    gold_pages: [15]
+    reference_answer: "Первые шаги — кругозор."
+    required_facts: ["первые шаги", "кругозор"]
+
+  - id: s3-03
+    segment: S3_layout
+    question: "Что на уровне 3 (основание) айсберга?"
+    gold_pages: [50]
+    reference_answer: "Eval, Observability, Guards, Memory, Skills."
+    required_facts: ["Eval", "Observability", "Guards", "Memory", "Skills"]
+
+  - id: s3-04
+    segment: S3_layout
+    question: "Что на вершине айсберга?"
+    gold_pages: [50]
+    reference_answer: "Чатбот / агент."
+    required_facts: ["чатбот", "агент"]
+
+  - id: s3-05
+    segment: S3_layout
+    question: "Из чего фундамент «дома культуры» (шаг 8 Коттера)?"
+    gold_pages: [40]
+    reference_answer: "Политики, AI Governance, Найм с ИИ."
+    required_facts: ["Политики", "AI Governance", "Найм с ИИ"]
+
+  - id: s3-06
+    segment: S3_layout
+    question: "Что является «крышей» дома культуры?"
+    gold_pages: [40]
+    reference_answer: "Культура: ИИ в работе — стандарт."
+    required_facts: ["культура", "ИИ в работе", "стандарт"]
+
+  - id: s3-07
+    segment: S3_layout
+    question: "Какие пять слоёв корпоративной ИИ-платформы?"
+    gold_pages: [38]
+    reference_answer: "OpenWebUI / LiteLLM / Ollama / OpenRouter / MCP."
+    required_facts: ["OpenWebUI", "LiteLLM", "Ollama", "OpenRouter", "MCP"]
+
+  - id: s3-08
+    segment: S3_layout
+    question: "Что на Layer 2 платформы?"
+    gold_pages: [38]
+    reference_answer: "LiteLLM Proxy."
+    required_facts: ["LiteLLM"]
+
+  - id: s3-09
+    segment: S3_layout
+    question: "Какие два пути запроса на ИИ на слайде «СТАРТ»?"
+    gold_pages: [4]
+    reference_answer: "Учредитель / сотрудник."
+    required_facts: ["учредитель", "сотрудник"]
+
+  - id: s3-10
+    segment: S3_layout
+    question: "Какие три стадии шага 3 модели Коттера?"
+    gold_pages: [32]
+    reference_answer: "Аудит → матрица 2×2 → топ-3 пилота."
+    required_facts: ["аудит", "матрица", "пилота"]
+
+  # --- S4 · многослайдовый / агрегация (6) ---
+  - id: s4-01
+    segment: S4_multi
+    question: "Перечисли все этапы модели Коттера из презентации."
+    gold_pages: [28, 29, 32, 34, 37, 39, 40]
+    reference_answer: >
+      8 шагов: срочность; коалиция; видение и стратегия; коммуникация;
+      победы; препятствия; закрепление; культура.
+    required_facts: ["срочность", "коалиция", "видение", "коммуникация", "победы", "культура"]
+
+  - id: s4-02
+    segment: S4_multi
+    question: "Какие шесть бизнес-инструментов в кейсах выпускников?"
+    gold_pages: [45]
+    reference_answer: "6 карточек бизнес-кейсов выпускников."
+    required_facts: ["6", "кейс"]
+
+  - id: s4-03
+    segment: S4_multi
+    question: "Какие пять ключевых тем «что знать и уметь»?"
+    gold_pages: [43]
+    reference_answer: "AIDD / промпт / RAG / агенты / качество."
+    required_facts: ["AIDD", "промпт", "RAG", "агенты", "качество"]
+
+  - id: s4-04
+    segment: S4_multi
+    question: "Для каких компаний показаны кейсы с метриками?"
+    gold_pages: [53, 54, 56, 57, 58, 60, 61, 62, 63]
+    reference_answer: "МФЦ, RUTUBE, ПрогрессАгро, РЖД, банк, ITone и др."
+    required_facts: ["МФЦ", "RUTUBE", "РЖД"]
+
+  - id: s4-05
+    segment: S4_multi
+    question: "Какие пять ступеней дорожной карты по порядку?"
+    gold_pages: [15]
+    reference_answer: "5 ступеней дорожной карты AI-first трансформации."
+    required_facts: ["5 ступеней"]
+
+  - id: s4-06
+    segment: S4_multi
+    question: "Какие четыре станции программы доклада?"
+    gold_pages: [3]
+    reference_answer: "Почему сейчас / карта / кейсы / дальше."
+    required_facts: ["почему сейчас", "карта", "кейсы", "дальше"]
+
+  # --- S5 · ненаходимое — ловушка (6) ---
+  - id: s5-01
+    segment: S5_unanswerable
+    question: "Какая выручка LLMStart за 2025?"
+    gold_pages: []
+    reference_answer: "В презентации нет данных о выручке."
+    required_facts: []
+
+  - id: s5-02
+    segment: S5_unanswerable
+    question: "Сколько стоит Deep Agents?"
+    gold_pages: []
+    reference_answer: "В презентации нет цены Deep Agents."
+    required_facts: []
+
+  - id: s5-03
+    segment: S5_unanswerable
+    question: "Сколько сотрудников в ITone?"
+    gold_pages: []
+    reference_answer: "В презентации нет данных о численности ITone."
+    required_facts: []
+
+  - id: s5-04
+    segment: S5_unanswerable
+    question: "В каком городе следующая конференция 1С?"
+    gold_pages: []
+    reference_answer: "В презентации не указан город следующей конференции."
+    required_facts: []
+
+  - id: s5-05
+    segment: S5_unanswerable
+    question: "Какая модель ИИ использовалась в кейсе РЖД?"
+    gold_pages: []
+    reference_answer: "В презентации не названа модель ИИ для кейса РЖД."
+    required_facts: []
+
+  - id: s5-06
+    segment: S5_unanswerable
+    question: "Какой опыт в ИИ у коллеги Александра?"
+    gold_pages: []
+    reference_answer: "В презентации нет данных об опыте коллеги Александра."
+    required_facts: []

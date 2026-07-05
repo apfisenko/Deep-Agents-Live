@@ -1,0 +1,3 @@
+# slide-21
+source: slide-21.png
+title: Ступень 2 — Систематизация

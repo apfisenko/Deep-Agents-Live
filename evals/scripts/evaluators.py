@@ -26,6 +26,15 @@ from ragas.metrics.collections import (
     Faithfulness,
 )
 
+from multimodal_metrics import (
+    gold_page_recall_at_k,
+    gold_page_set_recall_at_k,
+    mrr as gold_page_mrr,
+    ndcg_at_k,
+    pages_from_contexts,
+    unanswerable_refusal_score,
+)
+
 _JUDGE_RETRY_ATTEMPTS = int(os.environ.get("EVAL_JUDGE_RETRY_ATTEMPTS", "6"))
 _JUDGE_RETRY_BASE_SEC = float(os.environ.get("EVAL_JUDGE_RETRY_BASE_SEC", "20"))
 _JUDGE_MIN_INTERVAL_SEC = float(os.environ.get("EVAL_JUDGE_MIN_INTERVAL_SEC", "1.5"))
@@ -349,6 +358,19 @@ def evaluator_names_for_slug(
     )
     for graphrag_slug in ("graphrag/multi-hop", "graphrag/global", "graphrag/single-hop"):
         mapping[graphrag_slug] = graphrag_profile
+    multimodal_retrieval_profile = (
+        "task_error",
+        "gold_page_recall_at_5",
+        "ndcg_at_5",
+        "mrr",
+    )
+    multimodal_s4_profile = multimodal_retrieval_profile + ("gold_page_set_recall_at_5",)
+    multimodal_s5_profile = ("task_error", "unanswerable_refusal_rate")
+    mapping["multimodal/s1-text"] = multimodal_retrieval_profile
+    mapping["multimodal/s2-chart"] = multimodal_retrieval_profile
+    mapping["multimodal/s3-layout"] = multimodal_retrieval_profile
+    mapping["multimodal/s4-multi"] = multimodal_s4_profile
+    mapping["multimodal/s5-unanswerable"] = multimodal_s5_profile
     if slug not in mapping:
         msg = f"No evaluator profile for {dataset_slug}"
         raise ValueError(msg)
@@ -606,6 +628,97 @@ def make_item_evaluators(
             )
 
         evaluators.append(required_entity_recall_at_5)
+
+    if "gold_page_recall_at_5" in names:
+
+        def gold_page_recall_at_5(*, output: Any, metadata: Any = None, **_kw: Any) -> Evaluation:
+            _, contexts, _, err = _unwrap_output(output)
+            if err:
+                return Evaluation(name="gold_page_recall_at_5", value=0.0, comment=err)
+            meta = _metadata_dict(metadata)
+            gold_pages = [int(p) for p in meta.get("gold_pages") or []]
+            if not gold_pages:
+                return Evaluation(
+                    name="gold_page_recall_at_5",
+                    value=0.0,
+                    comment="no gold_pages",
+                )
+            pages = pages_from_contexts(contexts or [])
+            value = gold_page_recall_at_k(pages, gold_pages, k=5)
+            return Evaluation(
+                name="gold_page_recall_at_5",
+                value=value,
+                comment=f"pages={pages[:5]} gold={gold_pages}",
+            )
+
+        evaluators.append(gold_page_recall_at_5)
+
+    if "ndcg_at_5" in names:
+
+        def ndcg_at_5(*, output: Any, metadata: Any = None, **_kw: Any) -> Evaluation:
+            _, contexts, _, err = _unwrap_output(output)
+            if err:
+                return Evaluation(name="ndcg_at_5", value=0.0, comment=err)
+            meta = _metadata_dict(metadata)
+            gold_pages = [int(p) for p in meta.get("gold_pages") or []]
+            if not gold_pages:
+                return Evaluation(name="ndcg_at_5", value=0.0, comment="no gold_pages")
+            pages = pages_from_contexts(contexts or [])
+            value = ndcg_at_k(pages, gold_pages, k=5)
+            return Evaluation(name="ndcg_at_5", value=value, comment=f"pages={pages[:5]}")
+
+        evaluators.append(ndcg_at_5)
+
+    if "mrr" in names:
+
+        def mrr(*, output: Any, metadata: Any = None, **_kw: Any) -> Evaluation:
+            _, contexts, _, err = _unwrap_output(output)
+            if err:
+                return Evaluation(name="mrr", value=0.0, comment=err)
+            meta = _metadata_dict(metadata)
+            gold_pages = [int(p) for p in meta.get("gold_pages") or []]
+            if not gold_pages:
+                return Evaluation(name="mrr", value=0.0, comment="no gold_pages")
+            pages = pages_from_contexts(contexts or [])
+            value = gold_page_mrr(pages, gold_pages)
+            return Evaluation(name="mrr", value=value, comment=f"pages={pages[:5]}")
+
+        evaluators.append(mrr)
+
+    if "gold_page_set_recall_at_5" in names:
+
+        def gold_page_set_recall_at_5(*, output: Any, metadata: Any = None, **_kw: Any) -> Evaluation:
+            _, contexts, _, err = _unwrap_output(output)
+            if err:
+                return Evaluation(name="gold_page_set_recall_at_5", value=0.0, comment=err)
+            meta = _metadata_dict(metadata)
+            gold_pages = [int(p) for p in meta.get("gold_pages") or []]
+            if not gold_pages:
+                return Evaluation(name="gold_page_set_recall_at_5", value=0.0, comment="no gold_pages")
+            pages = pages_from_contexts(contexts or [])
+            value = gold_page_set_recall_at_k(pages, gold_pages, k=5)
+            return Evaluation(
+                name="gold_page_set_recall_at_5",
+                value=value,
+                comment=f"all_in_top5={bool(value)} pages={pages[:5]} gold={gold_pages}",
+            )
+
+        evaluators.append(gold_page_set_recall_at_5)
+
+    if "unanswerable_refusal_rate" in names:
+
+        def unanswerable_refusal_rate(*, output: Any, **_kw: Any) -> Evaluation:
+            answer, _, _, err = _unwrap_output(output)
+            if err:
+                return Evaluation(name="unanswerable_refusal_rate", value=0.0, comment=err)
+            value = unanswerable_refusal_score(answer or "")
+            return Evaluation(
+                name="unanswerable_refusal_rate",
+                value=value,
+                comment="refusal=1.0 means explicit 'not in deck'",
+            )
+
+        evaluators.append(unanswerable_refusal_rate)
 
     if "tool_correctness" in names:
 

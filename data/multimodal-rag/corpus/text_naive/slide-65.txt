@@ -1,0 +1,3 @@
+# slide-65
+source: slide-65.png
+title: AI First Club

@@ -1,0 +1,3 @@
+# slide-23
+source: slide-23.png
+title: Кейсы Э2 — Безопасность

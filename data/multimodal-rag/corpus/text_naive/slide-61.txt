@@ -1,0 +1,3 @@
+# slide-61
+source: slide-61.png
+title: Кейс — Банковский ИИ-агент

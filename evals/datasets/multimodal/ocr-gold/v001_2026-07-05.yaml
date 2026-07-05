@@ -1,0 +1,144 @@
+version: v001_2026-07-05
+comment: >
+  Gold reference text for OCR CER (~10 slides). Transcribed from visible PNG text.
+  Draft for user review on slides 9, 10, 11 before final CER run.
+
+slides:
+  - slide_number: 2
+    content_type: text
+    notes: Profile slide — pure Russian text
+    reference_text: |
+      Кто я
+      Сергей Смирнов, к.т.н.
+      Основатель LLMStart.ru
+      20+ лет разработка · 10+ лет ИИ
+      12+ AI-проектов в production
+      6 побед в ИИ-хакатонах
+      LLMSTART.RU
+
+  - slide_number: 9
+    content_type: chart
+    notes: REVIEW — curve years and percentages on chart
+    reference_text: |
+      Код уже не главное
+      Google Q4 2025
+      ~50% кода пишет AI
+      Anthropic
+      100% кода пишет AI
+      GitHub
+      100% кода пишет AI
+      2024
+      10%
+      2026
+      40%
+      2028
+      100%
+      LLMSTART.RU
+
+  - slide_number: 10
+    content_type: chart
+    notes: REVIEW — bar chart department percentages
+    reference_text: |
+      КАК КОМПАНИИ УЖЕ ИСПОЛЬЗУЮТ ИИ-АГЕНТОВ
+      72%
+      компаний активно используют или тестируют ИИ-агентов
+      Какие отделы внедряют ИИ-агентов?
+      Поддержка клиентов — 49%
+      Операции — 47%
+      Разработка — 35%
+      Маркетинг — 31%
+      HR — 30%
+      Zapier State of Agentic AI Survey, 2025
+      84%
+      планируют увеличить инвестиции в ИИ-агентов в 2026
+      LLMSTART.RU
+
+  - slide_number: 11
+    content_type: chart
+    notes: REVIEW — SberAnalytics bars and effect cards
+    reference_text: |
+      ЦИФРЫ РФ — СБЕРАНАЛИТИКА
+      39% компаний уже используют ИИ
+      Где автоматизируют?
+      Документооборот — 70%
+      Продажи — 55%
+      HR — 45%
+      Поддержка — 40%
+      Эффекты
+      Ускорение процессов — 45%
+      Снижение ФОТ — 30–40%
+      Рост выручки — 25%
+      LLMSTART.RU
+
+  - slide_number: 15
+    content_type: layout
+    notes: Five steps ladder
+    reference_text: |
+      5 СТУПЕНЕЙ AI-FIRST ТРАНСФОРМАЦИИ
+      Ступень 1 — Первое знакомство
+      Ступень 2 — Систематизация
+      Ступень 3 — Трансформация
+      Ступень 4 — Быстрый запуск
+      Ступень 5 — Стабильные рельсы
+      LLMSTART.RU
+
+  - slide_number: 18
+    content_type: text
+    notes: Case study text
+    reference_text: |
+      Кейсы — Этап 1
+      Аналитик
+      CRM-ассистент
+      Deep Research
+      LLMSTART.RU
+
+  - slide_number: 32
+    content_type: layout
+    notes: Kotter 3 — 2x2 matrix
+    reference_text: |
+      Коттер 3 — Видение
+      High Value / Low Complexity
+      High Value / High Complexity
+      Low Value / Low Complexity
+      Low Value / High Complexity
+      LLMSTART.RU
+
+  - slide_number: 38
+    content_type: layout
+    notes: Corporate AI platform layers
+    reference_text: |
+      Корпоративная ИИ-платформа
+      Слой 0 — Данные
+      Слой 1 — Модели
+      Слой 2 — Оркестрация
+      LiteLLM
+      Слой 3 — Агенты
+      Слой 4 — Интерфейсы
+      LLMSTART.RU
+
+  - slide_number: 44
+    content_type: chart
+    notes: Profession percentages 24/52/24
+    reference_text: |
+      Кто это делает
+      24%
+      52%
+      24%
+      Разработчики
+      Аналитики
+      Менеджеры
+      Дизайнеры
+      Маркетологи
+      LLMSTART.RU
+
+  - slide_number: 61
+    content_type: layout
+    notes: Banking agent pipeline diagram
+    reference_text: |
+      Банковский AI-агент
+      60% запросов без оператора
+      5 инструментов
+      Клиент
+      AI-агент
+      Оператор
+      LLMSTART.RU

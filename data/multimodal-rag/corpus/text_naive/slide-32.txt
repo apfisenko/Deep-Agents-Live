@@ -1,0 +1,3 @@
+# slide-32
+source: slide-32.png
+title: Коттер 3 — Видение

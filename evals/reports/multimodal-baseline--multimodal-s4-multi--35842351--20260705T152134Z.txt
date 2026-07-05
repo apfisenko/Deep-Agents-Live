@@ -1,0 +1,18 @@
+Local multimodal baseline run: multimodal-baseline--multimodal-s4-multi--35842351--20260705T152134Z
+6 items
+collection=multimodal_baseline
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 0.573
+  • avg_gold_page_set_recall_at_5: 0.333
+  • avg_mrr: 0.708
+  • avg_ndcg_at_5: 0.648
+
+Items:
+s4-01	0.714	1.000	1.000	0.000	nan	[34, 39, 29, 28, 37]	
+s4-02	1.000	1.000	1.000	1.000	nan	[45, 46, 62, 18, 20]	
+s4-03	1.000	1.000	1.000	1.000	nan	[43, 45, 18, 5, 17]	
+s4-04	0.222	0.277	0.250	0.000	nan	[18, 20, 45, 62, 63]	
+s4-05	0.500	0.613	1.000	0.000	nan	[15, 64, 28, 21, 48]	
+s4-06	0.000	0.000	0.000	0.000	nan	[57, 11, 34, 59, 50]	

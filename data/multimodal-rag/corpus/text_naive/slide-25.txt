@@ -1,0 +1,3 @@
+# slide-25
+source: slide-25.png
+title: Кейсы Э2 — Vibe-coding

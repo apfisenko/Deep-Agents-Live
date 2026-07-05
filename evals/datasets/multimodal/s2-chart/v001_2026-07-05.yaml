@@ -1,0 +1,207 @@
+dataset: s2-chart
+group: multimodal
+version: v001
+created: '2026-07-05'
+description: Multimodal RAG S2_chart items (M06 presentation)
+items:
+- id: s2-01
+  input:
+    message: Какой отдел чаще всего внедряет ИИ-агентов и сколько %?
+    channel: web
+  expected_output:
+    answer: Поддержка клиентов, 49%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 10
+    facts: &id001
+    - Поддержка клиентов
+    - 49%
+    required_entities: *id001
+- id: s2-02
+  input:
+    message: Какой % компаний использует или тестирует агентов?
+    channel: web
+  expected_output:
+    answer: 72%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 10
+    facts: &id002
+    - 72%
+    required_entities: *id002
+- id: s2-03
+  input:
+    message: Какой % компаний планирует рост инвестиций в 2026?
+    channel: web
+  expected_output:
+    answer: 84%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 10
+    facts: &id003
+    - 84%
+    required_entities: *id003
+- id: s2-04
+  input:
+    message: Где в РФ автоматизируют сильнее всего и какой %?
+    channel: web
+  expected_output:
+    answer: Документооборот, 70%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 11
+    facts: &id004
+    - Документооборот
+    - 70%
+    required_entities: *id004
+- id: s2-05
+  input:
+    message: На сколько снижается ФОТ на поддержке в РФ?
+    channel: web
+  expected_output:
+    answer: −30–40%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 11
+    facts: &id005
+    - −30–40%
+    - 30-40%
+    required_entities: *id005
+- id: s2-06
+  input:
+    message: Насколько быстрее выполняются задачи с ИИ в РФ?
+    channel: web
+  expected_output:
+    answer: 45%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 11
+    facts: &id006
+    - 45%
+    required_entities: *id006
+- id: s2-07
+  input:
+    message: В каком году кривая автономности достигает 100%?
+    channel: web
+  expected_output:
+    answer: '2028.'
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 9
+    facts: &id007
+    - '2028'
+    required_entities: *id007
+- id: s2-08
+  input:
+    message: Какой % кода написан AI в Google Q4 2025?
+    channel: web
+  expected_output:
+    answer: ~50%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 9
+    facts: &id008
+    - 50%
+    required_entities: *id008
+- id: s2-09
+  input:
+    message: Какой % компаний не вышел за рамки пилота?
+    channel: web
+  expected_output:
+    answer: 88%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 49
+    facts: &id009
+    - 88%
+    required_entities: *id009
+- id: s2-10
+  input:
+    message: Какой % начинающих исчезает с рынка за 1–5 лет?
+    channel: web
+  expected_output:
+    answer: 50%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 8
+    facts: &id010
+    - 50%
+    required_entities: *id010
+- id: s2-11
+  input:
+    message: В скольких % компаний РФ уже есть ИИ?
+    channel: web
+  expected_output:
+    answer: 39%.
+  metadata:
+    segment: b2b
+    multimodal_segment: S2_chart
+    intent: s2_chart
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 11
+    facts: &id011
+    - 39%
+    required_entities: *id011

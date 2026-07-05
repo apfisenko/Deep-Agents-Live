@@ -1,0 +1,3 @@
+# slide-44
+source: slide-44.png
+title: Кто это делает

@@ -1,0 +1,3 @@
+# slide-42
+source: slide-42.png
+title: Ступень 4 — Быстрый AI-запуск

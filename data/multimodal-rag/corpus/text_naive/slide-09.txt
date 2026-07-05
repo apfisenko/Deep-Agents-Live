@@ -1,0 +1,3 @@
+# slide-09
+source: slide-09.png
+title: Код уже не главное

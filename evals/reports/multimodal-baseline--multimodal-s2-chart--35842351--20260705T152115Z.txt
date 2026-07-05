@@ -1,0 +1,22 @@
+Local multimodal baseline run: multimodal-baseline--multimodal-s2-chart--35842351--20260705T152115Z
+11 items
+collection=multimodal_baseline
+top_k=5
+
+Average Scores:
+  • avg_gold_page_recall_at_5: 0.455
+  • avg_mrr: 0.394
+  • avg_ndcg_at_5: 0.409
+
+Items:
+s2-01	0.000	0.000	0.000	nan	nan	[59, 61, 52, 63, 62]	
+s2-02	0.000	0.000	0.000	nan	nan	[59, 63, 57, 61, 62]	
+s2-03	0.000	0.000	0.000	nan	nan	[5, 38, 12, 6, 33]	
+s2-04	1.000	1.000	1.000	nan	nan	[11, 5, 21, 24, 52]	
+s2-05	1.000	1.000	1.000	nan	nan	[11, 47, 48, 6, 49]	
+s2-06	1.000	0.500	0.333	nan	nan	[5, 52, 11, 42, 59]	
+s2-07	0.000	0.000	0.000	nan	nan	[5, 47, 11, 17, 24]	
+s2-08	0.000	0.000	0.000	nan	nan	[33, 42, 24, 65, 5]	
+s2-09	1.000	1.000	1.000	nan	nan	[49, 38, 42, 12, 59]	
+s2-10	0.000	0.000	0.000	nan	nan	[6, 11, 12, 36, 45]	
+s2-11	1.000	1.000	1.000	nan	nan	[11, 38, 5, 52, 59]	

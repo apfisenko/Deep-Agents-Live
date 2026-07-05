@@ -1,0 +1,3 @@
+# slide-46
+source: slide-46.png
+title: Кейсы выпускников — продукты

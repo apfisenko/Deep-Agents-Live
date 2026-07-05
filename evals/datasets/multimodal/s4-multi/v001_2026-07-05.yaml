@@ -1,0 +1,147 @@
+dataset: s4-multi
+group: multimodal
+version: v001
+created: '2026-07-05'
+description: Multimodal RAG S4_multi items (M06 presentation)
+items:
+- id: s4-01
+  input:
+    message: Перечисли все этапы модели Коттера из презентации.
+    channel: web
+  expected_output:
+    answer: '8 шагов: срочность; коалиция; видение и стратегия; коммуникация; победы;
+      препятствия; закрепление; культура.
+
+      '
+  metadata:
+    segment: b2b
+    multimodal_segment: S4_multi
+    intent: s4_multi
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 28
+    - 29
+    - 32
+    - 34
+    - 37
+    - 39
+    - 40
+    facts: &id001
+    - срочность
+    - коалиция
+    - видение
+    - коммуникация
+    - победы
+    - культура
+    required_entities: *id001
+- id: s4-02
+  input:
+    message: Какие шесть бизнес-инструментов в кейсах выпускников?
+    channel: web
+  expected_output:
+    answer: 6 карточек бизнес-кейсов выпускников.
+  metadata:
+    segment: b2b
+    multimodal_segment: S4_multi
+    intent: s4_multi
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 45
+    facts: &id002
+    - '6'
+    - кейс
+    required_entities: *id002
+- id: s4-03
+  input:
+    message: Какие пять ключевых тем «что знать и уметь»?
+    channel: web
+  expected_output:
+    answer: AIDD / промпт / RAG / агенты / качество.
+  metadata:
+    segment: b2b
+    multimodal_segment: S4_multi
+    intent: s4_multi
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 43
+    facts: &id003
+    - AIDD
+    - промпт
+    - RAG
+    - агенты
+    - качество
+    required_entities: *id003
+- id: s4-04
+  input:
+    message: Для каких компаний показаны кейсы с метриками?
+    channel: web
+  expected_output:
+    answer: МФЦ, RUTUBE, ПрогрессАгро, РЖД, банк, ITone и др.
+  metadata:
+    segment: b2b
+    multimodal_segment: S4_multi
+    intent: s4_multi
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 53
+    - 54
+    - 56
+    - 57
+    - 58
+    - 60
+    - 61
+    - 62
+    - 63
+    facts: &id004
+    - МФЦ
+    - RUTUBE
+    - РЖД
+    required_entities: *id004
+- id: s4-05
+  input:
+    message: Какие пять ступеней дорожной карты по порядку?
+    channel: web
+  expected_output:
+    answer: 5 ступеней дорожной карты AI-first трансформации.
+  metadata:
+    segment: b2b
+    multimodal_segment: S4_multi
+    intent: s4_multi
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 1
+    - 15
+    facts: &id005
+    - 5 ступеней
+    required_entities: *id005
+- id: s4-06
+  input:
+    message: Какие четыре станции программы доклада?
+    channel: web
+  expected_output:
+    answer: Почему сейчас / карта / кейсы / дальше.
+  metadata:
+    segment: b2b
+    multimodal_segment: S4_multi
+    intent: s4_multi
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 3
+    facts: &id006
+    - почему сейчас
+    - карта
+    - кейсы
+    - дальше
+    required_entities: *id006

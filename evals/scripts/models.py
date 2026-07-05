@@ -21,6 +21,13 @@ DATASETS_DIR = REPO_ROOT / "evals" / "datasets"
 
 Segment = Literal["b2c", "b2b"]
 QuestionSegment = Literal["single-hop", "multi-hop", "global"]
+MultimodalSegment = Literal[
+    "S1_text",
+    "S2_chart",
+    "S3_layout",
+    "S4_multi",
+    "S5_unanswerable",
+]
 GtQuality = Literal["verified", "approximate"]
 Source = Literal["real_dialog", "synthetic", "manual"]
 
@@ -41,6 +48,8 @@ class DatasetItemMetadata(BaseModel):
     source: Source
     gt_quality: GtQuality
     question_segment: QuestionSegment | None = None
+    multimodal_segment: MultimodalSegment | None = None
+    gold_pages: list[int] = Field(default_factory=list)
     required_entities: list[str] = Field(default_factory=list)
     reviewed_by: str | None = None
     product_id: str | None = None
@@ -58,7 +67,10 @@ class DatasetItemMetadata(BaseModel):
 
     @field_validator("facts")
     @classmethod
-    def facts_non_empty(cls, value: list[str]) -> list[str]:
+    def facts_non_empty(cls, value: list[str], info: Any) -> list[str]:
+        data = info.data if hasattr(info, "data") else {}
+        if data.get("multimodal_segment") == "S5_unanswerable":
+            return value
         if not value:
             msg = "facts[] must not be empty"
             raise ValueError(msg)
@@ -87,7 +99,7 @@ class DatasetItem(BaseModel):
 
 class DatasetManifest(BaseModel):
     dataset: str
-    group: Literal["e2e", "rag", "behavior", "edge", "graphrag"]
+    group: Literal["e2e", "rag", "behavior", "edge", "graphrag", "multimodal"]
     version: str
     created: str
     description: str

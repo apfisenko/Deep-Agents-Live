@@ -1,0 +1,3 @@
+# slide-48
+source: slide-48.png
+title: Ступень 5 — Стабильные рельсы

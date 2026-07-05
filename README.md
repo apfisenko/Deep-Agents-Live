@@ -83,8 +83,37 @@ Langfuse — traces и отладка агента. Поднимается в Do
 | `.\make.ps1 ps` | Статус контейнеров |
 | `.\make.ps1 logs` | Логи (последние 50 строк) |
 | `.\make.ps1 logs -f langfuse-web` | Follow-логи сервиса |
-| `.\make.ps1 compose <args>` | Любая `docker compose` команда |
-| `.\make.ps1 docker <args>` | Любая `docker` команда |
+| `.\make.ps1 compose <args>` | Любая `docker compose` команда (через WSL) |
+| `.\make.ps1 docker <args>` | Любая `docker` команда (через WSL) |
+
+На Windows **все** `docker` / `docker compose` из `make.ps1` выполняются **внутри WSL2** (см. [ADR-0004](docs/decisions/0004-windows-make-docker-wsl.md)), не нативно в PowerShell.
+
+### WSL: ошибка `CreateInstance/E_FAIL`
+
+При `.\make.ps1 up` или любом вызове WSL:
+
+```text
+Не удалось запустить распространение. Код ошибки: 6
+Wsl/Service/CreateInstance/E_FAIL
+```
+
+**Частые причины:** «зависший» WSL после нехватки диска, долгой сборки Docker-образа или сбоя Docker Desktop.
+
+**Быстрое восстановление:**
+
+```powershell
+wsl --shutdown
+# подождать 3–5 сек
+wsl echo ok
+.\make.ps1 up
+```
+
+**Если не помогло:**
+
+1. Перезагрузка Windows.
+2. PowerShell **от администратора:** `Restart-Service LxssManager`, затем `wsl --shutdown` и `wsl`.
+3. Проверить свободное место на диске C: и в WSL: `wsl df -h`.
+4. Docker Desktop: Quit → запуск снова → `wsl --shutdown` → `wsl`.
 
 На Linux/macOS те же цели через `make` (см. `make help`).
 
@@ -142,6 +171,41 @@ Invoke-WebRequest -Uri http://localhost:6333/collections -UseBasicParsing
 
 ---
 
+## Multimodal eval (sprint-07, OCR)
+
+Сравнение OCR-движков (Tesseract vs EasyOCR) и retrieval по сегментам S1–S5. Подробности: [sprint-07-multimodal-rag](docs/sprints/sprint-07-multimodal-rag/README.md).
+
+### Что должно быть готово перед `.\make.ps1 eval-multimodal-a-ocr`
+
+| Требование | Действие |
+|------------|----------|
+| **WSL2 + Docker** | `wsl echo ok`; при `E_FAIL` — см. [WSL: ошибка CreateInstance/E_FAIL](#wsl-ошибка-createinstancee_fail) |
+| **Qdrant** | `.\make.ps1 up` → `.\make.ps1 ps` (контейнер `qdrant` Running) |
+| **`.env`** | `ENV`, `OPENROUTER_API_KEY`, `EMBEDDING_MODEL` (e5, как в baseline) |
+| **Python (Windows)** | `cd backend; uv sync` и `cd evals; uv sync` |
+| **Корпус PNG** | `data/multimodal-rag/slide-{01..66}.png` |
+| **Eval manifests** | уже в `evals/datasets/multimodal/`; при необходимости: `cd evals; uv run python scripts/build_multimodal_manifest.py` |
+| **Gold CER (рекомендуется)** | сверить слайды 9–10–11 в `evals/datasets/multimodal/ocr-gold/v001_2026-07-05.yaml` |
+
+**Не нужны:** запущенный backend (`dev-backend`), Langfuse, Neo4j.
+
+**Сеть:** OpenRouter (embed) + первая загрузка моделей EasyOCR в Docker-образе.
+
+### Команды
+
+| Команда | Действие |
+|---------|----------|
+| `.\make.ps1 ocr-multimodal-tesseract` | OCR 66 слайдов → `evals/artifacts/ocr/tesseract/` (WSL Docker) |
+| `.\make.ps1 ocr-multimodal-modern` | EasyOCR → `evals/artifacts/ocr/modern/` (WSL Docker) |
+| `.\make.ps1 eval-multimodal-a-ocr` | OCR×2 + index + eval×2 + CER + `multimodal-a-ocr-comparison.md` |
+| `.\make.ps1 test` | backend + frontend + bot + **evals** (Windows) |
+
+Первый OCR собирает образ `docker/ocr` (CPU torch, ~5–10 мин). Артефакты OCR **не коммитятся** (см. `.gitignore`); в git — gold YAML и отчёты в `evals/reports/`.
+
+**Выход сравнения движков:** `evals/reports/multimodal-a-ocr-comparison.md` (+ per-engine `multimodal-a-ocr-tesseract.md`, `multimodal-a-ocr-modern.md`).
+
+---
+
 ## Neo4j (graph DB)
 
 Neo4j — граф знаний каталога курсов (sprint-06, [ADR-0007](docs/decisions/0007-neo4j-graphrag.md), [ADR-0008](docs/decisions/0008-neo4j-docker-infra.md)). Поднимается вместе с Langfuse/Qdrant через `make up` или отдельно через `graph-up`.
@@ -189,7 +253,9 @@ Start-Process http://localhost:7474
 | `dev-frontend` | Next.js (sprint-03) |
 | `dev-bot` | Telegram bot (sprint-04) |
 | `lint` / `format` / `typecheck` | Качество backend |
-| `test-backend` | pytest |
+| `test` / `test-backend` / `test-frontend` / `test-bot` / `test-evals` | pytest / vitest (Windows) |
+| `index-multimodal` / `eval-multimodal` | Multimodal index/eval (`CONFIG=evals/configs/...`) |
+| `ocr-multimodal-*` / `eval-multimodal-a-ocr` | OCR + сравнение движков (sprint-07) |
 | `index` | Index `data/` into Qdrant |
 | `check-rag-search-e2e` | Smoke: semantic search b2c после `index` (sprint-05) |
 | `check-rag-audience-filter` | Smoke: фильтр b2b/b2c (sprint-05) |

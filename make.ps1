@@ -30,6 +30,15 @@ function Invoke-WslDocker {
     wsl -e bash -lc "cd '$wslPath' && $Command"
 }
 
+function Invoke-WslDockerCompose {
+    param(
+        [string]$ComposeFile = "docker-compose.yml",
+        [string[]]$ComposeArgs
+    )
+    $argsJoined = $ComposeArgs -join " "
+    Invoke-WslDocker "docker compose -f $ComposeFile $argsJoined"
+}
+
 function Test-QdrantHealth {
     param([string]$BaseUrl)
     try {
@@ -196,13 +205,14 @@ function Show-Help {
     Write-Host "  lint           - ruff + eslint"
     Write-Host "  format         - ruff format backend"
     Write-Host "  typecheck      - mypy + tsc"
-    Write-Host "  test           - backend + frontend + bot tests"
+    Write-Host "  test           - backend + frontend + bot + evals tests (Windows uv/pnpm)"
     Write-Host "  test-backend   - pytest backend (optional extra args after target)"
     Write-Host "  test-frontend  - vitest frontend"
     Write-Host "  test-bot       - pytest bot"
+    Write-Host "  test-evals     - pytest evals/tests"
     Write-Host "  index          - index data/ into vector DB (Qdrant); --force to reindex all"
-    Write-Host "  up             - docker compose up -d (WSL)"
-    Write-Host "  down           - docker compose down (WSL)"
+    Write-Host "  up             - docker compose up -d (via WSL on Windows)"
+    Write-Host "  down           - docker compose down (via WSL on Windows)"
     Write-Host "  graph-up       - docker compose up -d neo4j only"
     Write-Host "  graph-down     - stop Neo4j container"
     Write-Host "  graph-status   - neo4j container status + Connection OK smoke"
@@ -213,8 +223,8 @@ function Show-Help {
     Write-Host "  text2cypher-smoke - NL text2cypher smoke (Neo4j + readonly user required)"
     Write-Host "  ps / status    - docker compose ps (WSL)"
     Write-Host "  logs           - docker compose logs [--tail N] [service]"
-    Write-Host "  compose        - docker compose <args>"
-    Write-Host "  docker         - docker <args>"
+    Write-Host "  compose        - docker compose <args> (via WSL on Windows)"
+    Write-Host "  docker         - docker <args> (via WSL on Windows)"
     Write-Host "  ci             - lint + typecheck + test"
     Write-Host "  compose-dev    - full stack in compose (sprint-04)"
     Write-Host "  check-health   - GET /health (backend must be running)"
@@ -237,6 +247,13 @@ function Show-Help {
     Write-Host "  eval-experiment - run experiment (env CONFIG=, DATASET=)"
     Write-Host "  eval-analyze   - error analysis (env RUN=, EMIT_ITEMS=1)"
     Write-Host "  eval-compare   - compare runs (env RUN_A=, RUN_B=)"
+    Write-Host "  index-multimodal          - index via env CONFIG= (default baseline yaml)"
+    Write-Host "  eval-multimodal           - index + segment eval via CONFIG="
+    Write-Host "  index-multimodal-baseline - alias: corpus + baseline index"
+    Write-Host "  eval-multimodal-baseline  - alias: baseline index + eval + report"
+    Write-Host "  ocr-multimodal-tesseract - OCR slides via docker/ocr (WSL)"
+    Write-Host "  ocr-multimodal-modern    - EasyOCR slides via docker/ocr (WSL)"
+    Write-Host "  eval-multimodal-a-ocr    - full method A eval (OCR WSL + index/eval Windows)"
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  .\make.ps1 ps"
@@ -428,6 +445,136 @@ function Invoke-CheckRagSearch {
     }
 }
 
+function Invoke-MultimodalQdrantScript {
+    param(
+        [string]$WorkingDir,
+        [string[]]$PythonArgs
+    )
+    Push-Location $WorkingDir
+    try {
+        $env:QDRANT_URL = Resolve-QdrantUrlForWindows
+        uv run python @PythonArgs
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Get-MultimodalConfigPath {
+    if ($env:CONFIG) {
+        return $env:CONFIG
+    }
+    return "evals/configs/multimodal-baseline.yaml"
+}
+
+function Invoke-IndexMultimodal {
+    $config = Get-MultimodalConfigPath
+    Invoke-MultimodalQdrantScript -WorkingDir $BackendDir -PythonArgs @(
+        "../evals/scripts/index_multimodal.py", "--config", "../$config", "--force"
+    )
+}
+
+function Invoke-EvalMultimodal {
+    Invoke-IndexMultimodal
+    $config = Get-MultimodalConfigPath
+    Invoke-MultimodalQdrantScript -WorkingDir (Join-Path $RepoRoot "evals") -PythonArgs @(
+        "scripts/run_multimodal_eval.py", "--config", "../$config"
+    )
+    Push-Location (Join-Path $RepoRoot "evals")
+    try {
+        uv run python scripts/build_multimodal_report.py --config "../$config"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-OcrMultimodal {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("tesseract", "modern")]
+        [string]$Engine
+    )
+    $outDir = if ($Engine -eq "tesseract") {
+        "evals/artifacts/ocr/tesseract"
+    } else {
+        "evals/artifacts/ocr/modern"
+    }
+    Invoke-WslDockerCompose -ComposeFile "docker/ocr/compose.ocr.yml" -ComposeArgs @(
+        "run", "--rm", "-e", "ENGINE=$Engine", "-e", "OUT_DIR=$outDir", "ocr"
+    )
+}
+
+function Invoke-EvalMultimodalAOcr {
+    Invoke-OcrMultimodal -Engine tesseract
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Invoke-OcrMultimodal -Engine modern
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $env:CONFIG = "evals/configs/multimodal-a-ocr-tesseract.yaml"
+    Invoke-EvalMultimodal
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $env:CONFIG = "evals/configs/multimodal-a-ocr-modern.yaml"
+    Invoke-EvalMultimodal
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Push-Location (Join-Path $RepoRoot "evals")
+    try {
+        uv run python scripts/run_ocr_cer.py --markdown
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        uv run python scripts/build_multimodal_ocr_comparison.py
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-TestEvals {
+    Push-Location $EvalsDir
+    try {
+        if ($DockerArgs.Count -gt 0) {
+            uv run pytest @DockerArgs
+        } else {
+            uv run pytest tests/ -q
+        }
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-IndexMultimodalBaseline {
+    Push-Location $BackendDir
+    try {
+        uv run python ../evals/scripts/build_multimodal_corpus.py
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+    Push-Location (Join-Path $RepoRoot "evals")
+    try {
+        uv run python scripts/build_multimodal_manifest.py
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+    $env:CONFIG = "evals/configs/multimodal-baseline.yaml"
+    Invoke-IndexMultimodal
+}
+
+function Invoke-EvalMultimodalBaseline {
+    Invoke-IndexMultimodalBaseline
+    $env:CONFIG = "evals/configs/multimodal-baseline.yaml"
+    Invoke-MultimodalQdrantScript -WorkingDir (Join-Path $RepoRoot "evals") -PythonArgs @(
+        "scripts/run_multimodal_eval.py", "--config", "configs/multimodal-baseline.yaml"
+    )
+    Push-Location (Join-Path $RepoRoot "evals")
+    try {
+        uv run python scripts/build_multimodal_report.py --config configs/multimodal-baseline.yaml
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
 switch ($Target) {
     "help" { Show-Help }
     "stop-dev" {
@@ -530,6 +677,8 @@ switch ($Target) {
         & $PSCommandPath test-frontend
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         & $PSCommandPath test-bot
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        & $PSCommandPath test-evals
     }
     "test-backend" {
         Push-Location $BackendDir
@@ -560,6 +709,9 @@ switch ($Target) {
             Pop-Location
         }
     }
+    "test-evals" {
+        Invoke-TestEvals
+    }
     "index" {
         Push-Location $BackendDir
         try {
@@ -571,16 +723,16 @@ switch ($Target) {
         }
     }
     "up" {
-        Invoke-WslDocker "docker compose up -d"
+        Invoke-WslDockerCompose -ComposeArgs @("up", "-d")
     }
     "down" {
-        Invoke-WslDocker "docker compose down"
+        Invoke-WslDockerCompose -ComposeArgs @("down")
     }
     "graph-up" {
-        Invoke-WslDocker "docker compose up -d neo4j"
+        Invoke-WslDockerCompose -ComposeArgs @("up", "-d", "neo4j")
     }
     "graph-down" {
-        Invoke-WslDocker "docker compose stop neo4j"
+        Invoke-WslDockerCompose -ComposeArgs @("stop", "neo4j")
     }
     "graph-status" {
         Invoke-WslDocker "docker compose ps neo4j"
@@ -685,6 +837,13 @@ switch ($Target) {
     "eval-experiment" { Invoke-EvalMake "experiment" -ExtraArgs $DockerArgs }
     "eval-analyze" { Invoke-EvalMake "analyze" -ExtraArgs $DockerArgs }
     "eval-compare" { Invoke-EvalMake "compare" -ExtraArgs $DockerArgs }
+    "index-multimodal" { Invoke-IndexMultimodal }
+    "eval-multimodal" { Invoke-EvalMultimodal }
+    "index-multimodal-baseline" { Invoke-IndexMultimodalBaseline }
+    "eval-multimodal-baseline" { Invoke-EvalMultimodalBaseline }
+    "ocr-multimodal-tesseract" { Invoke-OcrMultimodal -Engine tesseract }
+    "ocr-multimodal-modern" { Invoke-OcrMultimodal -Engine modern }
+    "eval-multimodal-a-ocr" { Invoke-EvalMultimodalAOcr }
     default {
         Write-Error "Unknown target: $Target. Run: .\make.ps1 help"
     }

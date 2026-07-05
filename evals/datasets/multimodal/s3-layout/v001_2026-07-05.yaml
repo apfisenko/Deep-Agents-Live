@@ -1,0 +1,205 @@
+dataset: s3-layout
+group: multimodal
+version: v001
+created: '2026-07-05'
+description: Multimodal RAG S3_layout items (M06 presentation)
+items:
+- id: s3-01
+  input:
+    message: Что на верхней ступени дорожной карты из 5?
+    channel: web
+  expected_output:
+    answer: Промышленный уровень — production.
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 15
+    facts: &id001
+    - промышленный
+    - production
+    required_entities: *id001
+- id: s3-02
+  input:
+    message: Что на первой (нижней) ступени дорожной карты?
+    channel: web
+  expected_output:
+    answer: Первые шаги — кругозор.
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 15
+    facts: &id002
+    - первые шаги
+    - кругозор
+    required_entities: *id002
+- id: s3-03
+  input:
+    message: Что на уровне 3 (основание) айсберга?
+    channel: web
+  expected_output:
+    answer: Eval, Observability, Guards, Memory, Skills.
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 50
+    facts: &id003
+    - Eval
+    - Observability
+    - Guards
+    - Memory
+    - Skills
+    required_entities: *id003
+- id: s3-04
+  input:
+    message: Что на вершине айсберга?
+    channel: web
+  expected_output:
+    answer: Чатбот / агент.
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 50
+    facts: &id004
+    - чатбот
+    - агент
+    required_entities: *id004
+- id: s3-05
+  input:
+    message: Из чего фундамент «дома культуры» (шаг 8 Коттера)?
+    channel: web
+  expected_output:
+    answer: Политики, AI Governance, Найм с ИИ.
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 40
+    facts: &id005
+    - Политики
+    - AI Governance
+    - Найм с ИИ
+    required_entities: *id005
+- id: s3-06
+  input:
+    message: Что является «крышей» дома культуры?
+    channel: web
+  expected_output:
+    answer: 'Культура: ИИ в работе — стандарт.'
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 40
+    facts: &id006
+    - культура
+    - ИИ в работе
+    - стандарт
+    required_entities: *id006
+- id: s3-07
+  input:
+    message: Какие пять слоёв корпоративной ИИ-платформы?
+    channel: web
+  expected_output:
+    answer: Layer 0 — отделы; Layer 1 — OpenWebUI; Layer 2 — LiteLLM Proxy; Layer
+      3 — Ollama/OpenRouter; Layer 4 — MCP/CRM/ERP.
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 38
+    facts: &id007
+    - OpenWebUI
+    - LiteLLM
+    - Ollama
+    - OpenRouter
+    - MCP
+    required_entities: *id007
+- id: s3-08
+  input:
+    message: Что на Layer 2 платформы?
+    channel: web
+  expected_output:
+    answer: LiteLLM Proxy.
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 38
+    facts: &id008
+    - LiteLLM
+    required_entities: *id008
+- id: s3-09
+  input:
+    message: Какие два пути запроса на ИИ на слайде «СТАРТ»?
+    channel: web
+  expected_output:
+    answer: Учредитель / сотрудник.
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 4
+    facts: &id009
+    - учредитель
+    - сотрудник
+    required_entities: *id009
+- id: s3-10
+  input:
+    message: Какие три стадии шага 3 модели Коттера?
+    channel: web
+  expected_output:
+    answer: Аудит → матрица 2×2 → топ-3 пилота.
+  metadata:
+    segment: b2b
+    multimodal_segment: S3_layout
+    intent: s3_layout
+    source: synthetic
+    gt_quality: verified
+    reviewed_by: sprint-07-task-02
+    gold_pages:
+    - 32
+    facts: &id010
+    - аудит
+    - матрица
+    - пилота
+    required_entities: *id010

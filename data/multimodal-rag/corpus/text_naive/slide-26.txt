@@ -1,0 +1,3 @@
+# slide-26
+source: slide-26.png
+title: Итог Э1+Э2 + CTA

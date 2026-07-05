@@ -1,0 +1,3 @@
+# slide-19
+source: slide-19.png
+title: Кейсы Э1 — Освобождение от рутины

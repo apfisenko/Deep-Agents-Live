@@ -1,0 +1,3 @@
+# slide-18
+source: slide-18.png
+title: Кейсы Э1 — ИИ как личный аналитик

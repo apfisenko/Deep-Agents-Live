@@ -76,6 +76,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "app/rag/pdf_text.py" = ["BLE001"]
 "app/rag/indexer.py" = ["PLR0915"]
+"app/rag/indexers/a_ocr_base.py" = ["TRY003", "EM102"]
 "app/rag/sparse_embed.py" = ["PLC0415"]
 "app/rag/retriever/*.py" = ["TC001", "BLE001"]
 "app/rag/retriever/reranker.py" = ["TC001", "BLE001", "PLC0415"]

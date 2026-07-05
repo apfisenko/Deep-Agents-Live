@@ -1,0 +1,3 @@
+# slide-03
+source: slide-03.png
+title: Агенда

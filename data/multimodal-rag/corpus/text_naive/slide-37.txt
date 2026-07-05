@@ -1,0 +1,3 @@
+# slide-37
+source: slide-37.png
+title: Коттер 5 — Препятствия

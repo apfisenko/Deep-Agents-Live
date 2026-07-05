@@ -1,11 +1,13 @@
 .PHONY: help dev dev-backend dev-frontend dev-bot stop-dev stop-backend stop-frontend stop-bot \
-	lint format typecheck test test-backend test-frontend test-bot index \
+	lint format typecheck test test-backend test-frontend test-bot test-evals index \
 	up down ps status logs compose docker migrate migrate-new ci compose-dev \
 	check-health check-reindex check-chat check-chat-stream check-langfuse check-traces check-telegram check-api \
 	check-rag-search-e2e check-rag-audience-filter \
 	graph-up graph-down graph-status graph-shell graph-init-readonly graph-index graph-qa text2cypher-smoke \
 	chat-telegram chat-stream langfuse-upload-dataset \
-	eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare
+	eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare \
+	index-multimodal eval-multimodal index-multimodal-baseline eval-multimodal-baseline \
+	ocr-multimodal-tesseract ocr-multimodal-modern eval-multimodal-a-ocr
 
 BACKEND_DIR := backend
 FRONTEND_DIR := frontend
@@ -70,6 +72,10 @@ help:
 	@echo "  eval-help      - eval contour help (see evals/README.md)"
 	@echo "  eval-build     - build dataset manifest YAML (DATASET=)"
 	@echo "  eval-validate  - pytest + dry-run all configs/datasets"
+	@echo "  index-multimodal          - index via CONFIG= (default baseline yaml)"
+	@echo "  eval-multimodal           - index + segment eval via CONFIG="
+	@echo "  index-multimodal-baseline - alias: corpus + baseline index"
+	@echo "  eval-multimodal-baseline  - alias: baseline index + eval + report"
 	@echo "  eval-sync      - sync datasets to Langfuse (DATASET=)"
 	@echo "  eval-experiment - run eval experiment (CONFIG=, DATASET=)"
 	@echo "  eval-analyze   - error analysis (RUN=, EMIT_ITEMS=1)"
@@ -115,7 +121,10 @@ typecheck:
 	cd $(FRONTEND_DIR) && pnpm typecheck
 	cd $(BOT_DIR) && uv run mypy .
 
-test: test-backend test-frontend test-bot
+test: test-backend test-frontend test-bot test-evals
+
+test-evals:
+	cd $(EVALS_DIR) && uv run pytest tests/ -q
 
 test-backend:
 	cd $(BACKEND_DIR) && uv run pytest $(ARGS)
@@ -232,3 +241,33 @@ chat-stream:
 
 eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare:
 	$(MAKE) -C $(EVALS_DIR) $(subst eval-,,$@)
+
+CONFIG ?= evals/configs/multimodal-baseline.yaml
+
+index-multimodal:
+	cd $(BACKEND_DIR) && uv run python ../evals/scripts/index_multimodal.py --config ../$(CONFIG) --force
+
+eval-multimodal: index-multimodal
+	cd $(EVALS_DIR) && uv run python scripts/run_multimodal_eval.py --config ../$(CONFIG)
+	cd $(EVALS_DIR) && uv run python scripts/build_multimodal_report.py --config ../$(CONFIG)
+
+index-multimodal-baseline:
+	cd $(BACKEND_DIR) && uv run python ../evals/scripts/build_multimodal_corpus.py
+	cd $(EVALS_DIR) && uv run python scripts/build_multimodal_manifest.py
+	$(MAKE) index-multimodal CONFIG=evals/configs/multimodal-baseline.yaml
+
+eval-multimodal-baseline: index-multimodal-baseline
+	cd $(EVALS_DIR) && uv run python scripts/run_multimodal_eval.py --config configs/multimodal-baseline.yaml
+	cd $(EVALS_DIR) && uv run python scripts/build_multimodal_report.py --config configs/multimodal-baseline.yaml
+
+ocr-multimodal-tesseract:
+	$(call DOCKER_WSL,docker compose -f docker/ocr/compose.ocr.yml run --rm -e ENGINE=tesseract -e OUT_DIR=evals/artifacts/ocr/tesseract ocr)
+
+ocr-multimodal-modern:
+	$(call DOCKER_WSL,docker compose -f docker/ocr/compose.ocr.yml run --rm -e ENGINE=modern -e OUT_DIR=evals/artifacts/ocr/modern ocr)
+
+eval-multimodal-a-ocr: ocr-multimodal-tesseract ocr-multimodal-modern
+	$(MAKE) eval-multimodal CONFIG=evals/configs/multimodal-a-ocr-tesseract.yaml
+	$(MAKE) eval-multimodal CONFIG=evals/configs/multimodal-a-ocr-modern.yaml
+	cd $(EVALS_DIR) && uv run python scripts/run_ocr_cer.py --markdown
+	cd $(EVALS_DIR) && uv run python scripts/build_multimodal_ocr_comparison.py

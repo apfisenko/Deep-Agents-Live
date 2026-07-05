@@ -25,6 +25,11 @@ DATASET_MIN_ITEMS: dict[str, int] = {
     "graphrag/multi-hop": 10,
     "graphrag/global": 6,
     "graphrag/single-hop": 3,
+    "multimodal/s1-text": 9,
+    "multimodal/s2-chart": 11,
+    "multimodal/s3-layout": 10,
+    "multimodal/s4-multi": 6,
+    "multimodal/s5-unanswerable": 6,
 }
 
 ALL_DATASET_SLUGS = tuple(DATASET_MIN_ITEMS.keys())
@@ -35,10 +40,19 @@ GRAPHAG_DATASET_SLUGS = (
     "graphrag/single-hop",
 )
 
+MULTIMODAL_DATASET_SLUGS = (
+    "multimodal/s1-text",
+    "multimodal/s2-chart",
+    "multimodal/s3-layout",
+    "multimodal/s4-multi",
+    "multimodal/s5-unanswerable",
+)
+
 CONFIG_DATASET_SLUGS: dict[str, tuple[str, ...]] = {
     "graphrag-baseline": GRAPHAG_DATASET_SLUGS,
     "graphrag-v001": GRAPHAG_DATASET_SLUGS,
     "graphrag-final": GRAPHAG_DATASET_SLUGS,
+    "multimodal-baseline": MULTIMODAL_DATASET_SLUGS,
 }
 
 
@@ -73,8 +87,8 @@ def manifest_path_for_slug(slug: str, version: str) -> Path:
 
 
 def should_apply_langfuse_name_override(slug: str, *, apply_name_override: bool) -> bool:
-    """GraphRAG segment datasets always use manifest path names in Langfuse."""
-    if slug.startswith("graphrag/"):
+    """GraphRAG / multimodal segment datasets always use manifest path names in Langfuse."""
+    if slug.startswith("graphrag/") or slug.startswith("multimodal/"):
         return False
     return apply_name_override
 

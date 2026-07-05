@@ -1,0 +1,3 @@
+# slide-07
+source: slide-07.png
+title: Мем

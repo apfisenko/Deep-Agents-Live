@@ -1,0 +1,3 @@
+# slide-30
+source: slide-30.png
+title: Кейс — Хакатон 50 человек

@@ -1,0 +1,3 @@
+# slide-41
+source: slide-41.png
+title: Итог Э3 + CTA

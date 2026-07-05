@@ -1,0 +1,3 @@
+# slide-06
+source: slide-06.png
+title: Новая логика роста

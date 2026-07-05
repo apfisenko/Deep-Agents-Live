@@ -1,0 +1,3 @@
+# slide-24
+source: slide-24.png
+title: Кейсы Э2 — No-code автоматизация

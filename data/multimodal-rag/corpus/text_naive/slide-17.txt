@@ -1,0 +1,3 @@
+# slide-17
+source: slide-17.png
+title: Главный принцип освоения

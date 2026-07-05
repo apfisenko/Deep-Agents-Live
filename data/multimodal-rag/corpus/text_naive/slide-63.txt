@@ -1,0 +1,3 @@
+# slide-63
+source: slide-63.png
+title: Кейс — ITone / Агент консультанта 1С

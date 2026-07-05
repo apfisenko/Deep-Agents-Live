@@ -1,0 +1,3 @@
+# slide-02
+source: slide-02.png
+title: Кто я

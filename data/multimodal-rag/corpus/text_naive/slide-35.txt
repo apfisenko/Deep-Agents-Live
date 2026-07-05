@@ -1,0 +1,3 @@
+# slide-35
+source: slide-35.png
+title: Кейс — Разработчики ПО, 6 дней

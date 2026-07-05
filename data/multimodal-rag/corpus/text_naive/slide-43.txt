@@ -1,0 +1,3 @@
+# slide-43
+source: slide-43.png
+title: Что нужно знать

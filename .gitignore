@@ -34,8 +34,9 @@ data/leads.txt
 *.log
 .playwright-mcp/
 
-# Local demo screenshots (artifacts live under /opt/cursor/artifacts)
-/swagger-docs.png
+# OCR artifacts (generated locally; gold YAML + reports are committed)
+evals/artifacts/ocr/
+
 evals/.env
 frontend/node_modules
 frontend/.next

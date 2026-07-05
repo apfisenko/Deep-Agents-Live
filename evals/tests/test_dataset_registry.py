@@ -9,6 +9,7 @@ from app.agent.run_config import RunConfig
 from dataset_registry import (
     ALL_DATASET_SLUGS,
     GRAPHAG_DATASET_SLUGS,
+    MULTIMODAL_DATASET_SLUGS,
     dataset_slugs_for_config,
     resolve_all_dataset_targets,
     resolve_dataset_target,
@@ -22,8 +23,9 @@ GRAPHRAG_V001_CONFIG = EVALS_ROOT / "configs" / "graphrag-v001.yaml"
 
 
 def test_all_dataset_slugs_count() -> None:
-    assert len(ALL_DATASET_SLUGS) == 11
+    assert len(ALL_DATASET_SLUGS) == 16
     assert len(GRAPHAG_DATASET_SLUGS) == 3
+    assert len(MULTIMODAL_DATASET_SLUGS) == 5
 
 
 def test_resolve_rag_format_facts(monkeypatch: pytest.MonkeyPatch) -> None:

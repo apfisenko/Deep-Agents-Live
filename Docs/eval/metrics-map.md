@@ -174,6 +174,54 @@ Judge для всех RAGAS/DeepEval LLM-метрик: **`google/gemini-2.5-flas
 
 ---
 
+### Multimodal RAG (sprint-07): три группы метрик
+
+Сравнение конфигов A/B/C/D — **строго по `multimodal_segment`**, не union average.
+
+#### Group 1 — Retrieval (S1–S4)
+
+| Метрика | Уровень | S1–S3 | S4_multi | S5 |
+|---------|---------|-------|----------|-----|
+| `gold_page_recall_at_5` | item: span | ✅ | ✅ | ⛔ n/a |
+| `ndcg_at_5` | item: span | ✅ | ✅ | ⛔ n/a |
+| `mrr` | item: span | ✅ | ✅ | ⛔ n/a |
+| `gold_page_set_recall_at_5` | item: span | — | ✅ north-star | ⛔ n/a |
+
+**Span:** top-5 retrieved chunks → `slide_number` из payload / `# slide-NN` в тексте.
+
+#### Group 2 — Ingestion-quality (диагностика, задачи 04/07)
+
+| Метрика | Когда | Слайды |
+|---------|-------|--------|
+| **CER** | Метод A (OCR) | ~10 репрезентативных |
+| **TEDS** | Метод D (multivector) | 10, 11 (табличные) |
+
+Не подменяют retrieval-метрики Group 1.
+
+#### Group 3 — Generation (опционально)
+
+| Метрика | Сегменты | Зачем |
+|---------|----------|-------|
+| `answer_correctness` | S1–S4 | E2E формулировка после retrieval |
+| `faithfulness` | S1–S4 | Анти-галлюцинации |
+| `unanswerable_refusal_rate` | **S5 only** | Поведение: отказ vs выдумка (**не nDCG**) |
+
+**Baseline (2026-07-05, naive text → e5):**
+
+| Сегмент | Recall@5 | nDCG@5 | MRR | Set-recall@5 |
+|---------|----------|--------|-----|--------------|
+| S1_text | 0.333 | 0.270 | 0.250 | — |
+| S2_chart | 0.455 | 0.409 | 0.394 | — |
+| S3_layout | 1.000 | 0.865 | 0.820 | — |
+| S4_multi | 0.573 | 0.648 | 0.708 | 0.333 |
+| S5 | — | — | — | — |
+
+Отчёт: [`evals/reports/multimodal-baseline.md`](../../evals/reports/multimodal-baseline.md).
+
+**Cost (per indexer config, sprint-07):** `build_time_s`, `index_size_mb`, `est_cost_usd` — отдельно от Group 1–3.
+
+---
+
 ## Сквозные run-level метрики (все прогоны)
 
 | Метрика | Уровень | Описание |
@@ -191,6 +239,8 @@ Run-level ключи — только в `run_metadata`, не в metadata items 
 | Метрика | ADR | Статус |
 |---------|-----|--------|
 | `required_entity_recall_at_5` | sprint-06 graphrag task 02 | ✅ Реализована в `evaluators.py`; graphrag slug profile |
+| `gold_page_recall_at_5`, `ndcg_at_5`, `mrr`, `gold_page_set_recall_at_5` | sprint-07 multimodal task 02 | ✅ `multimodal_metrics.py` + `evaluators.py` |
+| `unanswerable_refusal_rate` | sprint-07 S5 behavior | ✅ `multimodal_metrics.py`; generation-only |
 
 ---
 

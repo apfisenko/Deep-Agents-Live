@@ -1,0 +1,3 @@
+# slide-20
+source: slide-20.png
+title: Кейсы Э1 — Бизнес как медиа
