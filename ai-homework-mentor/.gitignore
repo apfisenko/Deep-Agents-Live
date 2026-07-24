@@ -23,3 +23,8 @@ logs/*
 workspace/*
 !workspace/README.md
 *.log
+
+# Generated run/compare/review reports (S8) — keep curated docs tracked
+docs/run-report-*.md
+docs/compare-modes-*.md
+docs/review-report-*.md

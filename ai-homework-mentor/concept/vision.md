@@ -135,7 +135,7 @@ graph TB
 ai-homework-mentor/
 ├── make.ps1              # точка входа команд (Windows / PowerShell)
 ├── concept/              # концепт-документы (idea, vision, architecture)
-├── roadmap.md            # дорожная карта спринтов S0–S9
+├── roadmap.md            # дорожная карта спринтов S0–S10
 ├── sprints/              # детальные README спринтов (по мере развёртки)
 ├── src/                  # исходный код CLI и агента (будет в спринтах)
 ├── config/               # YAML: промпты, параметры, rubric
@@ -201,12 +201,14 @@ ai-homework-mentor/
 
 ## 11. Критерии успеха v1
 
-- [ ] Сквозной E2E: вход → код → план → проверка субагентами → feedback
-- [ ] Оба входа работают: GitHub-ссылка и локальный путь
-- [ ] Rubric подбирается по теме; skills подключаются где уместно
-- [ ] Компактный и расширенный режимы CLI показывают ожидаемую информацию
-- [ ] В verbose видны: план, workspace, субагенты, рост/компактизация контекста, skills
-- [ ] Dogfooding: успешная проверка директории `ai-homework-mentor/`
+- [x] Сквозной E2E: вход → код → план → проверка субагентами → feedback
+- [x] Оба входа работают: GitHub-ссылка и локальный путь
+- [x] Rubric подбирается по теме; skills подключаются где уместно
+- [x] Компактный и расширенный режимы CLI показывают ожидаемую информацию
+- [x] В verbose видны: план, workspace, субагенты, рост/компактизация контекста, skills
+- [x] Dogfooding: успешная проверка директории `ai-homework-mentor/`
+
+> Доказательства: [docs/v1-checklist.md](../docs/v1-checklist.md), [docs/dogfooding-v1.md](../docs/dogfooding-v1.md). Закрыто в S7 (2026-07-24).
 
 ---
 
@@ -218,7 +220,7 @@ ai-homework-mentor/
 - Веб-UI и авторизация
 - Балльная система оценок
 - Мультимодальные задания (изображения, PDF и т.д.)
-- Checkpoint/resume, dynamic context, долговременная память ( — последующие слои roadmap)
+- Режимы single/subagents + compare/review-отчёты (**S8 ✅**); checkpoint/resume (S9), dynamic context (S10), долговременная память — последующие слои roadmap
 
 ---
 

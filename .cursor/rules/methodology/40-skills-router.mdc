@@ -136,3 +136,20 @@ alwaysApply: true
 - `~/.agents/skills/<name>/SKILL.md` — глобальные skills
 
 Если skill не найден по указанному пути — проверить в `~/.agents/skills/` или `~/.codex/skills/`.
+
+---
+
+## AI Homework Mentor
+
+Проектный роутер (проверка ДЗ): [`ai-homework-mentor/.cursor/rules/40-skills-router.mdc`](../../../ai-homework-mentor/.cursor/rules/40-skills-router.mdc).
+
+Перед review ДЗ — прочитать SKILL.md из таблицы проектного роутера / `config/skills_routing.yaml`.
+
+| Тип проверки ДЗ | Skill | Путь (в `ai-homework-mentor/`) |
+|-----------------|-------|--------------------------------|
+| Общая тема | `rubric-default` | `skills/rubric-default/SKILL.md` |
+| Python CLI | `rubric-python-cli` | `skills/rubric-python-cli/SKILL.md` |
+| Качество Python-кода | `modern-python` | `.agents/skills/modern-python/SKILL.md` |
+| FastAPI / API (если detected) | `fastapi-templates` | `.agents/skills/fastapi-templates/SKILL.md` |
+
+Inventory: `ai-homework-mentor/docs/skills-inventory-s5.md`.

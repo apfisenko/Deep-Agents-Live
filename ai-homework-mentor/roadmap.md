@@ -2,7 +2,7 @@
 
 > **Vision:** [./concept/vision.md](./concept/vision.md)
 > **Архитектура:** [./concept/architecture.md](./concept/architecture.md)
-> **Последнее обновление:** 2026-07-24 (S0 ✅, S1 ✅, S2 ✅, S3 ✅)
+> **Последнее обновление:** 2026-07-25 (S0–S7 ✅ → **v1**; **S8** режимы/отчёты ✅; опц. S9 checkpoint / S10 dynamic)
 
 ---
 
@@ -39,8 +39,9 @@ flowchart LR
     S4 --> S5["S5 Skills"]
     S5 --> S6["S6 Синтез"]
     S6 --> S7["S7 Dogfooding → v1"]
-    S7 -.опц..-> S8["S8 Checkpoint"]
-    S7 -.опц..-> S9["S9 Dynamic context"]
+    S7 --> S8["S8 Режимы + отчёты ✅"]
+    S7 -.опц..-> S9["S9 Checkpoint"]
+    S7 -.опц..-> S10["S10 Dynamic context"]
 ```
 
 ### Образовательная драматургия S3 → S4
@@ -131,7 +132,7 @@ flowchart LR
 
 ---
 
-### S4 — Субагенты: декомпозиция и изоляция («бабах») 📋
+### S4 — Субагенты: декомпозиция и изоляция («бабах») ✅
 
 > Детали: [`sprints/sprint-04-subagents/README.md`](./sprints/sprint-04-subagents/README.md)
 
@@ -142,14 +143,14 @@ flowchart LR
 **Цель:** разнести проверку на изолированных reviewer-субагентов (узкий бриф, ссылки на файлы, наверх — саммари). Verbose показывает запуск субагентов и чистый контекст родителя.
 
 **Ключевые результаты:**
-- [ ] Минимум 2 reviewer-субагента по аспектам
-- [ ] По review-файлу (ноте) на субагента в workspace
-- [ ] Verbose: бриф → summary; контраст размера контекста родителя vs S3
-- [ ] Субагенты не дублируют выводы друг друга
+- [x] Минимум 2 reviewer-субагента по аспектам
+- [x] По review-файлу (ноте) на субагента в workspace
+- [x] Verbose: бриф → summary; контраст размера контекста родителя vs S3
+- [x] Субагенты не дублируют выводы друг друга
 
 ---
 
-### S5 — Навыки (skills): свои rubric + публичные навыки 📋
+### S5 — Навыки (skills): свои rubric + публичные навыки ✅
 
 > Детали: [`sprints/sprint-05-skills/README.md`](./sprints/sprint-05-skills/README.md)
 
@@ -160,14 +161,14 @@ flowchart LR
 **Цель:** оформить критерии как навыки; свои rubric-skills под темы; подключить уместные публичные skills (например `fastapi-templates`, `modern-python`). Актуализировать правила использования скиллов в роутерах проекта. Skills — только из доверенного источника; SKILL.md читается до применения; в субагенте без секретов; код студента не исполняется.
 
 **Ключевые результаты:**
-- [ ] Rubric оформлены как навыки проекта
-- [ ] Нужные публичные skills установлены и применяются уместно
-- [ ] Verbose: какие skills/rubric активированы
-- [ ] Актуализированы `ai-homework-mentor/.cursor/rules/40-skills-router.mdc` и `.cursor/rules/methodology/40-skills-router.mdc`
+- [x] Rubric оформлены как навыки проекта
+- [x] Нужные публичные skills установлены и применяются уместно
+- [x] Verbose: какие skills/rubric активированы
+- [x] Актуализированы `ai-homework-mentor/.cursor/rules/40-skills-router.mdc` и `.cursor/rules/methodology/40-skills-router.mdc`
 
 ---
 
-### S6 — Синтез feedback из артефактов 📋
+### S6 — Синтез feedback из артефактов ✅
 
 > Детали: [`sprints/sprint-06-synthesis/README.md`](./sprints/sprint-06-synthesis/README.md)
 
@@ -178,13 +179,13 @@ flowchart LR
 **Цель:** reflection (покрытие аспектов, противоречия) + сборка `final_feedback` и `fix_plan`; сверка заявленного студентом с найденным. Rich CLI красиво печатает итог.
 
 **Ключевые результаты:**
-- [ ] Два финальных артефакта: `final_feedback`, `fix_plan`
-- [ ] Каждое замечание сослано на критерий rubric
-- [ ] Вывод краткий и actionable (compact + verbose)
+- [x] Два финальных артефакта: `final_feedback`, `fix_plan`
+- [x] Каждое замечание сослано на критерий rubric
+- [x] Вывод краткий и actionable (compact + verbose)
 
 ---
 
-### S7 — Dogfooding (E2E на самом себе) → v1 📋
+### S7 — Dogfooding (E2E на самом себе) → v1 ✅
 
 > Детали: [`sprints/sprint-07-dogfooding/README.md`](./sprints/sprint-07-dogfooding/README.md)
 
@@ -195,20 +196,40 @@ flowchart LR
 **Цель:** направить продукт на его же директорию и прогнать полную проверку без MCP. Зафиксировать, что нашёл о себе. Закрыть критерии успеха v1 из [vision.md](./concept/vision.md).
 
 **Ключевые результаты:**
-- [ ] Dogfooding: проверка `ai-homework-mentor/` → feedback + fix_plan по себе
-- [ ] Сквозной сценарий работает целиком (оба входа, план, субагенты, skills, синтез)
-- [ ] Критерии успеха v1 выполнены
-- [ ] Quickstart для Windows / PowerShell задокументирован
+- [x] Dogfooding: проверка `ai-homework-mentor/` → feedback + fix_plan по себе
+- [x] Сквозной сценарий работает целиком (оба входа, план, субагенты, skills, синтез)
+- [x] Критерии успеха v1 выполнены
+- [x] Quickstart для Windows / PowerShell задокументирован
 
 ---
 
-## Опционально (после v1 / если останется время)
+## После v1
 
-Жёсткой зависимости основного маршрута от этих спринтов нет.
+### S8 — Режимы проверки + отчёты сравнения ✅
 
-### S8 — Checkpoint / Resume 📋
+> Детали: [`sprints/sprint-08-review-modes/README.md`](./sprints/sprint-08-review-modes/README.md)  
+> **Закрыт:** 2026-07-25
 
-> Детали: [`sprints/sprint-08-checkpoint-resume/README.md`](./sprints/sprint-08-checkpoint-resume/README.md)
+**Механизм:** флаг режима review (`single` / `subagents`) + структурированные run/compare/review-отчёты.
+
+**Цель:** одна и та же проверка запускается одним агентом или с субагентами; в `docs/` — русскоязычные отчёты с параметрами, пошаговым ростом контекста (токены), суммарными токенами, временем; compare даёт таблицу плюсов/минусов; review-report — итог с рекомендациями. Сравнительный отчёт — **только** в `docs/`.
+
+**Ключевые результаты:**
+- [x] CLI `-Mode single|subagents` (default: `subagents`)
+- [x] Run-отчёт на русском в `docs/run-report-*.md` (в т.ч. токены окон reviewers)
+- [x] `compare-modes` → `docs/compare-modes-*.md` (таблица + плюсы/минусы)
+- [x] `docs/review-report-*.md` + RU итог/notes/plan
+- [x] Quickstart, comparison-variants, README (параметры запуска)
+
+---
+
+## Опционально (после S8 / если останется время)
+
+Жёсткой зависимости основного маршрута от этих спринтов нет. Следующие опциональные слои: **S9** checkpoint, **S10** dynamic context.
+
+### S9 — Checkpoint / Resume 📋
+
+> Детали: [`sprints/sprint-09-checkpoint-resume/README.md`](./sprints/sprint-09-checkpoint-resume/README.md)
 
 **Механизм:** checkpoint/resume; checkpoint = минимальное состояние процесса, не весь диалог.
 
@@ -216,9 +237,9 @@ flowchart LR
 
 ---
 
-### S9 — Dynamic context (стоимость/скорость через OpenRouter) 📋
+### S10 — Dynamic context (стоимость/скорость через OpenRouter) 📋
 
-> Детали: [`sprints/sprint-09-dynamic-context/README.md`](./sprints/sprint-09-dynamic-context/README.md)
+> Детали: [`sprints/sprint-10-dynamic-context/README.md`](./sprints/sprint-10-dynamic-context/README.md)
 
 **Механизм:** dynamic context — выбор модели (и опц. набора tools) под шаг.
 
@@ -271,10 +292,11 @@ S0 (каркас)
                  └─ S5 (субагентам нужны переиспользуемые процедуры/rubric-skills)
                      └─ S6 (нужны review-ноты субагентов для синтеза)
                          └─ S7 (склейка всего в dogfooding → v1)
-S8, S9 — опционально после S7; друг от друга не зависят.
+S8 (режимы + отчёты) ✅ — слой после S7
+S9, S10 — опционально после S7/S8; друг от друга не зависят
 ```
 
-Почему не иначе: GitHub рано (S1) — оба входа нужны до E2E; CE **до** субагентов (S3→S4) — иначе теряется образовательный контраст; skills после субагентов (S5) — навык применяют в изолированном окне; синтез после нот (S6).
+Почему не иначе: GitHub рано (S1) — оба входа нужны до E2E; CE **до** субагентов (S3→S4) — иначе теряется образовательный контраст; skills после субагентов (S5) — навык применяют в изолированном окне; синтез после нот (S6); режимы/compare (S8) после v1 — воспроизводимый контраст single vs subagents.
 
 ---
 
@@ -288,3 +310,12 @@ S8, S9 — опционально после S7; друг от друга не �
 | 2026-07-24 | S1 закрыт: parse Submission, local/GitHub staging, clarification в CLI |
 | 2026-07-24 | S2 закрыт: workspace-сессия, rubric YAML, todo plan, single-agent review + SimpleFeedback |
 | 2026-07-24 | S3 закрыт: context metrics, CE YAML, verbose CE panel, large_hw + pain-s3.md |
+| 2026-07-24 | S3 подтверждён пользователем: live large_hw + verbose, DoD закрыт |
+| 2026-07-24 | S4 закрыт: reviewer subagents, handoff contract, verbose subagents panel, contrast-s3-s4.md |
+| 2026-07-24 | S5 закрыт: rubric-skills, skills router, modern-python + fastapi-templates, verbose Rubric & Skills, оба 40-skills-router |
+| 2026-07-24 | S6 opened: Task 01 output schemas (FinalFeedback/FixPlan, fail criterion_id) |
+| 2026-07-24 | S6 закрыт: reflection + synthesis pipeline, final_feedback/fix_plan, claims_check, Rich CLI compact/verbose |
+| 2026-07-24 | S7 opened: Task 01 v1 checklist + gap analysis |
+| 2026-07-24 | S7 закрыт → **v1**: dogfood, E2E regression, quickstart-windows, checklist 12/12 |
+| 2026-07-24 | Пост-v1: новый **S8** (режимы + RU-отчёты/compare в docs); бывшие S8/S9 → **S9** checkpoint / **S10** dynamic context |
+| 2026-07-25 | **S8 закрыт:** `-Mode`, run/compare/review-отчёты (RU) в `docs/`, токены окон reviewers, RU notes/итог |

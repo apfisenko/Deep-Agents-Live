@@ -1,10 +1,10 @@
 # Sprint 05: Skills — свои rubric + публичные навыки
 
-> **Версия roadmap:** v0.2 (спринты S0–S9)
+> **Версия roadmap:** v0.2 (спринты S0–S10)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
-> **Статус:** 📋 Planned
-> **Открыт:** —
-> **Закрыт:** —
+> **Статус:** ✅ Done
+> **Открыт:** 2026-07-24
+> **Закрыт:** 2026-07-24
 > **Зависит от:** [Sprint 04](../sprint-04-subagents/README.md) (reviewer-субагенты + handoff)
 
 ---
@@ -29,7 +29,7 @@
 | В S5 | Не в S5 |
 |------|---------|
 | Rubric → project skills в `skills/` | Полный синтез и fix_plan (S6) |
-| Маршрутизация skills по теме + аспекту reviewer | Dynamic model routing (S9) |
+| Маршрутизация skills по теме + аспекту reviewer | Dynamic model routing (S10) |
 | Установка 1–2 публичных skills с skills.sh | Установка «всех подряд» с маркетплейса |
 | Актуализация двух `40-skills-router.mdc` | Dogfooding (S7) |
 
@@ -85,14 +85,14 @@ Assignment Topic
 
 | # | Задача | Статус | Plan | Summary |
 |---|--------|--------|------|---------|
-| 01 | Свои rubric-skills | 📋 | [plan](tasks/01-rubric-skills/plan.md) | — |
-| 02 | Роутинг skills по теме и аспекту | 📋 | [plan](tasks/02-skills-routing/plan.md) | — |
-| 03 | Публичные skills с skills.sh | 📋 | [plan](tasks/03-public-skills/plan.md) | — |
-| 04 | Роутеры + verbose «Rubric & Skills» | 📋 | [plan](tasks/04-routers-verbose/plan.md) | — |
+| 01 | Свои rubric-skills | ✅ | [plan](tasks/01-rubric-skills/plan.md) | [summary](tasks/01-rubric-skills/summary.md) |
+| 02 | Роутинг skills по теме и аспекту | ✅ | [plan](tasks/02-skills-routing/plan.md) | [summary](tasks/02-skills-routing/summary.md) |
+| 03 | Публичные skills с skills.sh | ✅ | [plan](tasks/03-public-skills/plan.md) | [summary](tasks/03-public-skills/summary.md) |
+| 04 | Роутеры + verbose «Rubric & Skills» | ✅ | [plan](tasks/04-routers-verbose/plan.md) | [summary](tasks/04-routers-verbose/summary.md) |
 
 ---
 
-## Задача 01: Свои rubric-skills 📋
+## Задача 01: Свои rubric-skills ✅
 
 ### Цель
 
@@ -134,7 +134,7 @@ Assignment Topic
 
 ---
 
-## Задача 02: Роутинг skills в runtime 📋
+## Задача 02: Роутинг skills в runtime ✅
 
 ### Цель
 
@@ -176,7 +176,7 @@ Assignment Topic
 
 ---
 
-## Задача 03: Публичные skills с skills.sh 📋
+## Задача 03: Публичные skills с skills.sh ✅
 
 ### Цель
 
@@ -220,7 +220,7 @@ Assignment Topic
 
 ---
 
-## Задача 04: Роутеры + verbose «Rubric & Skills» 📋
+## Задача 04: Роутеры + verbose «Rubric & Skills» ✅
 
 ### Цель
 
@@ -297,7 +297,7 @@ cd ai-homework-mentor
 
 ## Итог (заполняется после закрытия)
 
-—
+S5 закрыт 2026-07-24: rubric-skills + runtime router + `modern-python`/`fastapi-templates` в `.agents/skills/` + verbose «Rubric & Skills» + оба Cursor-роутера. Lint/tests зелёные (103). Следующий слой — S6 (синтез `final_feedback` / `fix_plan`).
 
 ---
 

@@ -1,10 +1,10 @@
 # Sprint 04: Субагенты — декомпозиция и изоляция («бабах»)
 
-> **Версия roadmap:** v0.2 (спринты S0–S9)
+> **Версия roadmap:** v0.2 (спринты S0–S10)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
-> **Статус:** 📋 Planned
-> **Открыт:** —
-> **Закрыт:** —
+> **Статус:** ✅ Done
+> **Открыт:** 2026-07-24
+> **Закрыт:** 2026-07-24
 > **Зависит от:** [Sprint 03](../sprint-03-context-visible/README.md) (`docs/pain-s3.md` + видимый CE на single-agent)
 
 ---
@@ -30,7 +30,7 @@
 |------|---------|
 | ≥2 reviewer-субагента | Оформление rubric как skills / skills.sh (S5) |
 | Узкий бриф + нота в `notes/` + summary наверх | Полированный `final_feedback` / `fix_plan` (S6) |
-| Verbose: handoff + parent context size | Dynamic model per step (S9) |
+| Verbose: handoff + parent context size | Dynamic model per step (S10) |
 | Сравнение метрик parent vs S3 | Утверждение, что CE больше не нужен (CE остаётся) |
 
 ---
@@ -83,14 +83,14 @@ Sprint считается завершённым, когда:
 
 | # | Задача | Статус | Plan | Summary |
 |---|--------|--------|------|---------|
-| 01 | Контракт handoff: brief / note / summary | 📋 | [plan](tasks/01-handoff-contract/plan.md) | — |
-| 02 | Реализация ≥2 reviewer-субагентов | 📋 | [plan](tasks/02-reviewer-subagents/plan.md) | — |
-| 03 | Оркестратор: делегирование + запрет дублей | 📋 | [plan](tasks/03-orchestrator-delegate/plan.md) | — |
-| 04 | Verbose verbose + контраст S3↔S4 | 📋 | [plan](tasks/04-contrast-cli/plan.md) | — |
+| 01 | Контракт handoff: brief / note / summary | ✅ | [plan](tasks/01-handoff-contract/plan.md) | [summary](tasks/01-handoff-contract/summary.md) |
+| 02 | Реализация ≥2 reviewer-субагентов | ✅ | [plan](tasks/02-reviewer-subagents/plan.md) | [summary](tasks/02-reviewer-subagents/summary.md) |
+| 03 | Оркестратор: делегирование + запрет дублей | ✅ | [plan](tasks/03-orchestrator-delegate/plan.md) | [summary](tasks/03-orchestrator-delegate/summary.md) |
+| 04 | Verbose verbose + контраст S3↔S4 | ✅ | [plan](tasks/04-contrast-cli/plan.md) | [summary](tasks/04-contrast-cli/summary.md) |
 
 ---
 
-## Задача 01: Контракт handoff 📋
+## Задача 01: Контракт handoff ✅
 
 ### Цель
 
@@ -100,12 +100,12 @@ Sprint считается завершённым, когда:
 
 ### Состав работ
 
-- [ ] Pydantic (или аналог): `ReviewBrief` (aspect, goal, file_paths[], rubric_criterion_ids[], constraints)
-- [ ] `ReviewSummary` (aspect, findings[], criterion_ids[], risks[], open_questions[]) — **короткий** лимит символов/пунктов в схеме или валидаторе
-- [ ] Формат файла ноты: `notes/review_<aspect>.md` (front matter optional)
-- [ ] Правило: в parent state кладём summary (+ путь к note), не полное содержимое note
-- [ ] Unit-тесты валидации / лимита summary
-- [ ] Самопроверка по DoD задачи
+- [x] Pydantic (или аналог): `ReviewBrief` (aspect, goal, file_paths[], rubric_criterion_ids[], constraints)
+- [x] `ReviewSummary` (aspect, findings[], criterion_ids[], risks[], open_questions[]) — **короткий** лимит символов/пунктов в схеме или валидаторе
+- [x] Формат файла ноты: `notes/review_<aspect>.md` (front matter optional)
+- [x] Правило: в parent state кладём summary (+ путь к note), не полное содержимое note
+- [x] Unit-тесты валидации / лимита summary
+- [x] Самопроверка по DoD задачи
 
 ### Критерии готовности (DoD)
 
@@ -132,7 +132,7 @@ Sprint считается завершённым, когда:
 
 ---
 
-## Задача 02: Reviewer-субагенты 📋
+## Задача 02: Reviewer-субагенты ✅
 
 ### Цель
 
@@ -142,12 +142,12 @@ Sprint считается завершённым, когда:
 
 ### Состав работ
 
-- [ ] Определение субагентов в коде/YAML (промпты в `config/prompts/reviewers/*.yaml`)
-- [ ] У каждого: доступ к workspace tools **в рамках brief** (не тащить весь репо в system prompt)
-- [ ] Изолированный контекст запуска (API DeepAgents subagents — по skill, не изобретать)
-- [ ] Запись `notes/review_<aspect>.md` + return `ReviewSummary`
-- [ ] Тесты с моком LLM: нота создана, summary валиден
-- [ ] Самопроверка по DoD задачи
+- [x] Определение субагентов в коде/YAML (промпты в `config/prompts/reviewers/*.yaml`)
+- [x] У каждого: доступ к workspace tools **в рамках brief** (не тащить весь репо в system prompt)
+- [x] Изолированный контекст запуска (API DeepAgents subagents — по skill, не изобретать)
+- [x] Запись `notes/review_<aspect>.md` + return `ReviewSummary`
+- [x] Тесты с моком LLM: нота создана, summary валиден
+- [x] Самопроверка по DoD задачи
 
 ### Критерии готовности (DoD)
 
@@ -174,7 +174,7 @@ Sprint считается завершённым, когда:
 
 ---
 
-## Задача 03: Оркестратор — делегирование 📋
+## Задача 03: Оркестратор — делегирование ✅
 
 ### Цель
 
@@ -184,12 +184,12 @@ Sprint считается завершённым, когда:
 
 ### Состав работ
 
-- [ ] Шаг плана: «delegate reviews» вместо монолитного single-agent review из S2/S3
-- [ ] Назначение criterion_ids без пересечения (или с явным primary owner при неизбежном overlap)
-- [ ] Родитель после handoff работает только с summaries + путями notes
-- [ ] Простой агрегат в `output/feedback.md` (черновой; финальный синтез — S6): склейка findings без глубокого reflection
-- [ ] Регрессия: маленький fixture из S2 всё ещё проходит E2E
-- [ ] Самопроверка по DoD задачи
+- [x] Шаг плана: «delegate reviews» вместо монолитного single-agent review из S2/S3
+- [x] Назначение criterion_ids без пересечения (или с явным primary owner при неизбежном overlap)
+- [x] Родитель после handoff работает только с summaries + путями notes
+- [x] Простой агрегат в `output/feedback.md` (черновой; финальный синтез — S6): склейка findings без глубокого reflection
+- [x] Регрессия: маленький fixture из S2 всё ещё проходит E2E
+- [x] Самопроверка по DoD задачи
 
 ### Критерии готовности (DoD)
 
@@ -216,7 +216,7 @@ Sprint считается завершённым, когда:
 
 ---
 
-## Задача 04: Verbose + контраст S3↔S4 📋
+## Задача 04: Verbose + контраст S3↔S4 ✅
 
 ### Цель
 
@@ -226,12 +226,12 @@ Sprint считается завершённым, когда:
 
 ### Состав работ
 
-- [ ] Verbose-секция Subagents: aspect → brief (сжато) → summary → путь note → длительность
-- [ ] Рядом / ниже: parent context size по шагам (переиспользовать CE-метрики S3)
-- [ ] Прогон сравнения на согласованном большом источнике (тот же, что в `pain-s3.md`, если возможно)
-- [ ] Заполнить `docs/contrast-s3-s4.md`: max parent tokens S3 vs S4, число CE-событий, качественный вывод
-- [ ] Compact: только «delegated: architecture, code_quality» + итоговый черновой feedback
-- [ ] Самопроверка по DoD спринта
+- [x] Verbose-секция Subagents: aspect → brief (сжато) → summary → путь note → длительность
+- [x] Рядом / ниже: parent context size по шагам (переиспользовать CE-метрики S3)
+- [x] Прогон сравнения на согласованном большом источнике (тот же, что в `pain-s3.md`, если возможно)
+- [x] Заполнить `docs/contrast-s3-s4.md`: max parent tokens S3 vs S4, число CE-событий, качественный вывод
+- [x] Compact: только «delegated: architecture, code_quality» + итоговый черновой feedback
+- [x] Самопроверка по DoD спринта
 
 ### Критерии готовности (DoD)
 
@@ -288,9 +288,11 @@ cd ai-homework-mentor
 
 ---
 
-## Итог (заполняется после закрытия)
+## Итог (закрыт 2026-07-24, подтверждён пользователем)
 
-—
+Проверка разнесена на **два изолированных reviewer-субагента** (`reviewer_architecture`, `reviewer_code_quality`) с контрактом handoff (`ReviewBrief` → note → `ReviewSummary`). Оркестратор делегирует через `task`, собирает summaries; полные ноты — в `/notes/`. Verbose показывает панель subagents + CE-ленту; compact — `delegated: …`. Контраст с S3 — [docs/contrast-s3-s4.md](../../docs/contrast-s3-s4.md).
+
+**Проверка:** `.\make.ps1 lint`; `.\make.ps1 test` — 90 passed. Live: `.\make.ps1 run -- -Path .\tests\fixtures\large_hw -Message "Тема: python-cli" -Verbose`.
 
 ---
 

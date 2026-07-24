@@ -20,8 +20,13 @@ def test_load_yaml_config_from_project() -> None:
     assert "Homework Mentor" in cfg.orchestrator_prompts.system_prompt
     assert "invent" in cfg.parse_submission_prompts.system_prompt.lower()
     assert "write_todos" in cfg.review_prompts.system_prompt.lower()
+    assert "contradiction" in cfg.synthesis_reflection_prompts.system_prompt.lower()
+    assert "criterion" in cfg.synthesis_final_prompts.system_prompt.lower()
     assert cfg.output.verbose.show_plan is True
+    assert cfg.output.verbose.show_skills is True
+    assert cfg.output.verbose.show_synthesis is True
     assert (project_root() / "config" / "agent.yaml").is_file()
+    assert (project_root() / "config" / "skills_routing.yaml").is_file()
 
 
 def test_load_yaml_config_missing_file(tmp_path: Path) -> None:
@@ -52,7 +57,19 @@ def test_load_yaml_config_invalid_field(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (config / "prompts" / "review.yaml").write_text(
-        "system_prompt: review\nfeedback_json_schema: '{}'\nreview_user_template: '{topic}'\n",
+        "system_prompt: review\n"
+        "feedback_json_schema: '{}'\n"
+        "review_user_template: '{topic}'\n"
+        "single_system_prompt: single\n"
+        "single_review_user_template: '{topic}'\n",
+        encoding="utf-8",
+    )
+    (config / "prompts" / "synthesis_reflection.yaml").write_text(
+        "system_prompt: reflect\nuser_template: '{gaps}'\n",
+        encoding="utf-8",
+    )
+    (config / "prompts" / "synthesis_final.yaml").write_text(
+        "system_prompt: synthesize\nuser_template: '{topic}'\n",
         encoding="utf-8",
     )
     (config / "output.yaml").write_text(
@@ -81,3 +98,35 @@ def test_runtime_settings_with_api_key(
     settings = load_runtime_settings(env_file=env_file)
     assert settings.openrouter_api_key.get_secret_value() == "sk-or-v1-test-key"
     assert settings.yaml.agent.model
+
+
+def test_openrouter_api_base_from_env(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "OPENROUTER_API_KEY=sk-or-v1-test-key\nOPENROUTER_URL=https://proxy.example/v1\n",
+        encoding="utf-8",
+    )
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENROUTER_URL", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_BASE", raising=False)
+    settings = load_runtime_settings(env_file=env_file)
+    assert settings.openrouter_api_base == "https://proxy.example/v1"
+
+
+def test_openrouter_model_with_free_suffix_gets_prefix(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "OPENROUTER_API_KEY=sk-or-v1-test-key\n"
+        "OPENROUTER_MODEL=nvidia/nemotron-3-nano-30b-a3b:free\n",
+        encoding="utf-8",
+    )
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENROUTER_MODEL", raising=False)
+    settings = load_runtime_settings(env_file=env_file)
+    assert settings.yaml.agent.model == "openrouter:nvidia/nemotron-3-nano-30b-a3b:free"

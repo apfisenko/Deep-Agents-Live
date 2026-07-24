@@ -39,7 +39,7 @@ def fetch_local_directory(
     dest = (staging_dir or default_staging_dir(root=root)).resolve()
     ignored = set(ignore_names or [])
 
-    if _is_relative_to(dest, src):
+    if _is_relative_to(dest, src) and not _staging_under_ignored_segment(dest, src, ignored):
         msg = f"Staging directory must not be inside source: {dest}"
         raise CodeFetchError(msg)
 
@@ -75,3 +75,13 @@ def _is_relative_to(path: Path, parent: Path) -> bool:
     except ValueError:
         return False
     return True
+
+
+def _staging_under_ignored_segment(dest: Path, src: Path, ignored: set[str]) -> bool:
+    """Allow in-tree staging when the first path segment under src is ignored (e.g. workspace/)."""
+    try:
+        relative = dest.resolve().relative_to(src.resolve())
+    except ValueError:
+        return False
+    parts = relative.parts
+    return bool(parts) and parts[0] in ignored

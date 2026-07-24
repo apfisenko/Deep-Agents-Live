@@ -1,0 +1,45 @@
+---
+description: AI Homework Mentor — маршрутизация skills для проверки ДЗ (rubric + ecosystem).
+alwaysApply: true
+globs:
+  - "ai-homework-mentor/**"
+---
+
+# Skills Router — AI Homework Mentor
+
+Перед review / изменением reviewer-промптов: **прочитать SKILL.md** из таблицы, затем применять. Не тащить skill «на всякий случай».
+
+## Как использовать
+
+1. Определить тему ДЗ и аспект reviewer (`architecture` | `code_quality`).
+2. Взять rubric-skill по topic + ecosystem skill по эвристике.
+3. Прочитать `SKILL.md` (allowlist: `skills/`, `.agents/skills/`).
+4. Передать skill в brief субагента; код студента не исполнять; секреты не передавать.
+
+Runtime-роутер: `config/skills_routing.yaml` + `homework_mentor.skills.router`.
+
+## Таблица: проверка ДЗ → skill
+
+### Rubric skills (проект)
+
+| Тема / ситуация | Skill | Путь |
+|-----------------|-------|------|
+| Неизвестная / общая тема | `rubric-default` | `skills/rubric-default/SKILL.md` |
+| Python CLI (`python-cli`) | `rubric-python-cli` | `skills/rubric-python-cli/SKILL.md` |
+
+### Ecosystem skills (публичные)
+
+| Тип проверки | Skill | Аспект | Когда |
+|--------------|-------|--------|-------|
+| Качество Python-кода / tooling | `modern-python` | `code_quality` | всегда для аспекта |
+| Структура FastAPI / API | `fastapi-templates` | `architecture` | topic содержит fastapi/api **или** в манифесте `**/api/**`, `**/routes/**`, `**/routers/**`, `*fastapi*` |
+
+### Inventory
+
+См. `docs/skills-inventory-s5.md`.
+
+## Запреты
+
+- Не устанавливать skills без чтения SKILL.md.
+- Не передавать в skill-контекст `.env`, ключи, полные тексты PD.
+- Не исполнять код студента «чтобы проверить по skill».

@@ -1,11 +1,11 @@
 # Sprint 07: Dogfooding → v1
 
-> **Версия roadmap:** v0.2 (спринты S0–S9)
+> **Версия roadmap:** v0.2 (спринты S0–S10)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
 > **Vision (критерии v1):** [../../concept/vision.md](../../concept/vision.md)
-> **Статус:** 📋 Planned
-> **Открыт:** —
-> **Закрыт:** —
+> **Статус:** ✅ Done
+> **Открыт:** 2026-07-24
+> **Закрыт:** 2026-07-24
 > **Зависит от:** [Sprint 06](../sprint-06-synthesis/README.md) (final_feedback + fix_plan)
 
 ---
@@ -22,7 +22,7 @@
 |--|--|
 | **Боль, которую закрываем** | Механика собрана по спринтам, но нет доказательства, что E2E держится на реальном коде продукта |
 | **Механизм deep-agent** | Полный E2E + **самопроверка** |
-| **Итог v1** | После S7 основной маршрут S0–S7 считается закрытым; S8/S9 — опционально |
+| **Итог v1** | После S7 основной маршрут S0–S7 считается закрытым; далее **S8 ✅** (режимы/отчёты), опц. S9/S10 |
 | **Граница** | Без MCP, без исполнения кода, без новых фич «по ходу» — только валидация и документация |
 
 ---
@@ -60,14 +60,14 @@ Sprint считается завершённым, когда:
 
 | # | Задача | Статус | Plan | Summary |
 |---|--------|--------|------|---------|
-| 01 | Чеклист v1 + gap analysis | 📋 | [plan](tasks/01-v1-checklist/plan.md) | — |
-| 02 | Dogfooding run на `ai-homework-mentor/` | 📋 | [plan](tasks/02-dogfood-run/plan.md) | — |
-| 03 | Регрессия E2E (оба входа, verbose) | 📋 | [plan](tasks/03-e2e-regression/plan.md) | — |
-| 04 | Quickstart + закрытие v1 | 📋 | [plan](tasks/04-quickstart-close/plan.md) | — |
+| 01 | Чеклист v1 + gap analysis | ✅ | [plan](tasks/01-v1-checklist/plan.md) | [summary](tasks/01-v1-checklist/summary.md) |
+| 02 | Dogfooding run на `ai-homework-mentor/` | ✅ | [plan](tasks/02-dogfood-run/plan.md) | [summary](tasks/02-dogfood-run/summary.md) |
+| 03 | Регрессия E2E (оба входа, verbose) | ✅ | [plan](tasks/03-e2e-regression/plan.md) | [summary](tasks/03-e2e-regression/summary.md) |
+| 04 | Quickstart + закрытие v1 | ✅ | [plan](tasks/04-quickstart-close/plan.md) | [summary](tasks/04-quickstart-close/summary.md) |
 
 ---
 
-## Задача 01: Чеклист v1 📋
+## Задача 01: Чеклист v1 ✅
 
 ### Цель
 
@@ -105,7 +105,7 @@ Sprint считается завершённым, когда:
 
 ---
 
-## Задача 02: Dogfooding run 📋
+## Задача 02: Dogfooding run ✅
 
 ### Цель
 
@@ -155,7 +155,7 @@ cd ai-homework-mentor
 
 ---
 
-## Задача 03: Регрессия E2E 📋
+## Задача 03: Регрессия E2E ✅
 
 ### Цель
 
@@ -198,7 +198,7 @@ cd ai-homework-mentor
 
 ---
 
-## Задача 04: Quickstart + закрытие v1 📋
+## Задача 04: Quickstart + закрытие v1 ✅
 
 ### Цель
 
@@ -264,21 +264,22 @@ cd ai-homework-mentor
 
 - Новые фичи v2 (MCP, БД, web UI, checkpoint)
 - Исправление всех findings dogfood (достаточно зафиксировать; критичные — отдельные tasks)
-- S8/S9 (опциональные спринты — разворачивать только по отдельному «ок»)
+- S8+ (пост-v1 спринты — разворачивать по отдельному «ок»)
 
 ---
 
 ## Итог (заполняется после закрытия)
 
-—
+S7 закрыт 2026-07-24. Продукт dogfood'ит себя (`docs/dogfooding-v1.md`); регрессия local/GitHub/clarification пройдена; сводный DoD v1 (12 пунктов) закрыт в `docs/v1-checklist.md`; quickstart — `docs/quickstart-windows.md`. Основной маршрут S0–S7 → **v1**. Блокеры dogfood (in-tree staging, materialize notes, synthesis string summaries) починены в Task 02. Follow-up findings — в backlog dogfooding, не в scope S7. Далее: **S8 ✅** (режимы + отчёты, закрыт 2026-07-25); опционально S9/S10.
 
 ---
 
-## После v1 (опционально)
+## После v1
 
 | Sprint | Тема |
 |--------|------|
-| **S8** | Checkpoint / Resume |
-| **S9** | Dynamic context (модели OpenRouter по шагам) |
+| **S8** | Режимы проверки (`single` / `subagents`) + RU-отчёты и compare в `docs/` |
+| **S9** | Checkpoint / Resume (опционально) |
+| **S10** | Dynamic context — модели OpenRouter по шагам (опционально) |
 
 Разворачивать отдельно по согласованию.

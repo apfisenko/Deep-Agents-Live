@@ -52,3 +52,37 @@ def test_local_module_has_no_subprocess_execution() -> None:
     assert "subprocess" not in source
     assert "os.system" not in source
     assert "Popen" not in source
+
+
+def test_fetch_local_allows_staging_under_ignored_workspace(tmp_path: Path) -> None:
+    """Dogfood: staging under source/workspace/ is OK when workspace is ignored."""
+    source = tmp_path / "project"
+    (source / "src").mkdir(parents=True)
+    (source / "src" / "app.py").write_text("print(1)\n", encoding="utf-8")
+    (source / ".env").write_text("SECRET=1\n", encoding="utf-8")
+    (source / "workspace" / "old").mkdir(parents=True)
+    (source / "workspace" / "old" / "x.txt").write_text("old\n", encoding="utf-8")
+    (source / "logs").mkdir()
+    (source / "logs" / "app.log").write_text("log\n", encoding="utf-8")
+
+    ignore = load_yaml_config().agent.code_fetch.ignore_names
+    staging = source / "workspace" / "session" / "code"
+    result = fetch_local_directory(source, staging_dir=staging, ignore_names=ignore)
+
+    assert (staging / "src" / "app.py").is_file()
+    assert "src/app.py" in result.files
+    assert not (staging / ".env").exists()
+    assert not (staging / "workspace").exists()
+    assert not (staging / "logs").exists()
+    assert all(not f.startswith(("workspace/", "logs/")) and f != ".env" for f in result.files)
+
+
+def test_fetch_local_still_rejects_staging_inside_source_without_ignore(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "project"
+    source.mkdir()
+    (source / "a.py").write_text("x\n", encoding="utf-8")
+    staging = source / "nested" / "code"
+    with pytest.raises(CodeFetchError, match="must not be inside source"):
+        fetch_local_directory(source, staging_dir=staging, ignore_names=[".venv"])

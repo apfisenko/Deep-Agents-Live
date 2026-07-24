@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dependencies = [
     "deepagents>=0.6.12",
     "langchain-openrouter>=0.2.7",
+    "langgraph-checkpoint-sqlite>=3.1.0",
     "pydantic>=2.13.4",
     "python-dotenv>=1.2.2",
     "pyyaml>=6.0.3",
@@ -18,6 +19,7 @@ dependencies = [
 
 [project.scripts]
 homework-mentor = "homework_mentor:main"
+homework-mentor-compare = "homework_mentor.cli.compare:run"
 
 [build-system]
 requires = ["uv_build>=0.11.3,<0.12.0"]
@@ -38,7 +40,7 @@ default-groups = ["lint", "test"]
 line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
-extend-exclude = ["tests/fixtures", "scripts"]
+extend-exclude = ["tests/fixtures", "scripts", ".agents"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -61,6 +63,22 @@ ignore = [
 ]
 "src/homework_mentor/submission/parser.py" = [
     "RUF001",  # Cyrillic clarification strings are intentional
+]
+"src/homework_mentor/reports/**/*.py" = [
+    "RUF001",  # Russian report text is intentional (S8)
+    "RUF002",  # Russian docstrings in report models
+]
+"src/homework_mentor/cli/compare.py" = [
+    "RUF001",  # Russian CLI help/strings for compare-modes
+]
+"src/homework_mentor/cli/display.py" = [
+    "RUF001",  # Russian feedback panel labels (S8)
+]
+"src/homework_mentor/cli/app.py" = [
+    "RUF001",  # Russian panel titles (S8)
+]
+"src/homework_mentor/output/render.py" = [
+    "RUF001",  # Russian final_feedback / fix_plan markdown (S8)
 ]
 
 [tool.ruff.format]

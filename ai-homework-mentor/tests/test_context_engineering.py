@@ -70,7 +70,19 @@ def test_agent_yaml_context_threshold_not_hardcoded(tmp_path) -> None:
         encoding="utf-8",
     )
     (config / "prompts" / "review.yaml").write_text(
-        "system_prompt: review\nfeedback_json_schema: '{}'\nreview_user_template: '{topic}'\n",
+        "system_prompt: review\n"
+        "feedback_json_schema: '{}'\n"
+        "review_user_template: '{topic}'\n"
+        "single_system_prompt: single\n"
+        "single_review_user_template: '{topic}'\n",
+        encoding="utf-8",
+    )
+    (config / "prompts" / "synthesis_reflection.yaml").write_text(
+        "system_prompt: reflect\nuser_template: '{gaps}'\n",
+        encoding="utf-8",
+    )
+    (config / "prompts" / "synthesis_final.yaml").write_text(
+        "system_prompt: synthesize\nuser_template: '{topic}'\n",
         encoding="utf-8",
     )
     (config / "output.yaml").write_text("default_mode: compact\n", encoding="utf-8")
