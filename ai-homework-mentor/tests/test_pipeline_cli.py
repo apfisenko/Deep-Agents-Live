@@ -8,14 +8,27 @@ from rich.console import Console
 from homework_mentor.cli.app import main
 from homework_mentor.code_fetch.models import FetchResult
 from homework_mentor.config import project_root
-from homework_mentor.feedback.models import SimpleFeedback
 from homework_mentor.orchestrator.review import ReviewRunResult, TodoItem
+from homework_mentor.output.schemas import CoverageReport, FinalFeedback, StrengthItem
 from homework_mentor.pipeline import SessionResult, run_homework_session
 from homework_mentor.rubric.loader import select_rubric
 from homework_mentor.submission import SourceType, Submission
 from homework_mentor.workspace import create_session
 
 FIXTURE = project_root() / "tests" / "fixtures" / "local_hw"
+
+
+def _feedback() -> FinalFeedback:
+    return FinalFeedback(
+        coverage=CoverageReport(
+            aspects_expected=["architecture"],
+            aspects_covered=["architecture"],
+            gaps=[],
+        ),
+        strengths=[StrengthItem(text="structure ok")],
+        issues=[],
+        next_step="Add tests",
+    )
 
 
 def test_session_clarification_skips_fetch(tmp_path: Path) -> None:
@@ -45,7 +58,8 @@ def test_session_local_fetch_and_review(tmp_path: Path) -> None:
         return ReviewRunResult(
             reply="ack review",
             todos=[TodoItem(content="plan", status="completed")],
-            feedback=SimpleFeedback(strengths=["ok"], issues=[], next_step="Continue"),
+            final_feedback=_feedback(),
+            fix_plan=None,
         )
 
     result = run_homework_session(
@@ -92,7 +106,7 @@ def test_cli_local_success_verbose(tmp_path: Path) -> None:
     console = Console(file=buffer, force_terminal=True, width=120, highlight=False)
     session = create_session(root=tmp_path, session_id="cli-verbose")
     rubric = select_rubric("python-cli", session=session)
-    feedback = SimpleFeedback(strengths=["structure ok"], issues=[], next_step="Add tests")
+    feedback = _feedback()
 
     def session_runner(**_kwargs: object) -> SessionResult:
         return SessionResult(
@@ -117,7 +131,7 @@ def test_cli_local_success_verbose(tmp_path: Path) -> None:
                     TodoItem(content="read rubric", status="completed"),
                     TodoItem(content="write feedback", status="completed"),
                 ],
-                feedback=feedback,
+                final_feedback=feedback,
             ),
             reply="Done.",
         )

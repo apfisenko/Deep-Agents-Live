@@ -23,3 +23,8 @@ code_fetch:
     - "dist"
     - "build"
     - ".eggs"
+    - "workspace"
+    - "logs"
+    - ".env"
+    - ".cursor"
+    - ".agents"

@@ -1,0 +1,23 @@
+# Topic → skills routing (S5)
+
+rubric:
+  default: rubric-default
+  by_topic:
+    python-cli: rubric-python-cli
+    python_cli: rubric-python-cli
+
+ecosystem:
+  - id: modern-python
+    aspects: [code_quality]
+    when: always_for_aspect
+  - id: fastapi-templates
+    aspects: [architecture]
+    when: api_detected
+
+api_detection:
+  topic_keywords: [fastapi, api, rest, webservice, web-service]
+  path_globs:
+    - "**/routes/**"
+    - "**/api/**"
+    - "**/*fastapi*"
+    - "**/routers/**"

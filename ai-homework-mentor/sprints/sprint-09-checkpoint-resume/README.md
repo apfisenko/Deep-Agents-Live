@@ -1,12 +1,12 @@
-# Sprint 08: Checkpoint / Resume (опционально)
+# Sprint 09: Checkpoint / Resume (опционально)
 
-> **Версия roadmap:** v0.2 (спринты S0–S9)
+> **Версия roadmap:** v0.3 (спринты S0–S10)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
 > **Статус:** 📋 Planned
 > **Открыт:** —
 > **Закрыт:** —
-> **Зависит от:** [Sprint 07](../sprint-07-dogfooding/README.md) (v1 — многошаговый процесс стабилен)
-> **Опционально:** не блокирует v1; брать после закрытия S7
+> **Зависит от:** [Sprint 07](../sprint-07-dogfooding/README.md) (v1 — многошаговый процесс стабилен); желательно после [Sprint 08](../sprint-08-review-modes/README.md) (**S8 ✅**)
+> **Опционально:** не блокирует v1; брать после закрытия S8
 
 ---
 
@@ -45,7 +45,7 @@ Sprint считается завершённым, когда:
 
 ## Навыки (skills) для исполнителя
 
-| Skill | Зачем в S8 |
+| Skill | Зачем в S9 |
 |-------|------------|
 | `langgraph-persistence` | Checkpointer, thread_id, resume API |
 | `langgraph-fundamentals` | Граф состояния, узлы процесса |
@@ -71,7 +71,7 @@ checkpoint_version: 1
 # НЕ сохраняем: OPENROUTER_API_KEY, полные message histories subagents
 ```
 
-Хранилище v1 S8: локально `workspace/.checkpoints/<session_id>/` или SQLite через LangGraph — выбрать в задаче 02 и зафиксировать в ADR/checkpoint-model.
+Хранилище v1 S9: локально `workspace/.checkpoints/<session_id>/` или SQLite через LangGraph — выбрать в задаче 02 и зафиксировать в ADR/checkpoint-model.
 
 ---
 
@@ -223,7 +223,7 @@ checkpoint_version: 1
 
 ---
 
-## Вне scope (не делать в S8)
+## Вне scope (не делать в S9)
 
 - Память между **разными** submission одного студента
 - Human-in-the-loop approve gate (следующий слой)
@@ -240,4 +240,4 @@ checkpoint_version: 1
 
 ## Следующий спринт
 
-[Sprint 09](../sprint-09-dynamic-context/README.md) — dynamic context / модели по шагам (независим от S8).
+[Sprint 10](../sprint-10-dynamic-context/README.md) — dynamic context / модели по шагам (независим от S9).

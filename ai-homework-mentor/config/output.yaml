@@ -3,5 +3,7 @@ verbose:
   show_config: true
   show_plan: true
   show_workspace: true
-  show_subagents: false
+  show_subagents: true
   show_context_metrics: true
+  show_skills: true
+  show_synthesis: true

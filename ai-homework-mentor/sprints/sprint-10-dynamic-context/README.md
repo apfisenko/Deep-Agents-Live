@@ -1,12 +1,12 @@
-# Sprint 09: Dynamic context — модели по шагам (опционально)
+# Sprint 10: Dynamic context — модели по шагам (опционально)
 
-> **Версия roadmap:** v0.2 (спринты S0–S9)
+> **Версия roadmap:** v0.3 (спринты S0–S10)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
 > **Статус:** 📋 Planned
 > **Открыт:** —
 > **Закрыт:** —
-> **Зависит от:** [Sprint 07](../sprint-07-dogfooding/README.md) (v1); **не** зависит от S8
-> **Опционально:** после v1 / параллельно S8
+> **Зависит от:** [Sprint 07](../sprint-07-dogfooding/README.md) (v1); **не** зависит от S9
+> **Опционально:** после v1 / параллельно S9; режимы из [Sprint 08](../sprint-08-review-modes/README.md) (**S8 ✅**) уже доступны
 
 ---
 
@@ -22,7 +22,7 @@
 |--|--|
 | **Боль, которую закрываем** | После v1 одна «сильная» модель на всех шагах — дорого и медленно на массовых reviewer-вызовах |
 | **Механизм deep-agent** | **Dynamic context** — выбор модели (и опц. tool set) под фазу/роль |
-| **Граница** | Не замена CE (S3); не checkpoint (S8); не смена провайдера — только routing моделей OpenRouter |
+| **Граница** | Не замена CE (S3); не checkpoint (S9); не смена провайдера — только routing моделей OpenRouter |
 
 ---
 
@@ -44,8 +44,8 @@ Sprint считается завершённым, когда:
 
 ## Навыки (skills) для исполнителя
 
-| Skill | Зачем в S9 |
-|-------|------------|
+| Skill | Зачем в S10 |
+|-------|-------------|
 | `deep-agents-core` | Model binding per agent/subagent |
 | `langchain-fundamentals` / `langchain-dependencies` | ChatOpenRouter / model kwargs |
 | `langgraph-fundamentals` | Model на уровне node при необходимости |
@@ -74,7 +74,7 @@ fallback:
   on_error: retry_strong | fail
   max_retries: 1
 
-# опционально v1 S9:
+# опционально v1 S10:
 # tools_by_role: reviewer: [read_file, list_dir]  # без лишних tools на synthesis
 ```
 
@@ -215,7 +215,7 @@ Orchestrator, каждый reviewer и synthesis/reflection используют
 ## Демонстрация через Rich CLI
 
 ```powershell
-# Routed (default after S9)
+# Routed (default after S10)
 .\make.ps1 run -- -Path .\tests\fixtures\local_hw -Message "Тема: …" -Verbose
 
 # All strong (baseline for benchmark)
@@ -227,23 +227,24 @@ $env:MODELS_PROFILE = "all_strong"
 
 ---
 
-## Вне scope (не делать в S9)
+## Вне scope (не делать в S10)
 
 - Смена провайдера (не OpenRouter)
 - Автовыбор модели по размеру контекста в runtime (можно следующий слой)
-- Checkpoint/resume (S8)
+- Checkpoint/resume (S9)
+- Режимы single/subagents и compare/review-отчёты (**S8 ✅** — уже отдельно)
 - Долговременная память студента, HITL gate
 
 ---
 
-## Следующий слой (не в S9)
+## Следующий слой (не в S10)
 
 | Слой | Описание |
 |------|----------|
 | **Долговременная память** | Накопление знаний о студенте между запусками |
 | **Human-in-the-loop** | Гейт подтверждения перед synthesis / отправкой feedback |
 
-Зафиксировать в roadmap «После S9», без развёртки спринта, пока нет запроса.
+Зафиксировать в roadmap «После S10», без развёртки спринта, пока нет запроса.
 
 ---
 

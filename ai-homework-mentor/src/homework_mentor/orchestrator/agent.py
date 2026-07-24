@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING, Any
 
 from deepagents import create_deep_agent
-from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessage, BaseMessage
 
-from homework_mentor.config import RuntimeSettings, load_runtime_settings
+from homework_mentor.config import (
+    DEFAULT_OPENROUTER_API_BASE,
+    RuntimeSettings,
+    apply_openrouter_process_env,
+    init_openrouter_chat_model,
+    load_runtime_settings,
+)
 from homework_mentor.logging_setup import setup_logging
 
 if TYPE_CHECKING:
@@ -22,15 +26,17 @@ class AgentError(RuntimeError):
     """Raised when the stub agent cannot produce a reply."""
 
 
+class ReviewError(AgentError):
+    """Review failed after workspace was created; carries partial session context."""
+
+    def __init__(self, message: str, *, session_id: str | None = None) -> None:
+        super().__init__(message)
+        self.session_id = session_id
+
+
 def build_agent(settings: RuntimeSettings) -> CompiledStateGraph[Any, Any, Any, Any]:
     """Build a minimal DeepAgents graph from YAML settings."""
-    agent_cfg = settings.yaml.agent
-    model = init_chat_model(
-        agent_cfg.model,
-        api_key=settings.openrouter_api_key.get_secret_value(),
-        temperature=agent_cfg.temperature,
-        max_tokens=agent_cfg.max_tokens,
-    )
+    model = init_openrouter_chat_model(settings)
     return create_deep_agent(
         model=model,
         tools=[],
@@ -70,10 +76,13 @@ def run_agent(
 
     runtime = settings or load_runtime_settings()
     logger = setup_logging(level=runtime.log_level)
-    logger.info("session start model=%s", runtime.yaml.agent.model)
+    logger.info(
+        "session start model=%s api_base=%s",
+        runtime.yaml.agent.model,
+        runtime.openrouter_api_base or DEFAULT_OPENROUTER_API_BASE,
+    )
 
-    # Ensure provider clients that read process env also see the key.
-    os.environ["OPENROUTER_API_KEY"] = runtime.openrouter_api_key.get_secret_value()
+    apply_openrouter_process_env(runtime)
 
     factory = agent_factory or build_agent
     agent = factory(runtime)

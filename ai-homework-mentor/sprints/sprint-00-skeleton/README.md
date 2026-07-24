@@ -1,6 +1,6 @@
 # Sprint 00: Каркас (skeleton)
 
-> **Версия roadmap:** v0.2 (спринты S0–S9)
+> **Версия roadmap:** v0.2 (спринты S0–S10)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
 > **Статус:** ✅ Done
 > **Открыт:** 2026-07-24

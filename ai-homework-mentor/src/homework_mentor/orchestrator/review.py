@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -15,12 +16,15 @@ from deepagents import (
 )
 from deepagents.backends.filesystem import FilesystemBackend
 from deepagents.middleware.filesystem import FilesystemPermission
-from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 
 from homework_mentor.config import (
+    DEFAULT_REVIEW_MODE,
+    ReviewMode,
     ReviewPrompts,
     RuntimeSettings,
+    apply_openrouter_process_env,
+    init_openrouter_chat_model,
     load_runtime_settings,
 )
 from homework_mentor.context.collector import ContextTraceCollector
@@ -32,9 +36,18 @@ from homework_mentor.context.harness import (
     pop_extra_middleware,
     set_pending_summarization_middleware,
 )
-from homework_mentor.feedback.models import SimpleFeedback
+from homework_mentor.errors import describe_exception, is_transient_provider_error
 from homework_mentor.logging_setup import setup_logging
 from homework_mentor.orchestrator.agent import AgentError, extract_final_text
+from homework_mentor.output.render import (
+    FINAL_FEEDBACK_JSON,
+    FIX_PLAN_JSON,
+    load_final_feedback,
+    load_fix_plan,
+)
+from homework_mentor.reviewers.collector import SubagentHandoffCollector
+from homework_mentor.reviewers.registry import build_reviewer_subagents, load_reviewer_specs
+from homework_mentor.reviewers.window_metrics import ReviewerWindowMetricsCollector
 from homework_mentor.workspace.events import WorkspaceEventCollector
 
 if TYPE_CHECKING:
@@ -44,8 +57,11 @@ if TYPE_CHECKING:
     from langgraph.graph.state import CompiledStateGraph
 
     from homework_mentor.code_fetch.models import FetchResult
+    from homework_mentor.output.schemas import FinalFeedback, FixPlan
     from homework_mentor.rubric.loader import RubricSelection
+    from homework_mentor.skills.models import SkillRef, SkillsSelection
     from homework_mentor.submission.models import Submission
+    from homework_mentor.synthesis.reflection import ReflectionResult
     from homework_mentor.workspace.session import WorkspaceSession
 
 logger = logging.getLogger(__name__)
@@ -66,14 +82,19 @@ class ReviewRunResult:
     todo_history: list[list[TodoItem]] = field(default_factory=list)
     events: WorkspaceEventCollector = field(default_factory=WorkspaceEventCollector)
     context_trace: ContextTraceCollector = field(default_factory=ContextTraceCollector)
-    feedback: SimpleFeedback | None = None
+    subagent_handoffs: SubagentHandoffCollector = field(default_factory=SubagentHandoffCollector)
+    final_feedback: FinalFeedback | None = None
+    fix_plan: FixPlan | None = None
+    reflection: ReflectionResult | None = None
+    skills: SkillsSelection | None = None
+    review_mode: ReviewMode = DEFAULT_REVIEW_MODE
 
 
 def _register_review_harness(model_name: str) -> None:
     register_harness_profile(
         model_name,
         HarnessProfile(
-            excluded_tools=frozenset({"execute", "task"}),
+            excluded_tools=frozenset({"execute"}),
             excluded_middleware=frozenset({"SummarizationMiddleware"}),
             extra_middleware=pop_extra_middleware,
             general_purpose_subagent=GeneralPurposeSubagentProfile(enabled=False),
@@ -85,20 +106,18 @@ def build_review_agent(
     settings: RuntimeSettings,
     *,
     session_root: Path,
+    skills_by_aspect: dict[str, list] | None = None,
+    review_mode: ReviewMode = DEFAULT_REVIEW_MODE,
+    window_metrics: ReviewerWindowMetricsCollector | None = None,
 ) -> CompiledStateGraph[Any, Any, Any, Any]:
     """Build a Deep Agent scoped to one workspace session."""
-    agent_cfg = settings.yaml.agent
-    model = init_chat_model(
-        agent_cfg.model,
-        api_key=settings.openrouter_api_key.get_secret_value(),
-        temperature=agent_cfg.temperature,
-        max_tokens=agent_cfg.max_tokens,
-    )
+    apply_openrouter_process_env(settings)
+    model = init_openrouter_chat_model(settings)
     backend = FilesystemBackend(root_dir=session_root, virtual_mode=True)
     set_pending_summarization_middleware(
-        build_summarization_middleware(model, backend, agent_cfg.context),
+        build_summarization_middleware(model, backend, settings.yaml.agent.context),
     )
-    _register_review_harness(agent_cfg.model)
+    _register_review_harness(settings.yaml.agent.model)
     permissions = [
         FilesystemPermission(
             operations=["read", "write", "list"],
@@ -106,33 +125,70 @@ def build_review_agent(
             mode="allow",
         ),
     ]
-    system_prompt = settings.yaml.review_prompts.system_prompt
+    prompts = settings.yaml.review_prompts
+    if review_mode == "subagents":
+        reviewer_specs = load_reviewer_specs()
+        reviewer_subagents = build_reviewer_subagents(
+            reviewer_specs,
+            model=model,
+            skills_by_aspect=skills_by_aspect,
+            window_metrics=window_metrics,
+        )
+        system_prompt = prompts.system_prompt
+    else:
+        reviewer_subagents = []
+        system_prompt = prompts.single_system_prompt
     return create_deep_agent(
         model=model,
         backend=backend,
         permissions=permissions,
         system_prompt=system_prompt,
+        subagents=reviewer_subagents,
         name="homework-mentor-review",
     )
 
 
-def build_review_message(
+def build_review_message(  # noqa: PLR0913 — explicit review message deps
     *,
     submission: Submission,
     fetch: FetchResult,
     rubric: RubricSelection,
     prompts: ReviewPrompts,
+    skills: SkillsSelection | None = None,
+    review_mode: ReviewMode = DEFAULT_REVIEW_MODE,
 ) -> str:
-    template = prompts.review_user_template
-    schema = prompts.feedback_json_schema.strip()
+    template = (
+        prompts.review_user_template
+        if review_mode == "subagents"
+        else prompts.single_review_user_template
+    )
     body = template.format(
         topic=submission.topic or "(not set)",
         source_type=submission.source_type.value,
         source=submission.source_value or "",
         file_count=fetch.file_count,
     )
-    rubric_hint = f"rubric_id: {rubric.rubric.id}\n"
-    return f"{body}\n{rubric_hint}\nRequired /output/feedback.json schema:\n{schema}"
+    specs = load_reviewer_specs()
+    reviewer_lines = "\n".join(
+        f"- {spec.name}: aspect={spec.aspect}, criteria={', '.join(spec.criterion_ids)}"
+        for spec in specs
+    )
+    if review_mode == "subagents":
+        rubric_hint = f"rubric_id: {rubric.rubric.id}\nreviewers:\n{reviewer_lines}\n"
+        stop_line = "Stop after reviewer summaries — synthesis writes final_feedback/fix_plan."
+    else:
+        rubric_hint = (
+            f"rubric_id: {rubric.rubric.id}\naspects to cover in notes:\n{reviewer_lines}\n"
+        )
+        stop_line = "Stop after writing review notes — synthesis writes final_feedback/fix_plan."
+    skills_hint = ""
+    if skills is not None:
+        skill_lines = "\n".join(
+            f"- {ref.id} ({ref.kind}, aspect={ref.aspect or 'all'}): {ref.reason}"
+            for ref in skills.all_refs()
+        )
+        skills_hint = f"active_skills:\n{skill_lines}\n"
+    return f"{body}\n{rubric_hint}{skills_hint}{stop_line}"
 
 
 def _parse_todos(raw: object) -> list[TodoItem]:
@@ -175,24 +231,87 @@ def _save_todo_snapshot(session: WorkspaceSession, todos: list[TodoItem]) -> Non
     target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def load_feedback_from_session(session: WorkspaceSession) -> SimpleFeedback | None:
-    path = session.output_dir / "feedback.json"
-    if not path.is_file():
-        return None
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-        return SimpleFeedback.model_validate(raw)
-    except (json.JSONDecodeError, ValueError):
-        logger.exception("failed to parse feedback.json")
-        return None
+def load_final_artifacts_from_session(
+    session: WorkspaceSession,
+) -> tuple[FinalFeedback | None, FixPlan | None]:
+    feedback_path = session.output_dir / FINAL_FEEDBACK_JSON
+    plan_path = session.output_dir / FIX_PLAN_JSON
+    feedback: FinalFeedback | None = None
+    plan: FixPlan | None = None
+    if feedback_path.is_file():
+        try:
+            feedback = load_final_feedback(feedback_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, ValueError):
+            logger.exception("failed to parse final_feedback.json")
+    if plan_path.is_file():
+        try:
+            plan = load_fix_plan(plan_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, ValueError):
+            logger.exception("failed to parse fix_plan.json")
+    return feedback, plan
 
 
-def run_review(
+@dataclass
+class _ReviewStreamState:
+    session: WorkspaceSession
+    collector: WorkspaceEventCollector
+    context_trace: ContextTraceCollector
+    handoffs: SubagentHandoffCollector
+    todo_history: list[list[TodoItem]]
+    todos: list[TodoItem]
+    observed_messages: int = 0
+
+
+def _process_review_chunk(
+    chunk: dict[str, Any],
+    state: _ReviewStreamState,
+) -> None:
+    new_todos = _parse_todos(chunk.get("todos"))
+    if new_todos and new_todos != state.todos:
+        state.todos = new_todos
+        state.todo_history.append(list(state.todos))
+        _save_todo_snapshot(state.session, state.todos)
+    messages = chunk.get("messages")
+    ce_event = parse_summarization_state(chunk.get("_summarization_event"))
+    if isinstance(messages, list):
+        typed_messages = [item for item in messages if isinstance(item, BaseMessage)]
+        new_messages = typed_messages[state.observed_messages :]
+        state.observed_messages = len(typed_messages)
+        if typed_messages:
+            state.context_trace.observe_messages(
+                typed_messages,
+                event_type=ce_event.event_type if ce_event else "none",
+                offload_path=ce_event.offload_path if ce_event else None,
+            )
+        for item in new_messages:
+            state.handoffs.observe_message(item)
+            _record_tool_events(state.collector, item)
+
+
+def _stream_review_agent(
+    agent: CompiledStateGraph[Any, Any, Any, Any],
+    *,
+    stream_input: dict[str, Any],
+    state: _ReviewStreamState,
+) -> dict[str, Any] | None:
+    final_state: dict[str, Any] | None = None
+    for chunk in agent.stream(stream_input, stream_mode="values"):
+        if not isinstance(chunk, dict):
+            continue
+        final_state = chunk
+        _process_review_chunk(chunk, state)
+    return final_state
+
+
+def run_review(  # noqa: PLR0913 — injectable deps for tests / skills wiring
     *,
     message: str,
     session: WorkspaceSession,
     settings: RuntimeSettings | None = None,
     agent_factory: Callable[[RuntimeSettings, Path], Any] | None = None,
+    skills: SkillsSelection | None = None,
+    skills_by_aspect: dict[str, list[SkillRef]] | None = None,
+    review_mode: ReviewMode = DEFAULT_REVIEW_MODE,
 ) -> ReviewRunResult:
     """Run the review agent with todo + FS event collection."""
     if not message.strip():
@@ -201,59 +320,85 @@ def run_review(
 
     runtime = settings or load_runtime_settings()
     setup_logging(level=runtime.log_level)
-    logger.info("review start session=%s model=%s", session.session_id, runtime.yaml.agent.model)
+    logger.info(
+        "review start session=%s model=%s mode=%s",
+        session.session_id,
+        runtime.yaml.agent.model,
+        review_mode,
+    )
 
-    factory = agent_factory or (lambda s, root: build_review_agent(s, session_root=root))
+    aspect_skills = skills_by_aspect
+    mode = review_mode
+    window_metrics = ReviewerWindowMetricsCollector()
+    factory = agent_factory or (
+        lambda s, root: build_review_agent(
+            s,
+            session_root=root,
+            skills_by_aspect=aspect_skills,
+            review_mode=mode,
+            window_metrics=window_metrics,
+        )
+    )
     agent = factory(runtime, session.root)
     collector = WorkspaceEventCollector()
     context_trace = ContextTraceCollector()
-    todo_history: list[list[TodoItem]] = []
-    todos: list[TodoItem] = []
+    handoffs = SubagentHandoffCollector()
+    stream_state = _ReviewStreamState(
+        session=session,
+        collector=collector,
+        context_trace=context_trace,
+        handoffs=handoffs,
+        todo_history=[],
+        todos=[],
+    )
     final_state: dict[str, Any] | None = None
+    stream_input = {"messages": [{"role": "user", "content": message}]}
+    attempts = 2
 
-    for chunk in agent.stream(
-        {"messages": [{"role": "user", "content": message}]},
-        stream_mode="values",
-    ):
-        if not isinstance(chunk, dict):
-            continue
-        final_state = chunk
-        new_todos = _parse_todos(chunk.get("todos"))
-        if new_todos and new_todos != todos:
-            todos = new_todos
-            todo_history.append(list(todos))
-            _save_todo_snapshot(session, todos)
-        messages = chunk.get("messages")
-        ce_event = parse_summarization_state(chunk.get("_summarization_event"))
-        if isinstance(messages, list):
-            typed_messages = [item for item in messages if isinstance(item, BaseMessage)]
-            if typed_messages:
-                context_trace.observe_messages(
-                    typed_messages,
-                    event_type=ce_event.event_type if ce_event else "none",
-                    offload_path=ce_event.offload_path if ce_event else None,
+    for attempt in range(attempts):
+        try:
+            final_state = _stream_review_agent(
+                agent,
+                stream_input=stream_input,
+                state=stream_state,
+            )
+            break
+        except Exception as exc:
+            transient = is_transient_provider_error(exc)
+            if transient and attempt + 1 < attempts:
+                logger.warning(
+                    "review provider error (retry %s/%s) session=%s: %s",
+                    attempt + 1,
+                    attempts,
+                    session.session_id,
+                    describe_exception(exc),
                 )
-            for item in typed_messages:
-                _record_tool_events(collector, item)
+                time.sleep(2)
+                continue
+            logger.exception("review failed session=%s", session.session_id)
+            msg = f"Review failed: {describe_exception(exc)}"
+            raise AgentError(msg) from exc
 
     if final_state is None:
         msg = "Review agent produced no state"
         raise AgentError(msg)
 
+    handoffs.merge_window_metrics(window_metrics)
     context_trace.persist(session)
     reply = extract_final_text(final_state)
-    feedback = load_feedback_from_session(session)
     logger.info(
-        "review done todos=%s feedback=%s context_steps=%s",
-        len(todos),
-        feedback is not None,
+        "review done todos=%s context_steps=%s handoffs=%s",
+        len(stream_state.todos),
         len(context_trace.events),
+        len(handoffs.events),
     )
     return ReviewRunResult(
         reply=reply,
-        todos=todos,
-        todo_history=todo_history,
+        todos=stream_state.todos,
+        todo_history=stream_state.todo_history,
         events=collector,
         context_trace=context_trace,
-        feedback=feedback,
+        subagent_handoffs=handoffs,
+        skills=skills,
+        review_mode=review_mode,
     )

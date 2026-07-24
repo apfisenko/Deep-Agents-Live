@@ -1,10 +1,10 @@
 # Sprint 06: Синтез feedback из артефактов
 
-> **Версия roadmap:** v0.2 (спринты S0–S9)
+> **Версия roadmap:** v0.2 (спринты S0–S10)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
-> **Статус:** 📋 Planned
-> **Открыт:** —
-> **Закрыт:** —
+> **Статус:** ✅ Done
+> **Открыт:** 2026-07-24
+> **Закрыт:** 2026-07-24
 > **Зависит от:** [Sprint 05](../sprint-05-skills/README.md) (review-ноты субагентов + rubric/skills)
 
 ---
@@ -29,7 +29,7 @@
 | В S6 | Не в S6 |
 |------|---------|
 | `output/final_feedback.*`, `output/fix_plan.*` | Dogfooding (S7) |
-| Reflection: покрытие аспектов, противоречия | Checkpoint/resume (S8) |
+| Reflection: покрытие аспектов, противоречия | Checkpoint/resume (S9) |
 | Ссылки на `criterion_id` из rubric | Балльная оценка |
 | Сверка submission vs findings | Новые reviewer-аспекты |
 
@@ -92,10 +92,10 @@ optional: [{ action, criterion_id, rationale }]
 
 | # | Задача | Статус | Plan | Summary |
 |---|--------|--------|------|---------|
-| 01 | Схемы final_feedback + fix_plan | 📋 | [plan](tasks/01-output-schemas/plan.md) | — |
-| 02 | Reflection: покрытие и противоречия | 📋 | [plan](tasks/02-reflection/plan.md) | — |
-| 03 | Синтез из notes/summaries + claims_check | 📋 | [plan](tasks/03-synthesis/plan.md) | — |
-| 04 | Rich CLI: compact/verbose итог | 📋 | [plan](tasks/04-cli-output/plan.md) | — |
+| 01 | Схемы final_feedback + fix_plan | ✅ | [plan](tasks/01-output-schemas/plan.md) | [summary](tasks/01-output-schemas/summary.md) |
+| 02 | Reflection: покрытие и противоречия | ✅ | [plan](tasks/02-reflection/plan.md) | [summary](tasks/02-reflection/summary.md) |
+| 03 | Синтез из notes/summaries + claims_check | ✅ | [plan](tasks/03-synthesis/plan.md) | [summary](tasks/03-synthesis/summary.md) |
+| 04 | Rich CLI: compact/verbose итог | ✅ | [plan](tasks/04-cli-output/plan.md) | [summary](tasks/04-cli-output/summary.md) |
 
 ---
 
@@ -296,7 +296,7 @@ cd ai-homework-mentor
 
 ## Итог (заполняется после закрытия)
 
-—
+S6 закрыт 2026-07-24: схемы `FinalFeedback`/`FixPlan` (fail `criterion_id`), reflection (coverage + contradictions), synthesis pipeline → `output/final_feedback.*` + `fix_plan.*` с `claims_check`, happy path без `SimpleFeedback`, Rich compact/verbose. Lint/tests зелёные (121). Следующий слой — S7 (dogfooding → v1).
 
 ---
 

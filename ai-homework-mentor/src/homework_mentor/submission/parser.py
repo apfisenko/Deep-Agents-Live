@@ -6,8 +6,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
-from langchain.chat_models import init_chat_model
-
+from homework_mentor.config import init_openrouter_chat_model
 from homework_mentor.submission.models import SourceType, Submission, TopicExtraction
 
 if TYPE_CHECKING:
@@ -134,12 +133,7 @@ def parse_submission(
 
 
 def _llm_extract_topic(raw_text: str, *, settings: RuntimeSettings) -> str | None:
-    model = init_chat_model(
-        settings.yaml.agent.model,
-        api_key=settings.openrouter_api_key.get_secret_value(),
-        temperature=0.0,
-        max_tokens=512,
-    )
+    model = init_openrouter_chat_model(settings, temperature=0.0, max_tokens=512)
     structured = model.with_structured_output(TopicExtraction)
     system = settings.yaml.parse_submission_prompts.system_prompt
     result = structured.invoke(

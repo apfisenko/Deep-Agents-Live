@@ -4,11 +4,20 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import yaml
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, SecretStr, ValidationError
+
+if TYPE_CHECKING:
+    from langchain_core.language_models import BaseChatModel
+
+DEFAULT_OPENROUTER_API_BASE = "https://openrouter.ai/api/v1"
+
+ReviewMode = Literal["single", "subagents"]
+DEFAULT_REVIEW_MODE: ReviewMode = "subagents"
+REVIEW_MODE_VALUES: tuple[ReviewMode, ...] = ("single", "subagents")
 
 
 class ConfigError(RuntimeError):
@@ -49,6 +58,18 @@ class ReviewPrompts(BaseModel):
     system_prompt: str = Field(min_length=1)
     feedback_json_schema: str = Field(min_length=1)
     review_user_template: str = Field(min_length=1)
+    single_system_prompt: str = Field(min_length=1)
+    single_review_user_template: str = Field(min_length=1)
+
+
+class SynthesisReflectionPrompts(BaseModel):
+    system_prompt: str = Field(min_length=1)
+    user_template: str = Field(min_length=1)
+
+
+class SynthesisFinalPrompts(BaseModel):
+    system_prompt: str = Field(min_length=1)
+    user_template: str = Field(min_length=1)
 
 
 class VerboseOutput(BaseModel):
@@ -57,6 +78,8 @@ class VerboseOutput(BaseModel):
     show_workspace: bool = False
     show_subagents: bool = False
     show_context_metrics: bool = False
+    show_skills: bool = False
+    show_synthesis: bool = True
 
 
 class OutputConfig(BaseModel):
@@ -69,6 +92,8 @@ class YamlConfig(BaseModel):
     orchestrator_prompts: OrchestratorPrompts
     parse_submission_prompts: ParseSubmissionPrompts
     review_prompts: ReviewPrompts
+    synthesis_reflection_prompts: SynthesisReflectionPrompts
+    synthesis_final_prompts: SynthesisFinalPrompts
     output: OutputConfig
 
 
@@ -77,6 +102,7 @@ class RuntimeSettings(BaseModel):
 
     yaml: YamlConfig
     openrouter_api_key: SecretStr
+    openrouter_api_base: str | None = None
     log_level: str = "INFO"
 
 
@@ -111,6 +137,8 @@ def load_yaml_config(*, root: Path | None = None) -> YamlConfig:
     prompts_raw = _read_yaml(base / "prompts" / "orchestrator.yaml")
     parse_raw = _read_yaml(base / "prompts" / "parse_submission.yaml")
     review_raw = _read_yaml(base / "prompts" / "review.yaml")
+    reflection_raw = _read_yaml(base / "prompts" / "synthesis_reflection.yaml")
+    final_raw = _read_yaml(base / "prompts" / "synthesis_final.yaml")
     output_raw = _read_yaml(base / "output.yaml")
     try:
         return YamlConfig(
@@ -118,11 +146,91 @@ def load_yaml_config(*, root: Path | None = None) -> YamlConfig:
             orchestrator_prompts=OrchestratorPrompts.model_validate(prompts_raw),
             parse_submission_prompts=ParseSubmissionPrompts.model_validate(parse_raw),
             review_prompts=ReviewPrompts.model_validate(review_raw),
+            synthesis_reflection_prompts=SynthesisReflectionPrompts.model_validate(
+                reflection_raw,
+            ),
+            synthesis_final_prompts=SynthesisFinalPrompts.model_validate(final_raw),
             output=OutputConfig.model_validate(output_raw),
         )
     except ValidationError as exc:
         msg = f"Config validation failed: {exc}"
         raise ConfigError(msg) from exc
+
+
+def _resolve_openrouter_api_base() -> str | None:
+    """Read OpenRouter base URL from `.env` (`OPENROUTER_API_BASE` or `OPENROUTER_URL`)."""
+    for key in ("OPENROUTER_API_BASE", "OPENROUTER_URL"):
+        value = os.getenv(key, "").strip()
+        if value:
+            return value.rstrip("/")
+    return None
+
+
+def apply_openrouter_process_env(settings: RuntimeSettings) -> None:
+    """Sync OpenRouter client env vars for SDKs that read process environment."""
+    os.environ["OPENROUTER_API_KEY"] = settings.openrouter_api_key.get_secret_value()
+    if settings.openrouter_api_base:
+        os.environ["OPENROUTER_API_BASE"] = settings.openrouter_api_base
+
+
+def init_openrouter_chat_model(
+    settings: RuntimeSettings,
+    *,
+    temperature: float | None = None,
+    max_tokens: int | None = None,
+) -> BaseChatModel:
+    """Build chat model from runtime settings and optional per-call overrides."""
+    from langchain.chat_models import init_chat_model  # noqa: PLC0415 — lazy import
+
+    agent_cfg = settings.yaml.agent
+    kwargs: dict[str, Any] = {
+        "api_key": settings.openrouter_api_key.get_secret_value(),
+        "temperature": agent_cfg.temperature if temperature is None else temperature,
+        "max_tokens": agent_cfg.max_tokens if max_tokens is None else max_tokens,
+    }
+    if settings.openrouter_api_base:
+        kwargs["base_url"] = settings.openrouter_api_base
+    return init_chat_model(agent_cfg.model, **kwargs)
+
+
+def _normalize_openrouter_model(model: str) -> str:
+    """Ensure OpenRouter model id includes provider prefix for LangChain."""
+    cleaned = model.strip()
+    if not cleaned or cleaned.startswith("openrouter:"):
+        return cleaned
+    return f"openrouter:{cleaned}"
+
+
+def _apply_env_agent_overrides(cfg: YamlConfig) -> YamlConfig:
+    """Optional overrides from `.env` (OPENROUTER_MODEL, temperature, max_tokens)."""
+    updates: dict[str, object] = {}
+    model = os.getenv("OPENROUTER_MODEL", "").strip()
+    if model:
+        updates["model"] = _normalize_openrouter_model(model)
+    temperature = os.getenv("OPENROUTER_TEMPERATURE", "").strip()
+    if temperature:
+        updates["temperature"] = float(temperature)
+    max_tokens = os.getenv("OPENROUTER_MAX_TOKENS", "").strip()
+    if max_tokens:
+        updates["max_tokens"] = int(max_tokens)
+    if not updates:
+        return cfg
+    agent = cfg.agent.model_copy(update=updates)
+    return cfg.model_copy(update={"agent": agent})
+
+
+def resolve_review_mode(cli_value: str | None = None) -> ReviewMode:
+    """Resolve review mode: CLI > env ``REVIEW_MODE`` > default ``subagents``."""
+    raw = (cli_value or "").strip() or os.getenv("REVIEW_MODE", "").strip()
+    if not raw:
+        return DEFAULT_REVIEW_MODE
+    normalized = raw.lower()
+    for mode in REVIEW_MODE_VALUES:
+        if normalized == mode:
+            return mode
+    allowed = ", ".join(REVIEW_MODE_VALUES)
+    msg = f"Invalid review mode {raw!r}. Allowed: {allowed}"
+    raise ConfigError(msg)
 
 
 def load_runtime_settings(
@@ -136,7 +244,7 @@ def load_runtime_settings(
     if dotenv_path.is_file():
         load_dotenv(dotenv_path, override=False)
 
-    yaml_cfg = load_yaml_config(root=project)
+    yaml_cfg = _apply_env_agent_overrides(load_yaml_config(root=project))
     api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
     if not api_key:
         msg = "OPENROUTER_API_KEY is missing or empty. Copy .env.example to .env and set the key."
@@ -146,5 +254,6 @@ def load_runtime_settings(
     return RuntimeSettings(
         yaml=yaml_cfg,
         openrouter_api_key=SecretStr(api_key),
+        openrouter_api_base=_resolve_openrouter_api_base(),
         log_level=log_level,
     )

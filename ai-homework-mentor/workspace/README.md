@@ -9,6 +9,6 @@ Each run creates:
 - `rubric/active.yaml`
 - `plan/todo.json` — optional todo snapshot
 - `notes/` — reviewer notes
-- `output/feedback.json` and `output/feedback.md`
+- `output/final_feedback.json` (+ `.md`) and `output/fix_plan.json` (+ `.md`)
 
 Do not commit session directories.
