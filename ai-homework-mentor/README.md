@@ -1,4 +1,4 @@
-# AI Homework Mentor
+#  AI Homework Mentor
 
 Консольная утилита (Rich CLI) на DeepAgents для проверки домашних заданий студентов: вход → код → план → reviewer-субагенты → `final_feedback` + `fix_plan`.
 
