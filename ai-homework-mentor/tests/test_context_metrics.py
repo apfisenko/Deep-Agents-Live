@@ -71,6 +71,7 @@ def test_run_review_records_context_trace(tmp_path) -> None:
             yield {
                 "messages": [HumanMessage(content="user"), AIMessage(content="assistant")],
                 "todos": [],
+                "_summarization_event": {"file_path": "/conversation_history/run.md"},
             }
 
     def agent_factory(_settings, _root):
@@ -84,4 +85,5 @@ def test_run_review_records_context_trace(tmp_path) -> None:
     )
     assert isinstance(result, ReviewRunResult)
     assert len(result.context_trace.events) >= 1
+    assert any(event.event_type == "offload" for event in result.context_trace.events)
     assert (session.notes_dir / "context_trace.jsonl").is_file()

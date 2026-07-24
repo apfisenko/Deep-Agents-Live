@@ -1,0 +1,13 @@
+# Fixture targets for Sprint 03+ demos and tests.
+#
+# CI (variant B): tests/fixtures/large_hw — run `uv run python scripts/generate_large_hw_fixture.py`
+# Demo / pain-s3.md (variant A): public GitHub repo below (pin ref for reproducibility).
+
+large_demo:
+  github_url: https://github.com/pallets/click
+  ref: 8.2.1
+  topic: python-cli
+
+large_ci:
+  local_path: tests/fixtures/large_hw
+  topic: python-cli

@@ -30,7 +30,8 @@ def test_build_summarization_middleware_uses_yaml_threshold() -> None:
         keep_messages=5,
     )
     middleware = build_summarization_middleware(model, backend=None, context=context)
-    assert middleware.trigger == ("tokens", 128)
+    assert middleware.name == "SummarizationMiddleware"
+    assert middleware._truncate_args_trigger == ("tokens", 64)  # noqa: SLF001
 
 
 def test_parse_summarization_offload_event() -> None:

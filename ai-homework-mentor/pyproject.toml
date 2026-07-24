@@ -38,7 +38,7 @@ default-groups = ["lint", "test"]
 line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
-extend-exclude = ["tests/fixtures"]
+extend-exclude = ["tests/fixtures", "scripts"]
 
 [tool.ruff.lint]
 select = ["ALL"]

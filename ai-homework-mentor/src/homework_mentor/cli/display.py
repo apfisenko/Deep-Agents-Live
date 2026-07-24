@@ -11,6 +11,7 @@ from rich.tree import Tree
 if TYPE_CHECKING:
     from rich.console import Console
 
+    from homework_mentor.context.models import ContextMetricEvent
     from homework_mentor.feedback.models import SimpleFeedback
     from homework_mentor.orchestrator.review import TodoItem
     from homework_mentor.rubric.loader import RubricSelection
@@ -106,3 +107,51 @@ def render_feedback(console: Console, feedback: SimpleFeedback | None, *, verbos
         summary_lines.append(f"Issues: {feedback.issues[0].text}")
     summary_lines.append(f"Next: {feedback.next_step}")
     console.print(Panel("\n".join(summary_lines), title="feedback", border_style="green"))
+
+
+def render_context_compact(console: Console, events: list[ContextMetricEvent]) -> None:
+    if not events:
+        return
+    last = events[-1]
+    console.print(f"[dim]context: {last.tokens_after} tokens[/dim]")
+
+
+def render_context_trace(console: Console, events: list[ContextMetricEvent]) -> None:
+    """Verbose CE panel: step → tokens → delta → event."""
+    if not events:
+        console.print(Panel("(no context trace)", title="context engineering", border_style="dim"))
+        return
+
+    table = Table(title="context engineering", show_header=True, header_style="bold")
+    table.add_column("step", width=5)
+    table.add_column("tokens", justify="right", width=8)
+    table.add_column("Δ", justify="right", width=6)
+    table.add_column("source", width=12)
+    table.add_column("event", width=10)
+    table.add_column("offload path")
+
+    for event in events:
+        delta = event.delta
+        delta_text = f"{delta:+d}" if delta else "0"
+        style = ""
+        if event.event_type in {"summarize", "offload", "compact"}:
+            style = "yellow"
+        table.add_row(
+            str(event.step),
+            str(event.tokens_after),
+            delta_text,
+            event.source,
+            event.event_type,
+            event.offload_path or "",
+            style=style,
+        )
+
+    console.print(table)
+    ce_hits = [event for event in events if event.event_type != "none"]
+    if ce_hits:
+        lines = [
+            f"{hit.event_type} @ step {hit.step}"
+            + (f" → {hit.offload_path}" if hit.offload_path else "")
+            for hit in ce_hits
+        ]
+        console.print(Panel("\n".join(lines), title="CE events", border_style="yellow"))

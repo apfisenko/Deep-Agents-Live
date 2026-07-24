@@ -4,4 +4,4 @@ verbose:
   show_plan: true
   show_workspace: true
   show_subagents: false
-  show_context_metrics: false
+  show_context_metrics: true

@@ -12,6 +12,8 @@ from rich.table import Table
 
 from homework_mentor import __version__
 from homework_mentor.cli.display import (
+    render_context_compact,
+    render_context_trace,
     render_current_todo,
     render_feedback,
     render_rubric_panel,
@@ -148,16 +150,17 @@ def render_success(
             )
         if yaml_cfg.output.verbose.show_plan and review.todos:
             render_todo_table(console, review.todos)
+        if yaml_cfg.output.verbose.show_context_metrics:
+            render_context_trace(console, review.context_trace.events)
         note_files = [
             path for path in result.workspace.list_relative_files() if path.startswith("notes/")
         ]
         if note_files:
             console.print(Panel("\n".join(note_files), title="notes files", border_style="dim"))
-        console.print(
-            "[dim]S2 verbose: no subagents / token charts (S3+)[/dim]",
-        )
     else:
         render_current_todo(console, review.todos)
+        if yaml_cfg.output.verbose.show_context_metrics:
+            render_context_compact(console, review.context_trace.events)
 
     render_feedback(console, review.feedback, verbose=verbose)
     if verbose and result.reply:

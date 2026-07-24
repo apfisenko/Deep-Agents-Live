@@ -2,9 +2,9 @@
 
 > **Версия roadmap:** v0.2 (спринты S0–S9)
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
-> **Статус:** 📋 Planned
-> **Открыт:** —
-> **Закрыт:** —
+> **Статус:** ✅ Done
+> **Открыт:** 2026-07-24
+> **Закрыт:** 2026-07-24
 > **Зависит от:** [Sprint 02](../sprint-02-workspace-rubric-plan/README.md) (workspace + rubric + todo, single-agent E2E)
 
 ---
@@ -74,8 +74,7 @@ Sprint считается завершённым, когда:
 | **B.** Локальный «толстый» fixture (сгенерировать много файлов в `tests/fixtures/large_hw/`) | Офлайн, стабильные CI/демо | Менее «настоящий» |
 | **C.** Уже существующий крупный каталог на машине разработчика (путь в `.env` / CLI) | Быстрый dogfood | Не воспроизводится у других |
 
-**Рекомендация плана:** **B для автотестов CE** (низкий порог) + **A или C для живого демо** в `docs/pain-s3.md`.  
-Исполнитель не выбирает молча — в `tasks/04-.../plan.md` зафиксировать выбранную пару после «ок» владельца продукта.
+**Решение (согласовано):** **B** — `tests/fixtures/large_hw` (CI) + **A** — [pallets/click](https://github.com/pallets/click) @ 8.2.1 (demo). См. [config/fixtures.yaml](../../config/fixtures.yaml).
 
 ---
 
@@ -83,10 +82,10 @@ Sprint считается завершённым, когда:
 
 | # | Задача | Статус | Plan | Summary |
 |---|--------|--------|------|---------|
-| 01 | Инструментация контекста (метрики + события) | 📋 | [plan](tasks/01-context-metrics/plan.md) | — |
-| 02 | Суммаризация / компактизация / offload по порогам YAML | 📋 | [plan](tasks/02-ce-mechanisms/plan.md) | — |
-| 03 | Verbose verbose: лента CE + токены по шагам | 📋 | [plan](tasks/03-ce-cli/plan.md) | — |
-| 04 | Прогон на большом репо + `docs/pain-s3.md` | 📋 | [plan](tasks/04-large-repo-pain/plan.md) | — |
+| 01 | Инструментация контекста (метрики + события) | ✅ | [plan](tasks/01-context-metrics/plan.md) | [summary](tasks/01-context-metrics/summary.md) |
+| 02 | Суммаризация / компактизация / offload по порогам YAML | ✅ | — | [summary](tasks/02-ce-mechanisms/summary.md) |
+| 03 | Verbose: лента CE + токены по шагам | ✅ | — | [summary](tasks/03-ce-cli/summary.md) |
+| 04 | Прогон на большом репо + `docs/pain-s3.md` | ✅ | [plan](tasks/04-large-repo-pain/plan.md) | [summary](tasks/04-large-repo-pain/summary.md) |
 
 ---
 
@@ -290,7 +289,9 @@ cd ai-homework-mentor
 
 ## Итог (заполняется после закрытия)
 
-—
+Single-agent review (поток S2) получил **видимый** context engineering: метрики tokens по шагам, события summarize/offload, трейс в `notes/context_trace.jsonl`, Rich verbose panel. Большой объём: fixture `large_hw` (CI) + `pallets/click` (demo). Боль зафиксирована в [docs/pain-s3.md](../../docs/pain-s3.md). Субагентов нет — готовность к контрасту S4.
+
+**Проверка:** `.\make.ps1 lint`; `.\make.ps1 test` — 66 passed.
 
 ---
 
