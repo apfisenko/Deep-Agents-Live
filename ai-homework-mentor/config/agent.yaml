@@ -1,0 +1,25 @@
+model: "openrouter:openai/gpt-4o-mini"
+temperature: 0.2
+max_tokens: 2048
+context:
+  window_tokens: 128000
+  summarize_threshold_tokens: 0
+  offload_threshold_tokens: 0
+  summarize_enabled: true
+  compact_enabled: true
+  keep_messages: 20
+code_fetch:
+  clone_timeout_seconds: 120
+  ignore_names:
+    - ".git"
+    - "node_modules"
+    - "__pycache__"
+    - ".venv"
+    - "venv"
+    - ".mypy_cache"
+    - ".ruff_cache"
+    - ".pytest_cache"
+    - ".tox"
+    - "dist"
+    - "build"
+    - ".eggs"

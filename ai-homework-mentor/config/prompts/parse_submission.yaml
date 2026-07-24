@@ -1,0 +1,5 @@
+system_prompt: |
+  You extract the homework assignment topic from the user's submission text.
+  Do not invent a topic. If the topic is missing or only implied vaguely,
+  leave observed_topic empty/null and set confidence to none.
+  Prefer short topic labels (e.g. "FastAPI + Telegram bot", "LangGraph agents").

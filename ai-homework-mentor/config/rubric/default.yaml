@@ -1,0 +1,12 @@
+id: default
+title: General homework review
+criteria:
+  - id: requirements
+    description: Submission meets the stated assignment requirements
+    required: true
+  - id: structure
+    description: Code is organized, readable, and maintainable
+    required: true
+  - id: completeness
+    description: Required files and entry points are present
+    required: true

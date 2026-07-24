@@ -1,0 +1,73 @@
+[project]
+name = "homework-mentor"
+version = "0.1.0"
+description = "AI Homework Mentor — deep-agent CLI for checking student homework"
+readme = "README.md"
+authors = [
+    { name = "apfisenko", email = "apfisenko@mts.ru" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "deepagents>=0.6.12",
+    "langchain-openrouter>=0.2.7",
+    "pydantic>=2.13.4",
+    "python-dotenv>=1.2.2",
+    "pyyaml>=6.0.3",
+    "rich>=15.0.0",
+]
+
+[project.scripts]
+homework-mentor = "homework_mentor:main"
+
+[build-system]
+requires = ["uv_build>=0.11.3,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+lint = [
+    "ruff>=0.16.0",
+]
+test = [
+    "pytest>=9.1.1",
+]
+
+[tool.uv]
+default-groups = ["lint", "test"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+extend-exclude = ["tests/fixtures"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D",      # pydocstyle — enable selectively later
+    "CPY",    # copyright headers not required in this project
+    "COM812", # trailing comma (formatter conflict)
+    "ISC001", # implicit string concat (formatter conflict)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",    # assert allowed in tests
+    "PLR2004", # magic values allowed in tests
+    "ANN",     # annotations optional in tests
+    "ARG",     # unused args in mocks/fixtures ok
+    "EM",      # exception message style relaxed in tests
+    "TRY",     # try/raise style relaxed in tests
+    "TC",      # TYPE_CHECKING imports optional in tests
+]
+"src/homework_mentor/submission/parser.py" = [
+    "RUF001",  # Cyrillic clarification strings are intentional
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "modern-python": {
+      "source": "trailofbits/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/modern-python/skills/modern-python/SKILL.md",
+      "computedHash": "404b0bcb99c5bc9b7ecc8c91ebb110751ff720976ad97792eb690c354d0b322a"
+    },
     "neo4j-cypher-skill": {
       "source": "neo4j-contrib/neo4j-skills",
       "sourceType": "github",
@@ -42,6 +48,12 @@
       "sourceType": "github",
       "skillPath": "neo4j-vector-index-skill/SKILL.md",
       "computedHash": "c7a14a3bddab93ba220cd3b8e79e023a1ceb5caccb70257c0c7359f82325a09f"
+    },
+    "uv-package-manager": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/python-development/skills/uv-package-manager/SKILL.md",
+      "computedHash": "9bfea04ad05ccf7ac25924ffb96a5e7bc01ecfd8753a5904ac2956ef7584e9a5"
     }
   }
 }

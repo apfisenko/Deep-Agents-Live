@@ -1,0 +1,15 @@
+id: python-cli
+title: Python CLI homework
+criteria:
+  - id: cli-entry
+    description: Clear CLI entry point and argument handling
+    required: true
+  - id: packaging
+    description: Project layout follows Python packaging conventions (src layout or clear modules)
+    required: true
+  - id: docs
+    description: README or docstrings explain how to run the CLI
+    required: false
+  - id: quality
+    description: Code style and error handling are reasonable for a small CLI
+    required: true

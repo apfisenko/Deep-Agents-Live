@@ -1,0 +1,25 @@
+# Secrets and local env
+.env
+.env.*
+!.env.example
+
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Runtime directories (Sprint 00+)
+logs/*
+!logs/.gitkeep
+workspace/*
+!workspace/README.md
+*.log

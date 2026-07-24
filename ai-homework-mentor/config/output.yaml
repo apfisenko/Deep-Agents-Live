@@ -1,0 +1,7 @@
+default_mode: compact
+verbose:
+  show_config: true
+  show_plan: true
+  show_workspace: true
+  show_subagents: false
+  show_context_metrics: false
