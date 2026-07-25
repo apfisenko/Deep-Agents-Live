@@ -29,6 +29,10 @@ from app.rag.retriever.context import (
     set_retriever_runtime_config,
 )
 from app.rag.retriever.runtime import runtime_from_run_config
+from app.security.context import reset_session_context, set_session_context
+from app.security.input_guard import evaluate_input
+from app.security.output_sanitizer import SanitizeContext, sanitize_output
+from app.security.prompt_appendix import append_security_prompt
 from app.tools.registry import get_agent_tools
 
 if TYPE_CHECKING:
@@ -54,6 +58,8 @@ class _StreamState:
     step_counter: int = 0
     active_step_id: str | None = None
     reply_parts: list[str] = field(default_factory=list)
+    payment_link_created: bool = False
+    payment_confirmed_via_tool: bool = False
 
     def next_step_id(self) -> str:
         self.step_counter += 1
@@ -66,6 +72,8 @@ class ReactAgentRunner:
         self._settings = settings
         self._run_config = run_config
         self._tools = get_agent_tools(routing_enabled=run_config.agent.routing_enabled)
+        base_prompt = resolve_prompt(run_config.prompt)
+        secured_prompt = append_security_prompt(base_prompt, enabled=settings.security_enabled)
         self._graph = create_react_agent(
             create_chat_model(
                 settings,
@@ -73,7 +81,7 @@ class ReactAgentRunner:
                 temperature=run_config.model.temperature,
             ),
             self._tools,
-            prompt=resolve_prompt(run_config.prompt),
+            prompt=secured_prompt,
         )
 
     @property
@@ -88,16 +96,15 @@ class ReactAgentRunner:
         channel: str = "web",
         extra_metadata: dict[str, Any] | None = None,
     ) -> AgentRunResult:
-        events: list[StreamEvent] = []
+        reply = ""
         async for event in self.stream(
             session_id,
             message,
             channel=channel,
             extra_metadata=extra_metadata,
         ):
-            if event.event == "token":
-                events.append(event)
-        reply = "".join(item.data.get("text", "") for item in events if item.event == "token")
+            if event.event == "done":
+                reply = str(event.data.get("reply", ""))
         if not reply:
             reply = "Извините, не удалось сформировать ответ."
         return AgentRunResult(reply=reply, session_id=session_id)
@@ -111,9 +118,19 @@ class ReactAgentRunner:
         extra_metadata: dict[str, Any] | None = None,
     ) -> AsyncIterator[StreamEvent]:
         store = get_session_store()
+        if self._settings.security_enabled:
+            guard = evaluate_input(message)
+            if guard.blocked:
+                reply = guard.reply
+                store.append_exchange(session_id, message, reply)
+                yield StreamEvent(event="token", data={"text": reply})
+                yield StreamEvent(event="done", data={"session_id": session_id, "reply": reply})
+                return
+
         history = store.get_messages(session_id)
         state = _StreamState()
         retriever_token = set_retriever_runtime_config(runtime_from_run_config(self._run_config))
+        session_token = set_session_context(session_id)
 
         yield StreamEvent(
             event="agent_step",
@@ -154,6 +171,7 @@ class ReactAgentRunner:
             raise map_openai_exception(exc) from exc
         finally:
             reset_retriever_runtime_config(retriever_token)
+            reset_session_context(session_token)
 
         yield StreamEvent(
             event="agent_step",
@@ -161,8 +179,17 @@ class ReactAgentRunner:
         )
 
         reply = "".join(state.reply_parts).strip() or "Извините, не удалось сформировать ответ."
+        if self._settings.security_enabled:
+            sanitized = sanitize_output(
+                reply,
+                context=SanitizeContext(
+                    payment_confirmed_via_tool=state.payment_confirmed_via_tool,
+                ),
+            )
+            reply = sanitized.text
+
         store.append_exchange(session_id, message, reply)
-        yield StreamEvent(event="done", data={"session_id": session_id})
+        yield StreamEvent(event="done", data={"session_id": session_id, "reply": reply})
 
     async def _map_graph_event(
         self,
@@ -194,6 +221,7 @@ class ReactAgentRunner:
                 result_payload = output.content
             else:
                 result_payload = output
+            self._track_tool_result(name, result_payload, state)
             yield StreamEvent(
                 event="tool_result",
                 data={"name": name, "result": result_payload, "step_id": step_id},
@@ -223,6 +251,23 @@ class ReactAgentRunner:
                     data={"id": respond_id, "label": DEFAULT_RESPOND_LABEL, "status": "done"},
                 )
                 yield StreamEvent(event="token", data={"text": text})
+
+    def _track_tool_result(self, tool_name: str, result_payload: Any, state: _StreamState) -> None:
+        if not self._settings.security_enabled:
+            return
+        raw = result_payload
+        if not isinstance(raw, str):
+            raw = str(raw)
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            return
+        if not isinstance(payload, dict):
+            return
+        if tool_name == "create_payment_link" and payload.get("order_id"):
+            state.payment_link_created = True
+        if tool_name == "confirm_payment" and payload.get("confirmed") is True:
+            state.payment_confirmed_via_tool = True
 
 
 _runners: dict[str, ReactAgentRunner] = {}

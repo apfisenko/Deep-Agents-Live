@@ -37,6 +37,7 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
         "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
     )
     monkeypatch.setenv("PDF_OCR_LLM_FALLBACK", "false")
+    monkeypatch.setenv("SECURITY_ENABLED", "true")
     monkeypatch.delenv("DOTENV_CONFIG", raising=False)
     clear_settings_cache()
     reset_store()

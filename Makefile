@@ -3,6 +3,7 @@
 	up down ps status logs compose docker migrate migrate-new ci compose-dev \
 	check-health check-reindex check-chat check-chat-stream check-langfuse check-traces check-telegram check-api \
 	check-rag-search-e2e check-rag-audience-filter \
+	qdrant-up qdrant-down \
 	graph-up graph-down graph-status graph-shell graph-init-readonly graph-index graph-qa text2cypher-smoke \
 	chat-telegram chat-stream langfuse-upload-dataset \
 	eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare \
@@ -46,6 +47,8 @@ help:
 	@echo "  index          - index data/ into vector DB (Qdrant); ARGS=\"--force\" to reindex all"
 	@echo "  up             - docker compose up -d (WSL)"
 	@echo "  down           - docker compose down (WSL)"
+	@echo "  qdrant-up      - docker compose up -d qdrant only (minimal RAG stack)"
+	@echo "  qdrant-down    - stop Qdrant container"
 	@echo "  graph-up       - docker compose up -d neo4j only"
 	@echo "  graph-down     - stop Neo4j container"
 	@echo "  graph-status   - neo4j container status + Connection OK smoke"
@@ -146,6 +149,12 @@ up:
 
 down:
 	$(call DOCKER_WSL,docker compose down)
+
+qdrant-up:
+	$(call DOCKER_WSL,docker compose up -d qdrant)
+
+qdrant-down:
+	$(call DOCKER_WSL,docker compose stop qdrant)
 
 graph-up:
 	$(call DOCKER_WSL,docker compose up -d neo4j)

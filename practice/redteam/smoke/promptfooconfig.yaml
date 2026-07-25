@@ -1,0 +1,17 @@
+# Trivial Promptfoo smoke — not agent redteam
+description: sprint-08 tooling smoke
+
+prompts:
+  - "Say hello to {{name}}"
+
+providers:
+  - id: echo
+    config:
+      # echo provider returns the prompt as output
+
+tests:
+  - vars:
+      name: world
+    assert:
+      - type: contains
+        value: "hello"

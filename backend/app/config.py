@@ -5,7 +5,12 @@ from functools import lru_cache
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.env_loader import load_repo_env
 from app.paths import DEFAULT_LEADS_PATH, REPO_ROOT
+
+
+def _ensure_repo_env_loaded() -> None:
+    load_repo_env()
 
 
 class Settings(BaseSettings):
@@ -152,6 +157,7 @@ class Settings(BaseSettings):
         default="оплатил,оплатила,оплачено",
         validation_alias="MOCK_PAYMENT_CONFIRM_KEYWORDS",
     )
+    security_enabled: bool = Field(default=True, validation_alias="SECURITY_ENABLED")
     leads_file_path: str = Field(
         default=str(DEFAULT_LEADS_PATH),
         validation_alias="LEADS_FILE_PATH",
@@ -179,6 +185,7 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
+    _ensure_repo_env_loaded()
     return Settings()
 
 

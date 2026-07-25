@@ -1,7 +1,7 @@
 # Roadmap — Deep-Agents-Live
 
 > **Vision:** [concept/vision.md](concept/vision.md)
-> **Последнее обновление:** 2026-07-06 (sprint-07 multimodal-rag ✅ Done)
+> **Последнее обновление:** 2026-07-25 (sprint-08 red-teaming-baseline ✅ Done)
 
 ---
 
@@ -49,6 +49,7 @@
 | 05 | vector-db | Перевести RAG-слой с in-memory FAISS на выбранную векторную БД | ✅ | [sprint-05-vector-db](sprints/sprint-05-vector-db/README.md) |
 | 06 | graphrag | Граф знаний Neo4j + graph/global retrieval, hybrid с reranker, text2cypher | ✅ | [sprint-06-graphrag](sprints/sprint-06-graphrag/README.md) · [schema](sprints/sprint-06-graphrag/schema.md) · [ADR-0007](decisions/0007-neo4j-graphrag.md) · [eval final](../evals/reports/graphrag-final.md) |
 | 07 | multimodal-rag | Мультимодальная индексация B2B-презентации (66 PNG): OCR / caption / unified / multivector; сегментный eval и матрица «метод × цена» | ✅ | [sprint-07-multimodal-rag](sprints/sprint-07-multimodal-rag/README.md) · [eval final](../evals/reports/mmrag-summary.md) |
+| 08 | red-teaming-baseline | Promptfoo red-teaming: модель угроз → baseline до/после → фиксы за `SECURITY_ENABLED` | ✅ | [sprint-08-red-teaming-baseline](sprints/sprint-08-red-teaming-baseline/README.md) · [final-report](sprints/sprint-08-red-teaming-baseline/final-report.md) |
 
 ---
 
@@ -61,15 +62,15 @@
 - [ ] Postgres: сессии диалогов и лиды (миграции Alembic)
 - [ ] Сквозной `session_id` при переходе виджет ↔ Telegram
 - [ ] Эскалация на эксперта (handoff tool / уведомление)
-- [ ] Guardrails (базовые: тематика, PII, лимиты)
+- [x] Guardrails (базовые: payment order, PROTECTED leak, scope hijack) — sprint-08: `SECURITY_ENABLED` + FIX-01…04; ASR 67%→37%; [final-report](sprints/sprint-08-red-teaming-baseline/final-report.md)
 - [ ] Webhook CRM (опционально, вместо `leads.txt`)
 
 **Спринты:**
 
 | # | Sprint | Цель | Статус | Документ |
 |---|--------|------|--------|----------|
-| 05 | persistence | Postgres, data-model, миграция лидов и сессий | 📋 | — |
-| 06 | channels-guardrails | Сквозные сессии, guardrails, эскалация | 📋 | — |
+| 09 | persistence | Postgres, data-model, миграция лидов и сессий | 📋 | — |
+| 10 | channels-guardrails | Сквозные сессии, guardrails, эскалация | 📋 | — |
 
 ---
 
@@ -88,8 +89,8 @@
 
 | # | Sprint | Цель | Статус | Документ |
 |---|--------|------|--------|----------|
-| 07 | production-deploy | CI/CD, контейнеры, staging + prod | 📋 | — |
-| 08 | payments-embed | Платёжка, встраивание виджета на сайт | 📋 | — |
+| 11 | production-deploy | CI/CD, контейнеры, staging + prod | 📋 | — |
+| 12 | payments-embed | Платёжка, встраивание виджета на сайт | 📋 | — |
 
 ---
 
@@ -119,4 +120,6 @@
 | 2026-07-03 | Закрыт sprint-06 graphrag: Neo4j KG, graph/global/hybrid retrieval, text2cypher guardrails, agent routing; eval [`graphrag-final`](../evals/reports/graphrag-final.md) (entity@5 multi +0.17, global +0.51 vs baseline) |
 | 2026-07-05 | Открыт sprint-07 multimodal-rag: B2B-презентация 66 PNG, 5 методов индексации, сегментный eval S1–S5; [`README`](sprints/sprint-07-multimodal-rag/README.md) |
 | 2026-07-06 | Закрыт sprint-07 multimodal-rag: 7 конфигов × 5 сегментов, primary **B_gemini** (~$0.10, S2 nDCG 0.944); eval [`mmrag-summary`](../evals/reports/mmrag-summary.md) |
+| 2026-07-25 | Открыт план sprint-08 red-teaming-baseline; плановые спринты v0.2/v1.0 сдвинуты (09–12) |
+| 2026-07-25 | Закрыт sprint-08 red-teaming-baseline: Promptfoo baseline до/после, FIX-01…04, ASR −30 pp; [final-report](sprints/sprint-08-red-teaming-baseline/final-report.md) |
 

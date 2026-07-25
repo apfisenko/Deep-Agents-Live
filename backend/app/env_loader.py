@@ -34,6 +34,8 @@ def _parse_env_file(path: Path, *, setdefault: bool) -> None:
         key, _, value = line.partition("=")
         key = key.strip()
         value = value.strip()
+        if "#" in value:
+            value = value.split("#", 1)[0].strip()
         if setdefault:
             os.environ.setdefault(key, value)
         else:

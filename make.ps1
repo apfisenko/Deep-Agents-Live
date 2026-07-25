@@ -213,6 +213,8 @@ function Show-Help {
     Write-Host "  index          - index data/ into vector DB (Qdrant); --force to reindex all"
     Write-Host "  up             - docker compose up -d (via WSL on Windows)"
     Write-Host "  down           - docker compose down (via WSL on Windows)"
+    Write-Host "  qdrant-up      - docker compose up -d qdrant only (minimal RAG stack)"
+    Write-Host "  qdrant-down    - stop Qdrant container"
     Write-Host "  graph-up       - docker compose up -d neo4j only"
     Write-Host "  graph-down     - stop Neo4j container"
     Write-Host "  graph-status   - neo4j container status + Connection OK smoke"
@@ -724,6 +726,10 @@ switch ($Target) {
     }
     "dev-backend" {
         Stop-BackendDev
+        # Docker in WSL: localhost:6333/7687 from Windows often fails — resolve like index/check-rag
+        $env:QDRANT_URL = Resolve-QdrantUrlForWindows
+        $env:NEO4J_URI = Resolve-Neo4jUriForWindows
+        Write-Host "dev-backend env: QDRANT_URL=$($env:QDRANT_URL) NEO4J_URI=$($env:NEO4J_URI)"
         Push-Location $BackendDir
         try {
             uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --log-config log_config.dev.json
@@ -857,6 +863,12 @@ switch ($Target) {
     }
     "down" {
         Invoke-WslDockerCompose -ComposeArgs @("down")
+    }
+    "qdrant-up" {
+        Invoke-WslDockerCompose -ComposeArgs @("up", "-d", "qdrant")
+    }
+    "qdrant-down" {
+        Invoke-WslDockerCompose -ComposeArgs @("stop", "qdrant")
     }
     "graph-up" {
         Invoke-WslDockerCompose -ComposeArgs @("up", "-d", "neo4j")

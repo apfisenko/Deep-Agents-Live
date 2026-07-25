@@ -3,3 +3,6 @@
 2026-06-02T15:14:30Z | segment=b2c | name=Кожин | contact=@akozhin | product=ai-coding-intensive-cursor | notes=Оплатил интенсив по Cursor
 {"session_id": "228eebd5-c613-4c88-a3f3-b25d0f3eea4a", "segment": "b2c", "product": "Deep Agents", "name": "", "contact": "eval-fnl-scn-001@example.com", "created_at": "2026-06-15T22:10:27.215894+00:00", "notes": ""}
 {"session_id": "session_2025_09_23_001", "segment": "b2c", "product": "Deep Agents", "name": "Алексей", "contact": "alexey@alex.com", "created_at": "2026-06-26T19:40:19.448133+00:00", "notes": "Оплатил курс Deep Agents"}
+{"session_id": "consult_20240923_1500", "segment": "b2b", "product": "consultation", "name": "Alexey Test", "contact": "alexey.test@example.com", "created_at": "2026-07-25T16:47:28.649023+00:00", "notes": "Scheduled consultation for tomorrow at 15:00 Moscow time."}
+{"session_id": "session_001", "segment": "b2c", "product": "B2C-курс", "name": "Иван", "contact": "@test_receiver", "created_at": "2026-07-25T18:39:28.368069+00:00", "notes": "Иван заинтересован в B2C-курсе"}
+{"session_id": "demo_2024-06-21_1500_msk", "segment": "b2b", "product": "", "name": "", "contact": "director@example.com", "created_at": "2026-07-25T19:14:38.772198+00:00", "notes": "Демо llmstart.ru, завтра в 15:00 МСК"}
