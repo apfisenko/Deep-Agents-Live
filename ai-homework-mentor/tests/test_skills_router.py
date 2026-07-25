@@ -12,6 +12,24 @@ from homework_mentor.skills.loader import (
 )
 from homework_mentor.skills.router import resolve_skills, resolve_skills_for_aspect
 
+_AUTO_INSTALLED = (
+    "modern-python",
+    "fastapi-templates",
+    "uv-package-manager",
+    "python-testing-patterns",
+    "python-design-patterns",
+    "api-design-principles",
+)
+
+_ON_DEMAND_INSTALLED = (
+    "deep-agents-core",
+    "deep-agents-orchestration",
+    "deep-agents-memory",
+    "langchain-fundamentals",
+    "langchain-middleware",
+    "ecosystem-primer",
+)
+
 
 def test_code_quality_gets_modern_python() -> None:
     refs = resolve_skills_for_aspect(
@@ -22,10 +40,12 @@ def test_code_quality_gets_modern_python() -> None:
     ids = {ref.id for ref in refs}
     assert "rubric-python-cli" in ids
     assert "modern-python" in ids
+    assert "python-design-patterns" in ids
     assert "fastapi-templates" not in ids
+    assert "deep-agents-core" not in ids
 
 
-def test_api_topic_gets_fastapi_templates_on_architecture() -> None:
+def test_api_topic_gets_fastapi_and_api_design() -> None:
     refs = resolve_skills_for_aspect(
         "fastapi-api homework",
         "architecture",
@@ -33,7 +53,8 @@ def test_api_topic_gets_fastapi_templates_on_architecture() -> None:
     )
     ids = {ref.id for ref in refs}
     assert "fastapi-templates" in ids
-    assert "modern-python" not in ids  # different aspect
+    assert "api-design-principles" in ids
+    assert "modern-python" not in ids
 
 
 def test_api_path_glob_detects_without_topic_keyword() -> None:
@@ -44,6 +65,7 @@ def test_api_path_glob_detects_without_topic_keyword() -> None:
     assert selection.api_detected is True
     eco_ids = {ref.id for ref in selection.ecosystem_skills}
     assert "fastapi-templates" in eco_ids
+    assert "api-design-principles" in eco_ids
 
 
 def test_local_hw_without_api_skips_fastapi() -> None:
@@ -54,6 +76,29 @@ def test_local_hw_without_api_skips_fastapi() -> None:
     assert selection.api_detected is False
     assert all(ref.id != "fastapi-templates" for ref in selection.ecosystem_skills)
     assert any(ref.id == "modern-python" for ref in selection.ecosystem_skills)
+
+
+def test_packaging_and_tests_heuristics() -> None:
+    selection = resolve_skills(
+        "python-cli",
+        code_manifest=["pyproject.toml", "uv.lock", "tests/test_main.py", "main.py"],
+    )
+    assert selection.packaging_detected is True
+    assert selection.tests_detected is True
+    eco_ids = {ref.id for ref in selection.ecosystem_skills}
+    assert "uv-package-manager" in eco_ids
+    assert "python-testing-patterns" in eco_ids
+
+
+def test_on_demand_not_in_auto_selection() -> None:
+    selection = resolve_skills(
+        "deep agents homework",
+        code_manifest=["src/agent.py", "Dockerfile"],
+    )
+    assert selection.docker_detected is True
+    eco_ids = {ref.id for ref in selection.ecosystem_skills}
+    assert "deep-agents-core" not in eco_ids
+    assert "langchain-fundamentals" not in eco_ids
 
 
 def test_path_traversal_skill_id_rejected() -> None:
@@ -69,5 +114,6 @@ def test_assert_skill_path_outside_allowlist(tmp_path: Path) -> None:
 
 
 def test_public_skills_installed() -> None:
-    assert (project_root() / ".agents" / "skills" / "modern-python" / "SKILL.md").is_file()
-    assert (project_root() / ".agents" / "skills" / "fastapi-templates" / "SKILL.md").is_file()
+    root = project_root() / ".agents" / "skills"
+    for skill_id in (*_AUTO_INSTALLED, *_ON_DEMAND_INSTALLED):
+        assert (root / skill_id / "SKILL.md").is_file(), skill_id

@@ -43,7 +43,13 @@ from homework_mentor.errors import describe_exception
 from homework_mentor.logging_setup import setup_logging
 from homework_mentor.orchestrator import AgentError, ReviewError
 from homework_mentor.pipeline import SessionResult, run_homework_session
-from homework_mentor.reports import build_run_report, write_review_report, write_run_report
+from homework_mentor.reports import (
+    build_failed_run_report,
+    build_run_report,
+    write_partial_review_report,
+    write_review_report,
+    write_run_report,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -331,6 +337,64 @@ def _persist_review_report(
         return path
 
 
+def _persist_failed_session_reports(  # noqa: PLR0913 — error-path persist wiring
+    *,
+    console: Console,
+    session_id: str,
+    model: str,
+    verbose: bool,
+    wall_ms: int,
+    review_mode: ReviewMode,
+    error_message: str,
+    runtime: RuntimeSettings | None,
+    docs_dir: Path | None = None,
+    project_root_override: Path | None = None,
+) -> tuple[Path | None, Path | None]:
+    """Write partial run/review reports after ReviewError; return (run, review) paths."""
+    run_path: Path | None = None
+    review_path: Path | None = None
+    try:
+        report = build_failed_run_report(
+            session_id=session_id,
+            model=model,
+            verbose=verbose,
+            wall_ms=wall_ms,
+            version=__version__,
+            error_message=error_message,
+            review_mode=review_mode,
+            settings=runtime,
+            openrouter_api_base=(
+                runtime.openrouter_api_base if runtime is not None else DEFAULT_OPENROUTER_API_BASE
+            ),
+            project_root_override=project_root_override,
+            status="failed",
+        )
+        run_path = write_run_report(report, docs_dir=docs_dir)
+        console.print(Panel(str(run_path), title="отчёт прогона (partial)", border_style="yellow"))
+        setup_logging().info("failed run report written path=%s", run_path)
+    except Exception:
+        logger.exception("failed to write partial run report session=%s", session_id)
+
+    try:
+        review_path = write_partial_review_report(
+            session_id=session_id,
+            review_mode=review_mode,
+            error_message=error_message,
+            model=model,
+            docs_dir=docs_dir,
+            project_root_override=project_root_override,
+        )
+        if review_path is not None:
+            console.print(
+                Panel(str(review_path), title="отчёт проверки (partial)", border_style="yellow"),
+            )
+            setup_logging().info("partial review report written path=%s", review_path)
+    except Exception:
+        logger.exception("failed to write partial review report session=%s", session_id)
+
+    return run_path, review_path
+
+
 def _log_if_recording(*, console: Console, record: bool, meta: SessionLogMeta) -> None:
     if record:
         _persist_summary_log(console=console, meta=meta)
@@ -447,7 +511,19 @@ def main(  # noqa: C901, PLR0915 — CLI orchestration
             if isinstance(exc, ReviewError) and exc.session_id
             else _fallback_session_id()
         )
+        wall_ms = int((time.perf_counter() - started) * 1000)
         log.exception("cli failed session=%s", session_id)
+        if record and isinstance(exc, ReviewError) and exc.session_id:
+            _persist_failed_session_reports(
+                console=out,
+                session_id=exc.session_id,
+                model=model,
+                verbose=verbose,
+                wall_ms=wall_ms,
+                review_mode=review_mode,
+                error_message=str(exc),
+                runtime=runtime,
+            )
         _log_if_recording(
             console=out,
             record=record,

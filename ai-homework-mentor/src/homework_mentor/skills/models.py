@@ -1,4 +1,4 @@
-"""Skill reference models for S5 routing."""
+"""Skill reference models for S5/S8 routing."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ class SkillRef(BaseModel):
     kind: Literal["rubric", "ecosystem"]
     reason: str = Field(min_length=1)
     aspect: str | None = None
+    source: Literal["auto", "on_demand"] = "auto"
 
 
 class SkillsSelection(BaseModel):
@@ -23,6 +24,9 @@ class SkillsSelection(BaseModel):
     rubric_skill: SkillRef
     ecosystem_skills: list[SkillRef] = Field(default_factory=list)
     api_detected: bool = False
+    packaging_detected: bool = False
+    tests_detected: bool = False
+    docker_detected: bool = False
 
     def all_refs(self) -> list[SkillRef]:
         return [self.rubric_skill, *self.ecosystem_skills]
@@ -35,3 +39,6 @@ class SkillsSelection(BaseModel):
             if skill.aspect is None or skill.aspect == aspect
         )
         return refs
+
+    def on_demand_count(self) -> int:
+        return sum(1 for skill in self.ecosystem_skills if skill.source == "on_demand")

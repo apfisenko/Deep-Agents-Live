@@ -1,4 +1,4 @@
-# Topic → skills routing (S5)
+# Topic → skills routing (S5 + S8 catalog / dynamic activate)
 
 rubric:
   default: rubric-default
@@ -6,13 +6,41 @@ rubric:
     python-cli: rubric-python-cli
     python_cli: rubric-python-cli
 
+# Auto-attached when `when` matches
 ecosystem:
   - id: modern-python
     aspects: [code_quality]
     when: always_for_aspect
+  - id: python-design-patterns
+    aspects: [code_quality]
+    when: always_for_aspect
+  - id: uv-package-manager
+    aspects: [code_quality]
+    when: packaging_detected
+  - id: python-testing-patterns
+    aspects: [code_quality]
+    when: tests_detected
   - id: fastapi-templates
     aspects: [architecture]
     when: api_detected
+  - id: api-design-principles
+    aspects: [architecture]
+    when: api_detected
+
+# Available for mid-run activate_review_skill (not auto)
+on_demand:
+  - id: deep-agents-core
+    aspects: [architecture]
+  - id: deep-agents-orchestration
+    aspects: [architecture]
+  - id: deep-agents-memory
+    aspects: [architecture]
+  - id: langchain-fundamentals
+    aspects: [architecture]
+  - id: langchain-middleware
+    aspects: [architecture]
+  - id: ecosystem-primer
+    aspects: [architecture]
 
 api_detection:
   topic_keywords: [fastapi, api, rest, webservice, web-service]
@@ -21,3 +49,30 @@ api_detection:
     - "**/api/**"
     - "**/*fastapi*"
     - "**/routers/**"
+
+packaging_detection:
+  path_globs:
+    - "**/pyproject.toml"
+    - "**/uv.lock"
+    - "**/poetry.lock"
+    - "**/requirements.txt"
+    - "**/setup.cfg"
+    - "**/setup.py"
+
+tests_detection:
+  path_globs:
+    - "**/tests/**"
+    - "**/test_*.py"
+    - "**/*_test.py"
+    - "**/conftest.py"
+
+docker_detection:
+  path_globs:
+    - "**/Dockerfile*"
+    - "**/docker-compose*.yml"
+    - "**/docker-compose*.yaml"
+    - "**/compose.yml"
+    - "**/compose.yaml"
+
+# Cap for mid-run on_demand activations per session
+max_on_demand: 5

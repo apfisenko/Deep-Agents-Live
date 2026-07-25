@@ -48,6 +48,7 @@ from homework_mentor.output.render import (
 from homework_mentor.reviewers.collector import SubagentHandoffCollector
 from homework_mentor.reviewers.registry import build_reviewer_subagents, load_reviewer_specs
 from homework_mentor.reviewers.window_metrics import ReviewerWindowMetricsCollector
+from homework_mentor.skills.activate import build_activate_review_skill_tool
 from homework_mentor.workspace.events import WorkspaceEventCollector
 
 if TYPE_CHECKING:
@@ -102,13 +103,15 @@ def _register_review_harness(model_name: str) -> None:
     )
 
 
-def build_review_agent(
+def build_review_agent(  # noqa: PLR0913 — agent wiring needs explicit deps
     settings: RuntimeSettings,
     *,
     session_root: Path,
     skills_by_aspect: dict[str, list] | None = None,
     review_mode: ReviewMode = DEFAULT_REVIEW_MODE,
     window_metrics: ReviewerWindowMetricsCollector | None = None,
+    skills: SkillsSelection | None = None,
+    session: WorkspaceSession | None = None,
 ) -> CompiledStateGraph[Any, Any, Any, Any]:
     """Build a Deep Agent scoped to one workspace session."""
     apply_openrouter_process_env(settings)
@@ -138,12 +141,32 @@ def build_review_agent(
     else:
         reviewer_subagents = []
         system_prompt = prompts.single_system_prompt
+
+    tools: list[Any] = []
+    if skills is not None and session is not None:
+        tools.append(
+            build_activate_review_skill_tool(
+                skills,
+                session=session,
+                skills_by_aspect=skills_by_aspect,
+            ),
+        )
+        system_prompt = (
+            f"{system_prompt.rstrip()}\n\n"
+            "You may call activate_review_skill(skill_id, aspect, reason) to attach an "
+            "on_demand skill (deep-agents-*, langchain-*, ecosystem-primer) when the "
+            "submission clearly needs it. Prefer auto skills already listed; do not "
+            "activate skills without a concrete reason. Activated excerpts land under "
+            "/notes/skills/."
+        )
+
     return create_deep_agent(
         model=model,
         backend=backend,
         permissions=permissions,
         system_prompt=system_prompt,
         subagents=reviewer_subagents,
+        tools=tools,
         name="homework-mentor-review",
     )
 
@@ -184,7 +207,8 @@ def build_review_message(  # noqa: PLR0913 — explicit review message deps
     skills_hint = ""
     if skills is not None:
         skill_lines = "\n".join(
-            f"- {ref.id} ({ref.kind}, aspect={ref.aspect or 'all'}): {ref.reason}"
+            f"- {ref.id} ({ref.kind}, source={ref.source}, "
+            f"aspect={ref.aspect or 'all'}): {ref.reason}"
             for ref in skills.all_refs()
         )
         skills_hint = f"active_skills:\n{skill_lines}\n"
@@ -329,6 +353,8 @@ def run_review(  # noqa: PLR0913 — injectable deps for tests / skills wiring
 
     aspect_skills = skills_by_aspect
     mode = review_mode
+    skills_selection = skills
+    review_session = session
     window_metrics = ReviewerWindowMetricsCollector()
     factory = agent_factory or (
         lambda s, root: build_review_agent(
@@ -337,6 +363,8 @@ def run_review(  # noqa: PLR0913 — injectable deps for tests / skills wiring
             skills_by_aspect=aspect_skills,
             review_mode=mode,
             window_metrics=window_metrics,
+            skills=skills_selection,
+            session=review_session,
         )
     )
     agent = factory(runtime, session.root)

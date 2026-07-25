@@ -149,7 +149,9 @@ alwaysApply: true
 |-----------------|-------|--------------------------------|
 | Общая тема | `rubric-default` | `skills/rubric-default/SKILL.md` |
 | Python CLI | `rubric-python-cli` | `skills/rubric-python-cli/SKILL.md` |
-| Качество Python-кода | `modern-python` | `.agents/skills/modern-python/SKILL.md` |
-| FastAPI / API (если detected) | `fastapi-templates` | `.agents/skills/fastapi-templates/SKILL.md` |
+| Качество Python-кода | `modern-python`, `python-design-patterns` | `.agents/skills/…` |
+| Packaging / tests (эвристика) | `uv-package-manager`, `python-testing-patterns` | `.agents/skills/…` |
+| FastAPI / API (если detected) | `fastapi-templates`, `api-design-principles` | `.agents/skills/…` |
+| Agents / LangChain (on_demand) | `deep-agents-*`, `langchain-*`, `ecosystem-primer` | via `activate_review_skill` |
 
-Inventory: `ai-homework-mentor/docs/skills-inventory-s5.md`.
+Inventory: `ai-homework-mentor/docs/skills-inventory-s8.md` (S5: `skills-inventory-s5.md`).

@@ -2,7 +2,7 @@
 
 from homework_mentor.workspace.events import WorkspaceEvent, WorkspaceEventCollector
 from homework_mentor.workspace.security import WorkspaceSecurityError, resolve_safe_path
-from homework_mentor.workspace.session import WorkspaceSession, create_session
+from homework_mentor.workspace.session import WorkspaceSession, create_session, open_session
 
 __all__ = [
     "WorkspaceEvent",
@@ -10,5 +10,6 @@ __all__ = [
     "WorkspaceSecurityError",
     "WorkspaceSession",
     "create_session",
+    "open_session",
     "resolve_safe_path",
 ]

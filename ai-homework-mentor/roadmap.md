@@ -220,6 +220,7 @@ flowchart LR
 - [x] `compare-modes` → `docs/compare-modes-*.md` (таблица + плюсы/минусы)
 - [x] `docs/review-report-*.md` + RU итог/notes/plan
 - [x] Quickstart, comparison-variants, README (параметры запуска)
+- [x] Follow-up: partial-отчёты при `ReviewError`; skills catalog + `activate_review_skill` ([inventory S8](./docs/skills-inventory-s8.md))
 
 ---
 
@@ -319,3 +320,4 @@ S9, S10 — опционально после S7/S8; друг от друга н
 | 2026-07-24 | S7 закрыт → **v1**: dogfood, E2E regression, quickstart-windows, checklist 12/12 |
 | 2026-07-24 | Пост-v1: новый **S8** (режимы + RU-отчёты/compare в docs); бывшие S8/S9 → **S9** checkpoint / **S10** dynamic context |
 | 2026-07-25 | **S8 закрыт:** `-Mode`, run/compare/review-отчёты (RU) в `docs/`, токены окон reviewers, RU notes/итог |
+| 2026-07-25 | S8 follow-up: partial-отчёты при ReviewError; skills catalog + `activate_review_skill` (inventory S8) |

@@ -70,3 +70,4 @@ class RunReport(BaseModel):
     totals: RunReportTotals
     timing: RunReportTiming
     status: str = "ok"
+    error_message: str | None = None

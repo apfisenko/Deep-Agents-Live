@@ -35,6 +35,8 @@ def test_render_skills_panel() -> None:
     assert "rubric-python-cli" in text
     assert "modern-python" in text
     assert "api_detected=False" in text
+    assert "packaging=False" in text
+    assert "source" in text.lower() or "auto" in text
 
 
 def test_render_skills_compact() -> None:

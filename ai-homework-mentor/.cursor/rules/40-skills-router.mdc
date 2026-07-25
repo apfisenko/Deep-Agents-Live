@@ -1,5 +1,5 @@
 ---
-description: AI Homework Mentor — маршрутизация skills для проверки ДЗ (rubric + ecosystem).
+description: AI Homework Mentor — маршрутизация skills для проверки ДЗ (rubric + ecosystem + on_demand).
 alwaysApply: true
 globs:
   - "ai-homework-mentor/**"
@@ -12,11 +12,12 @@ globs:
 ## Как использовать
 
 1. Определить тему ДЗ и аспект reviewer (`architecture` | `code_quality`).
-2. Взять rubric-skill по topic + ecosystem skill по эвристике.
-3. Прочитать `SKILL.md` (allowlist: `skills/`, `.agents/skills/`).
-4. Передать skill в brief субагента; код студента не исполнять; секреты не передавать.
+2. Взять rubric-skill по topic + ecosystem skill по эвристике (`config/skills_routing.yaml`).
+3. При mid-run необходимости — `activate_review_skill` для `on_demand` catalog.
+4. Прочитать `SKILL.md` (allowlist: `skills/`, `.agents/skills/`).
+5. Передать skill в brief субагента; код студента не исполнять; секреты не передавать.
 
-Runtime-роутер: `config/skills_routing.yaml` + `homework_mentor.skills.router`.
+Runtime: `homework_mentor.skills.router` + `homework_mentor.skills.activate`.
 
 ## Таблица: проверка ДЗ → skill
 
@@ -27,19 +28,41 @@ Runtime-роутер: `config/skills_routing.yaml` + `homework_mentor.skills.rou
 | Неизвестная / общая тема | `rubric-default` | `skills/rubric-default/SKILL.md` |
 | Python CLI (`python-cli`) | `rubric-python-cli` | `skills/rubric-python-cli/SKILL.md` |
 
-### Ecosystem skills (публичные)
+### Ecosystem skills (auto)
 
-| Тип проверки | Skill | Аспект | Когда |
-|--------------|-------|--------|-------|
-| Качество Python-кода / tooling | `modern-python` | `code_quality` | всегда для аспекта |
-| Структура FastAPI / API | `fastapi-templates` | `architecture` | topic содержит fastapi/api **или** в манифесте `**/api/**`, `**/routes/**`, `**/routers/**`, `*fastapi*` |
+| Skill | Аспект | Когда |
+|-------|--------|-------|
+| `modern-python` | `code_quality` | всегда |
+| `python-design-patterns` | `code_quality` | всегда |
+| `uv-package-manager` | `code_quality` | `packaging_detected` |
+| `python-testing-patterns` | `code_quality` | `tests_detected` |
+| `fastapi-templates` | `architecture` | `api_detected` |
+| `api-design-principles` | `architecture` | `api_detected` |
+
+### On-demand (activate mid-run)
+
+| Skill | Аспект |
+|-------|--------|
+| `deep-agents-core` | `architecture` |
+| `deep-agents-orchestration` | `architecture` |
+| `deep-agents-memory` | `architecture` |
+| `langchain-fundamentals` | `architecture` |
+| `langchain-middleware` | `architecture` |
+| `ecosystem-primer` | `architecture` |
+
+### Pending
+
+| Skill | Примечание |
+|-------|------------|
+| `docker-expert` | нет в skills.sh; эвристика `docker_detected` готова |
 
 ### Inventory
 
-См. `docs/skills-inventory-s5.md`.
+См. `docs/skills-inventory-s8.md`.
 
 ## Запреты
 
 - Не устанавливать skills без чтения SKILL.md.
 - Не передавать в skill-контекст `.env`, ключи, полные тексты PD.
 - Не исполнять код студента «чтобы проверить по skill».
+- Не активировать on_demand без конкретной причины.

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
+from homework_mentor.config import DEFAULT_REVIEW_MODE
 from homework_mentor.reports.models import (
     ReviewerTokenRow,
     RunReport,
@@ -11,10 +13,14 @@ from homework_mentor.reports.models import (
     RunReportTiming,
     RunReportTotals,
 )
+from homework_mentor.submission.models import Submission
 from homework_mentor.synthesis.pipeline import discover_review_note_names
+from homework_mentor.workspace import open_session
 
 if TYPE_CHECKING:
-    from homework_mentor.config import RuntimeSettings
+    from pathlib import Path
+
+    from homework_mentor.config import ReviewMode, RuntimeSettings
     from homework_mentor.pipeline import SessionResult
     from homework_mentor.reviewers.collector import SubagentHandoffEvent
 
@@ -129,4 +135,68 @@ def build_run_report(  # noqa: PLR0913 — explicit report inputs
         totals=totals,
         timing=timing,
         status=status,
+    )
+
+
+def _load_submission(session_root: Path) -> Submission | None:
+    path = session_root / "input" / "submission.json"
+    if not path.is_file():
+        return None
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        return None
+    return Submission.model_validate(raw)
+
+
+def build_failed_run_report(  # noqa: PLR0913 — explicit failed-run inputs
+    *,
+    session_id: str,
+    model: str,
+    verbose: bool,
+    wall_ms: int,
+    version: str,
+    error_message: str,
+    review_mode: ReviewMode | None = None,
+    settings: RuntimeSettings | None = None,
+    openrouter_api_base: str | None = None,
+    project_root_override: Path | None = None,
+    status: str = "failed",
+) -> RunReport:
+    """Build a partial run report from an existing workspace after ReviewError."""
+    session = open_session(session_id, root=project_root_override)
+    submission = _load_submission(session.root)
+    context = settings.yaml.agent.context if settings is not None else None
+    notes_count = len(discover_review_note_names(session.notes_dir))
+    mode = review_mode or DEFAULT_REVIEW_MODE
+    params = RunReportParams(
+        review_mode=mode,
+        model=model,
+        topic=submission.topic if submission is not None else None,
+        source_type=submission.source_type.value if submission is not None else None,
+        source_value=submission.source_value if submission is not None else None,
+        verbose=verbose,
+        version=version,
+        session_id=session.session_id,
+        workspace=str(session.root),
+        openrouter_api_base=openrouter_api_base,
+        window_tokens=context.window_tokens if context is not None else None,
+        summarize_threshold_tokens=(
+            context.summarize_threshold_tokens if context is not None else None
+        ),
+        offload_threshold_tokens=context.offload_threshold_tokens if context is not None else None,
+        summarize_enabled=context.summarize_enabled if context is not None else None,
+        compact_enabled=context.compact_enabled if context is not None else None,
+    )
+    totals = RunReportTotals(
+        max_parent_tokens=0,
+        final_parent_tokens=0,
+        total_tokens_estimate=0,
+        notes_count=notes_count,
+    )
+    return RunReport(
+        params=params,
+        totals=totals,
+        timing=RunReportTiming(wall_ms=max(0, wall_ms)),
+        status=status,
+        error_message=error_message,
     )

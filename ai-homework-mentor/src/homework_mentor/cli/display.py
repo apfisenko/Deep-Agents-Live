@@ -359,14 +359,16 @@ def render_skills_panel(console: Console, skills: SkillsSelection | None) -> Non
     table = Table(title="Rubric & Skills", show_header=True, header_style="bold")
     table.add_column("id", width=22)
     table.add_column("kind", width=10)
+    table.add_column("source", width=10)
     table.add_column("aspect", width=14)
     table.add_column("reason", max_width=28)
-    table.add_column("path", max_width=40)
+    table.add_column("path", max_width=36)
 
     for ref in skills.all_refs():
         table.add_row(
             ref.id,
             ref.kind,
+            ref.source,
             ref.aspect or "—",
             ref.reason,
             ref.path,
@@ -374,7 +376,12 @@ def render_skills_panel(console: Console, skills: SkillsSelection | None) -> Non
     console.print(table)
     console.print(
         Panel(
-            f"api_detected={skills.api_detected}",
+            (
+                f"api_detected={skills.api_detected} "
+                f"packaging={skills.packaging_detected} "
+                f"tests={skills.tests_detected} "
+                f"docker={skills.docker_detected}"
+            ),
             title="skills routing",
             border_style="magenta",
         ),

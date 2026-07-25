@@ -38,18 +38,43 @@ class EcosystemRule:
 
 
 @dataclass(frozen=True)
+class OnDemandRule:
+    id: str
+    aspects: list[str]
+
+
+@dataclass(frozen=True)
 class SkillsRoutingConfig:
     rubric_default: str
     rubric_by_topic: dict[str, str]
     ecosystem: list[EcosystemRule] = field(default_factory=list)
+    on_demand: list[OnDemandRule] = field(default_factory=list)
     topic_keywords: list[str] = field(default_factory=list)
     path_globs: list[str] = field(default_factory=list)
+    packaging_globs: list[str] = field(default_factory=list)
+    tests_globs: list[str] = field(default_factory=list)
+    docker_globs: list[str] = field(default_factory=list)
+    max_on_demand: int = 5
+
+    def catalog_ids(self) -> set[str]:
+        ids = {rule.id for rule in self.ecosystem}
+        ids.update(rule.id for rule in self.on_demand)
+        return ids
+
+    def aspects_for(self, skill_id: str) -> set[str]:
+        aspects: set[str] = set()
+        for rule in self.ecosystem:
+            if rule.id == skill_id:
+                aspects.update(rule.aspects)
+        for rule in self.on_demand:
+            if rule.id == skill_id:
+                aspects.update(rule.aspects)
+        return aspects
 
 
 def load_skills_routing(*, root: Path | None = None) -> SkillsRoutingConfig:
     path = (root or project_root()) / "config" / "skills_routing.yaml"
     if not path.is_file():
-        # fallback via config_dir for tests that only patch config
         alt = config_dir() / "skills_routing.yaml"
         path = alt if alt.is_file() else path
     if not path.is_file():
@@ -62,6 +87,22 @@ def load_skills_routing(*, root: Path | None = None) -> SkillsRoutingConfig:
     return _parse_routing(raw)
 
 
+def _path_matches(file_path: str, pattern: str) -> bool:
+    path = file_path.replace("\\", "/")
+    if fnmatch(path, pattern):
+        return True
+    if pattern.startswith("**/"):
+        suffix = pattern[3:]
+        return fnmatch(path, suffix) or fnmatch(path.split("/")[-1], suffix)
+    return fnmatch(path.split("/")[-1], pattern)
+
+
+def _manifest_matches(code_manifest: list[str], globs: list[str]) -> bool:
+    return any(
+        _path_matches(file_path, pattern) for file_path in code_manifest for pattern in globs
+    )
+
+
 def detect_api(
     *,
     topic: str | None,
@@ -72,12 +113,19 @@ def detect_api(
     for keyword in routing.topic_keywords:
         if keyword in normalized:
             return True
-    for file_path in code_manifest:
-        normalized_path = file_path.replace("\\", "/")
-        for pattern in routing.path_globs:
-            if fnmatch(normalized_path, pattern):
-                return True
-    return False
+    return _manifest_matches(code_manifest, routing.path_globs)
+
+
+def detect_packaging(*, code_manifest: list[str], routing: SkillsRoutingConfig) -> bool:
+    return _manifest_matches(code_manifest, routing.packaging_globs)
+
+
+def detect_tests(*, code_manifest: list[str], routing: SkillsRoutingConfig) -> bool:
+    return _manifest_matches(code_manifest, routing.tests_globs)
+
+
+def detect_docker(*, code_manifest: list[str], routing: SkillsRoutingConfig) -> bool:
+    return _manifest_matches(code_manifest, routing.docker_globs)
 
 
 def resolve_skills(
@@ -92,6 +140,16 @@ def resolve_skills(
     cfg = routing or load_skills_routing(root=root)
     manifest = code_manifest or []
     api_detected = detect_api(topic=topic, code_manifest=manifest, routing=cfg)
+    packaging_detected = detect_packaging(code_manifest=manifest, routing=cfg)
+    tests_detected = detect_tests(code_manifest=manifest, routing=cfg)
+    docker_detected = detect_docker(code_manifest=manifest, routing=cfg)
+    flags = {
+        "api_detected": api_detected,
+        "packaging_detected": packaging_detected,
+        "tests_detected": tests_detected,
+        "docker_detected": docker_detected,
+    }
+
     rubric_id = _rubric_skill_id(topic, cfg)
     rubric_path = _skill_md_path(rubric_id, root=root)
     rubric_ref = SkillRef(
@@ -100,10 +158,11 @@ def resolve_skills(
         kind="rubric",
         reason=f"topic→{rubric_id}",
         aspect=None,
+        source="auto",
     )
     ecosystem: list[SkillRef] = []
     for rule in cfg.ecosystem:
-        if not _ecosystem_applies(rule, api_detected=api_detected):
+        if not _ecosystem_applies(rule, flags=flags):
             continue
         skill_path = _skill_md_path(rule.id, root=root)
         for rule_aspect in rule.aspects:
@@ -112,12 +171,13 @@ def resolve_skills(
                     id=rule.id,
                     path=str(skill_path),
                     kind="ecosystem",
-                    reason=_ecosystem_reason(rule, api_detected=api_detected),
+                    reason=_ecosystem_reason(rule, flags=flags),
                     aspect=rule_aspect,
+                    source="auto",
                 ),
             )
             logger.info(
-                "skill activated id=%s aspect=%s reason=%s",
+                "skill activated id=%s aspect=%s reason=%s source=auto",
                 rule.id,
                 rule_aspect,
                 rule.when,
@@ -127,12 +187,15 @@ def resolve_skills(
         rubric_skill=rubric_ref,
         ecosystem_skills=ecosystem,
         api_detected=api_detected,
+        packaging_detected=packaging_detected,
+        tests_detected=tests_detected,
+        docker_detected=docker_detected,
     )
     logger.info(
-        "rubric skill activated id=%s reason=%s api_detected=%s",
+        "rubric skill activated id=%s reason=%s flags=%s",
         rubric_ref.id,
         rubric_ref.reason,
-        api_detected,
+        flags,
     )
 
     if session is not None:
@@ -176,17 +239,15 @@ def _rubric_skill_id(topic: str | None, cfg: SkillsRoutingConfig) -> str:
     return cfg.rubric_default
 
 
-def _ecosystem_applies(rule: EcosystemRule, *, api_detected: bool) -> bool:
+def _ecosystem_applies(rule: EcosystemRule, *, flags: dict[str, bool]) -> bool:
     if rule.when == "always_for_aspect":
         return True
-    if rule.when == "api_detected":
-        return api_detected
-    return False
+    return bool(flags.get(rule.when, False))
 
 
-def _ecosystem_reason(rule: EcosystemRule, *, api_detected: bool) -> str:
-    if rule.when == "api_detected":
-        return "api_detected" if api_detected else "api_not_detected"
+def _ecosystem_reason(rule: EcosystemRule, *, flags: dict[str, bool]) -> str:
+    if rule.when.endswith("_detected"):
+        return rule.when if flags.get(rule.when) else f"{rule.when}=false"
     return f"aspect rule ({rule.when})"
 
 
@@ -206,6 +267,47 @@ def _normalize_topic(topic: str | None) -> str:
     return re.sub(r"[\s_]+", "-", lowered).strip("-")
 
 
+def _parse_ecosystem_rules(raw_list: object) -> list[EcosystemRule]:
+    rules: list[EcosystemRule] = []
+    if not isinstance(raw_list, list):
+        return rules
+    for entry in raw_list:
+        if not isinstance(entry, dict):
+            continue
+        skill_id = entry.get("id")
+        aspects = entry.get("aspects") or []
+        when = entry.get("when") or "always_for_aspect"
+        if not isinstance(skill_id, str) or not isinstance(when, str):
+            continue
+        if not isinstance(aspects, list) or not aspects:
+            continue
+        rules.append(
+            EcosystemRule(id=skill_id, aspects=[str(a) for a in aspects], when=when),
+        )
+    return rules
+
+
+def _parse_on_demand(raw_list: object) -> list[OnDemandRule]:
+    rules: list[OnDemandRule] = []
+    if not isinstance(raw_list, list):
+        return rules
+    for entry in raw_list:
+        if not isinstance(entry, dict):
+            continue
+        skill_id = entry.get("id")
+        aspects = entry.get("aspects") or []
+        if not isinstance(skill_id, str) or not isinstance(aspects, list) or not aspects:
+            continue
+        rules.append(OnDemandRule(id=skill_id, aspects=[str(a) for a in aspects]))
+    return rules
+
+
+def _str_list(raw: object) -> list[str]:
+    if not isinstance(raw, list):
+        return []
+    return [str(item) for item in raw]
+
+
 def _parse_routing(raw: dict[str, Any]) -> SkillsRoutingConfig:
     rubric = raw.get("rubric")
     if not isinstance(rubric, dict):
@@ -221,42 +323,46 @@ def _parse_routing(raw: dict[str, Any]) -> SkillsRoutingConfig:
         raise SkillsRoutingError(msg)
     by_topic = {str(key): str(value) for key, value in by_topic_raw.items()}
 
-    ecosystem_rules: list[EcosystemRule] = []
-    for entry in raw.get("ecosystem") or []:
-        if not isinstance(entry, dict):
-            continue
-        skill_id = entry.get("id")
-        aspects = entry.get("aspects") or []
-        when = entry.get("when") or "always_for_aspect"
-        if not isinstance(skill_id, str) or not isinstance(when, str):
-            continue
-        if not isinstance(aspects, list) or not aspects:
-            continue
-        ecosystem_rules.append(
-            EcosystemRule(id=skill_id, aspects=[str(a) for a in aspects], when=when),
-        )
-
     api = raw.get("api_detection") or {}
     if not isinstance(api, dict):
         api = {}
-    keywords = [str(item).lower() for item in (api.get("topic_keywords") or [])]
-    globs = [str(item) for item in (api.get("path_globs") or [])]
+    packaging = raw.get("packaging_detection") or {}
+    if not isinstance(packaging, dict):
+        packaging = {}
+    tests = raw.get("tests_detection") or {}
+    if not isinstance(tests, dict):
+        tests = {}
+    docker = raw.get("docker_detection") or {}
+    if not isinstance(docker, dict):
+        docker = {}
+
+    max_on_demand_raw = raw.get("max_on_demand", 5)
+    max_on_demand = int(max_on_demand_raw) if isinstance(max_on_demand_raw, int) else 5
 
     return SkillsRoutingConfig(
         rubric_default=default,
         rubric_by_topic=by_topic,
-        ecosystem=ecosystem_rules,
-        topic_keywords=keywords,
-        path_globs=globs,
+        ecosystem=_parse_ecosystem_rules(raw.get("ecosystem")),
+        on_demand=_parse_on_demand(raw.get("on_demand")),
+        topic_keywords=[str(item).lower() for item in (api.get("topic_keywords") or [])],
+        path_globs=_str_list(api.get("path_globs")),
+        packaging_globs=_str_list(packaging.get("path_globs")),
+        tests_globs=_str_list(tests.get("path_globs")),
+        docker_globs=_str_list(docker.get("path_globs")),
+        max_on_demand=max_on_demand,
     )
 
 
 __all__ = [
     "EcosystemRule",
+    "OnDemandRule",
     "SkillsRoutingConfig",
     "SkillsRoutingError",
     "build_briefs_skills",
     "detect_api",
+    "detect_docker",
+    "detect_packaging",
+    "detect_tests",
     "load_skills_routing",
     "resolve_skills",
     "resolve_skills_for_aspect",

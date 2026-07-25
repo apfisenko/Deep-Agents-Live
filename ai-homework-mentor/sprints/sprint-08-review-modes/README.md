@@ -4,7 +4,7 @@
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
 > **Статус:** ✅ Done
 > **Открыт:** 2026-07-24
-> **Закрыт:** 2026-07-25
+> **Закрыт:** 2026-07-25 (core + follow-up Task 07–08)
 > **Зависит от:** [Sprint 07](../sprint-07-dogfooding/README.md) (v1)
 > **После v1:** следующий основной слой (не опциональный)
 
@@ -87,6 +87,9 @@ Sprint считается завершённым, когда:
 | 03 | `compare-modes` + сравнительный отчёт в `docs/` (RU) | ✅ | [plan](tasks/03-compare-modes/plan.md) | [summary](tasks/03-compare-modes/summary.md) |
 | 04 | Docs + метрики токенов субагентов | ✅ | [plan](tasks/04-docs-tests/plan.md) | [summary](tasks/04-docs-tests/summary.md) |
 | 05 | Русский итог/notes + `docs/review-report-*.md` | ✅ | [plan](tasks/05-ru-review-report/plan.md) | [summary](tasks/05-ru-review-report/summary.md) |
+| 06 | Полный путь к проекту в шапке `review-report` | ✅ | [plan](tasks/06-project-path-in-report/plan.md) | [summary](tasks/06-project-path-in-report/summary.md) |
+| 07 | Partial-отчёты при `ReviewError` | ✅ | [plan](tasks/07-partial-reports-on-error/plan.md) | [summary](tasks/07-partial-reports-on-error/summary.md) |
+| 08 | Catalog skills + динамическая активация mid-run | ✅ | [plan](tasks/08-skills-catalog-dynamic/plan.md) | [summary](tasks/08-skills-catalog-dynamic/summary.md) |
 
 ---
 
@@ -120,6 +123,24 @@ Sprint считается завершённым, когда:
 
 ---
 
+## Задача 06: Путь к проекту в review-report ✅
+
+См. [summary](tasks/06-project-path-in-report/summary.md).
+
+---
+
+## Задача 07: Partial-отчёты при ошибке ✅
+
+См. [summary](tasks/07-partial-reports-on-error/summary.md).
+
+---
+
+## Задача 08: Catalog skills + dynamic activate ✅
+
+См. [summary](tasks/08-skills-catalog-dynamic/summary.md).
+
+---
+
 ## Демонстрация через Rich CLI
 
 ```powershell
@@ -142,16 +163,19 @@ Sprint считается завершённым, когда:
 - Checkpoint / resume (→ S9)
 - Dynamic model routing / $/cost OpenRouter (→ S10)
 - Сравнительный отчёт в `logs/`
-- Новые аспекты reviewer / смена rubric
+- Новые аспекты reviewer (только `architecture` / `code_quality`)
 
 ---
 
 ## Итог
 
-Sprint 08 закрыт 2026-07-25.
+Sprint 08 закрыт 2026-07-25 (core + follow-up Task 07–08).
 
 - Режимы `single` / `subagents` воспроизводимы CLI/env
 - Run / compare / review-отчёты на русском в `docs/`
+- В шапке `review-report` — полный путь/URL проекта (`Проект:`)
+- При `ReviewError` — partial run/review-отчёты (если есть notes)
+- Skills catalog: auto + on_demand (`activate_review_skill`); inventory S8
 - Токены окон reviewers видны отдельно от parent CE
 - Student-facing итог, notes и plan — на русском
 - `.\make.ps1 ci` зелёный

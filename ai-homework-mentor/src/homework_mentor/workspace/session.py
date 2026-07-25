@@ -6,14 +6,13 @@ import json
 import shutil
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from homework_mentor.config import project_root
 from homework_mentor.workspace.security import WorkspaceSecurityError, resolve_safe_path
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from homework_mentor.submission.models import Submission
 
 _SESSION_DIRS = ("input", "code", "rubric", "plan", "notes", "output")
@@ -84,6 +83,24 @@ def create_session(*, root: Path | None = None, session_id: str | None = None) -
     for name in _SESSION_DIRS:
         (session_root / name).mkdir(parents=True, exist_ok=True)
     return WorkspaceSession(session_id=sid, root=session_root)
+
+
+def open_session(session_id: str, *, root: Path | None = None) -> WorkspaceSession:
+    """Open an existing workspace session; raise FileNotFoundError if missing."""
+    if not session_id or ".." in Path(session_id).parts or Path(session_id).is_absolute():
+        msg = f"Invalid session id: {session_id!r}"
+        raise ValueError(msg)
+    base = (root or project_root()) / "workspace"
+    session_root = (base / session_id).resolve()
+    try:
+        session_root.relative_to(base.resolve())
+    except ValueError as exc:
+        msg = f"Session path escapes workspace root: {session_id}"
+        raise ValueError(msg) from exc
+    if not session_root.is_dir():
+        msg = f"Workspace session not found: {session_id}"
+        raise FileNotFoundError(msg)
+    return WorkspaceSession(session_id=session_id, root=session_root)
 
 
 def migrate_legacy_staging(*, legacy_dir: Path, session: WorkspaceSession) -> None:
