@@ -13,7 +13,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.prebuilt import create_react_agent
 
 from app.agent.config_registry import get_default_config_id, get_run_config
-from app.agent.prompt_resolver import resolve_prompt
+from app.agent.prompt_store import fetch as fetch_cached_prompt
 from app.agent.step_labels import (
     DEFAULT_ANALYZE_LABEL,
     DEFAULT_RESPOND_LABEL,
@@ -36,6 +36,7 @@ from app.security.prompt_appendix import append_security_prompt
 from app.tools.registry import get_agent_tools
 
 if TYPE_CHECKING:
+    from app.agent.prompt_resolver import ResolvedPrompt
     from app.agent.run_config import RunConfig
 
 logger = logging.getLogger(__name__)
@@ -67,13 +68,23 @@ class _StreamState:
 
 
 class ReactAgentRunner:
-    def __init__(self, run_config: RunConfig) -> None:
+    def __init__(
+        self,
+        run_config: RunConfig,
+        *,
+        resolved_prompt: ResolvedPrompt | None = None,
+    ) -> None:
         settings = get_settings()
         self._settings = settings
         self._run_config = run_config
         self._tools = get_agent_tools(routing_enabled=run_config.agent.routing_enabled)
-        base_prompt = resolve_prompt(run_config.prompt)
-        secured_prompt = append_security_prompt(base_prompt, enabled=settings.security_enabled)
+        if resolved_prompt is None:
+            resolved_prompt, _ = fetch_cached_prompt(run_config.prompt, settings=settings)
+        self._resolved_prompt = resolved_prompt
+        secured_prompt = append_security_prompt(
+            resolved_prompt.text,
+            enabled=settings.security_enabled,
+        )
         self._graph = create_react_agent(
             create_chat_model(
                 settings,
@@ -87,6 +98,10 @@ class ReactAgentRunner:
     @property
     def config_id(self) -> str:
         return self._run_config.config_id
+
+    @property
+    def prompt_version(self) -> int | None:
+        return self._resolved_prompt.version
 
     async def run(
         self,
@@ -143,25 +158,29 @@ class ReactAgentRunner:
         trace_metadata: dict[str, str] = {
             "channel": channel,
             "session_id": session_id,
-            **self._run_config.to_metadata(),
+            **self._run_config.to_metadata(resolved_prompt=self._resolved_prompt),
         }
         if extra_metadata:
             trace_metadata.update({key: str(value) for key, value in extra_metadata.items()})
+        run_metadata: dict[str, Any] = dict(trace_metadata)
+        if self._resolved_prompt.linkable:
+            run_metadata["langfuse_prompt"] = self._resolved_prompt.langfuse_prompt
         config = cast(
             "RunnableConfig",
             {
                 "callbacks": get_langfuse_callbacks(self._settings),
-                "metadata": trace_metadata,
+                "metadata": run_metadata,
                 "tags": [channel, self._run_config.config_id],
             },
         )
 
         try:
-            async for graph_event in self._graph.astream_events(
+            stream = self._graph.astream_events(
                 cast("Any", {"messages": messages}),
                 config=config,
                 version="v2",
-            ):
+            )
+            async for graph_event in stream:
                 event_payload = cast("dict[str, Any]", graph_event)
                 async for mapped in self._map_graph_event(event_payload, state):
                     yield mapped
@@ -184,6 +203,7 @@ class ReactAgentRunner:
                 reply,
                 context=SanitizeContext(
                     payment_confirmed_via_tool=state.payment_confirmed_via_tool,
+                    session_id=session_id,
                 ),
             )
             reply = sanitized.text
@@ -275,8 +295,24 @@ _runners: dict[str, ReactAgentRunner] = {}
 
 def get_agent_runner(config_id: str | None = None) -> ReactAgentRunner:
     cid = config_id or get_default_config_id()
+    run_config = get_run_config(cid)
+
+    if run_config.prompt.source == "langfuse":
+        resolved, version_changed = fetch_cached_prompt(run_config.prompt)
+        if version_changed and cid in _runners:
+            prev = _runners[cid].prompt_version
+            logger.info(
+                "Prompt version changed (v%s → v%s) — invalidating agent and config cache",
+                prev,
+                resolved.version,
+            )
+            del _runners[cid]
+        if cid not in _runners:
+            _runners[cid] = ReactAgentRunner(run_config, resolved_prompt=resolved)
+        return _runners[cid]
+
     if cid not in _runners:
-        _runners[cid] = ReactAgentRunner(get_run_config(cid))
+        _runners[cid] = ReactAgentRunner(run_config)
     return _runners[cid]
 
 

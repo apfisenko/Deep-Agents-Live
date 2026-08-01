@@ -63,7 +63,7 @@ Telegram-бот: `TELEGRAM_BOT_TOKEN` в `.env`, затем `.\make.ps1 dev-bot`
 
 ## Langfuse (self-hosted)
 
-Langfuse — traces и отладка агента. Поднимается в Docker (WSL), UI на порту **3001**.
+Langfuse — **traces**, **Prompt Management** (версии промптов, link to traces) и eval-датасеты. Поднимается в Docker (WSL), UI на порту **3001**.
 
 | | |
 |---|---|
@@ -72,7 +72,8 @@ Langfuse — traces и отладка агента. Поднимается в Do
 | **Вход (dev)** | `admin@admin.local` / `admin` |
 | **API keys (dev)** | `pk-lf-dev` / `sk-lf-dev` |
 
-Подробности: headless init, переменные, команды docker, troubleshooting — в [docs/concept/integrations.md#langfuse-self-hosted](docs/concept/integrations.md).
+Подробности: headless init, переменные, docker, troubleshooting — [docs/concept/integrations.md#langfuse-self-hosted](docs/concept/integrations.md).  
+**Версионность промптов:** [docs/guides/langfuse-prompt-versioning.md](docs/guides/langfuse-prompt-versioning.md).
 
 ### Команды
 
@@ -81,6 +82,10 @@ Langfuse — traces и отладка агента. Поднимается в Do
 | `.\make.ps1 up` | Поднять Langfuse stack |
 | `.\make.ps1 down` | Остановить контейнеры |
 | `.\make.ps1 ps` | Статус контейнеров |
+| `.\make.ps1 check-langfuse` | Health API |
+| `.\make.ps1 check-traces` | Smoke: traces web + telegram |
+| `.\make.ps1 langfuse-upload-prompts` | Sync промптов в Langfuse Prompt Management |
+| `.\make.ps1 langfuse-upload-dataset` | Upload JSONL-датасета в Langfuse |
 | `.\make.ps1 logs` | Логи (последние 50 строк) |
 | `.\make.ps1 logs -f langfuse-web` | Follow-логи сервиса |
 | `.\make.ps1 compose <args>` | Любая `docker compose` команда (через WSL) |
@@ -115,6 +120,47 @@ wsl echo ok
 3. Проверить свободное место на диске C: и в WSL: `wsl df -h`.
 4. Docker Desktop: Quit → запуск снова → `wsl --shutdown` → `wsl`.
 
+### WSL: постоянный рестарт контейнеров / `docker.service`
+
+**Симптомы:** в `docker ps` контейнеры постоянно «Up N seconds»; в логах — `SIGTERM`, `terminating connection due to administrator command`, `Exiting on signal: TERMINATED`; `docker events` показывает массовый `die` (exit 143/137), без `restart` и `oom`.
+
+**Причина:** не crash loop контейнеров. При `systemd=true` в WSL каждый короткий вызов `wsl -e bash -lc "..."` (из `make.ps1`, Cursor, терминала) создаёт сессию; когда команда завершается, systemd выключает VM → `Stopping docker.service` → контейнеры получают SIGTERM. WSL не успевает корректно выключиться за 10 сек и делает force reboot. `vmIdleTimeout=-1` в `.wslconfig` это **не** отменяет.
+
+**Фикс (один раз):**
+
+```bash
+wsl -d Ubuntu
+sudo loginctl enable-linger $USER
+loginctl show-user $USER -p Linger   # ожидается Linger=yes
+```
+
+Затем перезапустить WSL:
+
+```powershell
+wsl --shutdown
+# подождать 5 сек
+.\make.ps1 up
+```
+
+**Дополнительно:**
+
+- Держать открытым постоянный терминал `wsl -d Ubuntu` — пока сессия жива, shutdown не срабатывает.
+- В `%USERPROFILE%\.wslconfig` можно включить swap (сейчас часто `swap=0` при 6 GB RAM и тяжёлом стеке):
+
+```ini
+[wsl2]
+vmIdleTimeout=-1
+memory=6GB
+processors=4
+swap=2GB
+```
+
+После правки `.wslconfig`: `wsl --shutdown`.
+
+**Проверка:** через 5–10 мин без активных `wsl`-команд `journalctl -u docker --since "10 min ago" | grep -E "Starting|Stopping"` не должен показывать циклических stop/start; uptime контейнеров в `docker ps` растёт.
+
+**Не поможет:** менять `restart:` в `docker-compose.yml`, переустанавливать Docker, чинить Redis/Postgres ошибки Langfuse во время shutdown — это следствия, не причина.
+
 На Linux/macOS те же цели через `make` (см. `make help`).
 
 ### Первый запуск / сброс
@@ -128,7 +174,7 @@ Headless init создаёт org, project и пользователя при **�
 .\make.ps1 up
 ```
 
-Traces из Agent Core появятся после **sprint-02** (SDK в backend). Сейчас Langfuse готов как инфраструктура observability.
+Traces из Agent Core пишутся через SDK (`CallbackHandler`). Промпты из Langfuse: `PROMPT_SOURCE=langfuse` в `.env` — см. [langfuse-prompt-versioning.md](docs/guides/langfuse-prompt-versioning.md).
 
 ---
 

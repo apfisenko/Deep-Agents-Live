@@ -236,6 +236,7 @@ function Show-Help {
     Write-Host "  check-langfuse - Langfuse /api/public/health"
     Write-Host "  check-traces   - verify Langfuse traces for web+telegram chat"
     Write-Host "  langfuse-upload-dataset - upload/reload JSONL to Langfuse"
+    Write-Host "  langfuse-upload-prompts - upload agent prompts to Langfuse Prompt Management"
     Write-Host "  check-telegram - TCP/getMe to api.telegram.org (VPN/proxy)"
     Write-Host "  check-api      - all checks above"
     Write-Host "  check-rag-search-e2e - RAG search smoke (Qdrant up + index; task 04 p.3)"
@@ -295,6 +296,22 @@ function Invoke-LangfuseUploadDataset {
             --input (Join-Path $RepoRoot $datasetJsonl) `
             --dataset-name $datasetName `
             --reload
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Invoke-LangfuseUploadPrompts {
+    $venvPython = Join-Path $BackendDir ".venv\Scripts\python.exe"
+    $python = if (Test-Path $venvPython) { $venvPython } else { (Get-Command python -ErrorAction SilentlyContinue).Source }
+    if (-not $python) {
+        Write-Error "Python not found. Run: cd backend; uv sync"
+    }
+
+    Push-Location $BackendDir
+    try {
+        & $python scripts/upload_langfuse_prompts.py
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     } finally {
         Pop-Location
@@ -957,6 +974,7 @@ switch ($Target) {
     "check-langfuse" { Invoke-CheckApi "langfuse" }
     "check-traces" { Invoke-CheckApi "traces" }
     "langfuse-upload-dataset" { Invoke-LangfuseUploadDataset }
+    "langfuse-upload-prompts" { Invoke-LangfuseUploadPrompts }
     "check-telegram" {
         Push-Location (Join-Path $RepoRoot "frontend\bot")
         try {

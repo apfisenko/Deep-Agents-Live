@@ -11,8 +11,10 @@ def test_langfuse_disabled_returns_empty(monkeypatch) -> None:
     clear_settings_cache()
     reset_langfuse_callbacks()
 
-    assert get_langfuse_callbacks() == []
-    assert get_langfuse_callbacks() == []
+    with patch("app.config.load_repo_env"):
+        clear_settings_cache()
+        assert get_langfuse_callbacks() == []
+        assert get_langfuse_callbacks() == []
 
 
 def test_langfuse_unreachable_returns_empty(monkeypatch) -> None:
@@ -23,10 +25,14 @@ def test_langfuse_unreachable_returns_empty(monkeypatch) -> None:
     clear_settings_cache()
     reset_langfuse_callbacks()
 
-    with patch(
-        "app.integrations.langfuse.is_langfuse_reachable",
-        return_value=False,
+    with (
+        patch("app.config.load_repo_env"),
+        patch(
+            "app.integrations.langfuse.is_langfuse_reachable",
+            return_value=False,
+        ),
     ):
+        clear_settings_cache()
         assert get_langfuse_callbacks() == []
 
 
@@ -40,15 +46,38 @@ def test_langfuse_initializes_once_when_reachable(monkeypatch) -> None:
 
     handler = MagicMock()
     with (
+        patch("app.config.load_repo_env"),
         patch("app.integrations.langfuse.is_langfuse_reachable", return_value=True),
         patch("langfuse.Langfuse"),
         patch("langfuse.langchain.CallbackHandler", return_value=handler),
     ):
+        clear_settings_cache()
         first = get_langfuse_callbacks()
         second = get_langfuse_callbacks()
 
     assert first == [handler]
     assert second == [handler]
+
+
+def test_get_langfuse_client_available_without_tracing_flag(monkeypatch) -> None:
+    monkeypatch.setenv("LANGFUSE_ENABLED", "false")
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-lf-dev")
+    monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-lf-dev")
+    monkeypatch.setenv("LANGFUSE_HOST", "http://localhost:3001")
+    clear_settings_cache()
+    reset_langfuse_callbacks()
+
+    mock_client = MagicMock()
+    with (
+        patch("app.config.load_repo_env"),
+        patch("app.integrations.langfuse.is_langfuse_reachable", return_value=True),
+        patch("langfuse.Langfuse"),
+        patch("langfuse.get_client", return_value=mock_client),
+    ):
+        clear_settings_cache()
+        from app.integrations.langfuse import get_langfuse_client
+
+        assert get_langfuse_client() is mock_client
 
 
 def test_ensure_langfuse_client_initializes_once(monkeypatch) -> None:
@@ -60,9 +89,11 @@ def test_ensure_langfuse_client_initializes_once(monkeypatch) -> None:
     reset_langfuse_callbacks()
 
     with (
+        patch("app.config.load_repo_env"),
         patch("app.integrations.langfuse.is_langfuse_reachable", return_value=True),
         patch("langfuse.Langfuse") as mock_langfuse_ctor,
     ):
+        clear_settings_cache()
         from app.integrations.langfuse import ensure_langfuse_client
 
         assert ensure_langfuse_client() is True

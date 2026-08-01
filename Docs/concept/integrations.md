@@ -105,7 +105,7 @@ Embeddings при model-specific ошибке: лог + 503 на поиск в R
 
 | Параметр | Значение |
 |----------|----------|
-| Назначение | Traces, spans, generations; отладка агента студентами |
+| Назначение | Traces, spans, generations; **Prompt Management** (E-10); eval-датасеты |
 | Направление | Out (Core → Langfuse ingest API) |
 | Протокол | HTTPS REST |
 | Критичность | **Важно, не блокирующее** — при недоступности диалог продолжается |
@@ -179,6 +179,19 @@ Docker Compose secrets (dev, в `.env`): `LANGFUSE_NEXTAUTH_SECRET`, `LANGFUSE_S
 
 Ключи `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` должны совпадать с `LANGFUSE_INIT_PROJECT_*` при headless init.
 
+#### Prompt Management (E-10)
+
+Промпты: git (`backend/app/agent/prompts/*.txt`) → sync в Langfuse → runtime по **`PROMPT_NAME` + `PROMPT_LABEL`** (fetch конкретного промпта по name и label).
+
+| Команда | Действие |
+|---------|----------|
+| `make langfuse-upload-prompts` / `.\make.ps1 langfuse-upload-prompts` | Загрузить `PROMPT_NAME`, назначить `PROMPT_LABEL`, снять метку с других промптов **реестра** |
+| `PROMPT_SOURCE=langfuse` в `.env` | Runtime: `get_prompt(PROMPT_NAME, label=PROMPT_LABEL)` (см. guide) |
+| `PROMPT_FALLBACK_PATH` | Дефолтный `.txt`, если Langfuse недоступен |
+
+Код: `prompt_resolver.py`, link to traces — `metadata["langfuse_prompt"]` в `react_agent.py` (LangChain `CallbackHandler`).  
+**Инструкция:** [langfuse-prompt-versioning.md](../guides/langfuse-prompt-versioning.md).
+
 #### Langfuse MCP (только Cursor IDE)
 
 | Переменная | Назначение |
@@ -196,7 +209,8 @@ MCP — инструмент разработки в IDE (чтение traces, �
 | init не создал пользователя | БД уже была занята → `compose down -v` и `up` |
 | неверный логин | Использовать email `admin@admin.local`, не `admin` |
 | контейнер `unhealthy` | `.\make.ps1 logs langfuse-web`; дождаться minio/clickhouse |
-| traces не видны | SDK подключается в sprint-02; проверить `LANGFUSE_ENABLED` и ключи |
+| traces не видны | Проверить `LANGFUSE_ENABLED`, ключи, flush delay |
+| link to traces пустой | `prompt.source: langfuse`, не fallback; см. [guide](../guides/langfuse-prompt-versioning.md) |
 | `logs -f langfuse-web` | follow-логи сервиса |
 | `compose <args>` | произвольная `docker compose` команда |
 | `docker <args>` | произвольная `docker` команда |
@@ -251,6 +265,19 @@ Docker Compose secrets (dev, в `.env`): `LANGFUSE_NEXTAUTH_SECRET`, `LANGFUSE_S
 | `LANGFUSE_REQUEST_TIMEOUT_SEC` | Timeout HTTP к Langfuse | `5` |
 
 Ключи `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` должны совпадать с `LANGFUSE_INIT_PROJECT_*` при headless init.
+
+#### Prompt Management (E-10)
+
+Промпты: git (`backend/app/agent/prompts/*.txt`) → sync в Langfuse → runtime по **`PROMPT_NAME` + `PROMPT_LABEL`** (fetch конкретного промпта по name и label).
+
+| Команда | Действие |
+|---------|----------|
+| `make langfuse-upload-prompts` / `.\make.ps1 langfuse-upload-prompts` | Загрузить `PROMPT_NAME`, назначить `PROMPT_LABEL`, снять метку с других промптов **реестра** |
+| `PROMPT_SOURCE=langfuse` в `.env` | Runtime: `get_prompt(PROMPT_NAME, label=PROMPT_LABEL)` (см. guide) |
+| `PROMPT_FALLBACK_PATH` | Дефолтный `.txt`, если Langfuse недоступен |
+
+Код: `prompt_resolver.py`, link to traces — `metadata["langfuse_prompt"]` в `react_agent.py` (LangChain `CallbackHandler`).  
+**Инструкция:** [langfuse-prompt-versioning.md](../guides/langfuse-prompt-versioning.md).
 
 #### Langfuse MCP (только Cursor IDE)
 

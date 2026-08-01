@@ -95,16 +95,23 @@ class RunConfig(BaseModel):
             raw = resolve_env_placeholders(raw)
         return cls.model_validate(raw)
 
-    def to_metadata(self) -> dict[str, str]:
+    def to_metadata(self, *, resolved_prompt: Any | None = None) -> dict[str, str]:
         """Langfuse propagated attributes must be strings."""
-        return {
+        metadata = {
             "config_id": self.config_id,
             "model": self.model.name,
             "temperature": str(self.model.temperature),
             "benchmark_only": str(self.benchmark_only).lower(),
             "retriever_backend": self.retriever.backend,
             "routing_enabled": str(self.agent.routing_enabled).lower(),
+            "prompt_source": self.prompt.source,
+            "prompt_name": self.prompt.name,
         }
+        if self.prompt.label:
+            metadata["prompt_label"] = self.prompt.label
+        if resolved_prompt is not None and resolved_prompt.version is not None:
+            metadata["prompt_version"] = str(resolved_prompt.version)
+        return metadata
 
     def to_retriever_runtime(self) -> dict[str, Any]:
         weights = self.retriever.hybrid_weights

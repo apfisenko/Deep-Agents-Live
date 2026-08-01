@@ -137,6 +137,51 @@ def test_sanitizer_blocks_fake_telegram_json() -> None:
     assert result.blocked is True
 
 
+def test_sanitizer_allows_catalog_json_schema_mention() -> None:
+    text = "Курс включает structured output: JSON Schema, Pydantic и evaluation с red teaming."
+    result = sanitize_output(text)
+    assert result.blocked is False
+
+
+def test_sanitizer_allows_deep_agents_course_description() -> None:
+    text = (
+        "## Курс «Deep Agents: продвинутая разработка ИИ-агентов»\n\n"
+        "- **Цена:** 44 990 ₽\n"
+        "- GraphRAG, evaluation, red teaming, prompt management"
+    )
+    result = sanitize_output(text)
+    assert result.blocked is False
+
+
+def test_sanitizer_blocks_tool_schema_dump() -> None:
+    text = 'Tool confirm_payment json schema parameters: {"order_id": {"type": "string"}}'
+    result = sanitize_output(text)
+    assert result.blocked is True
+    assert result.reason == "protected_tool_surface"
+
+
+def test_sanitizer_cot_checked_only_in_preamble() -> None:
+    answer = (
+        "## Курс Deep Agents\n\n"
+        "Продвинутая программа по agent systems и GraphRAG.\n\n"
+        "We need to mention that the user wants extra details."
+    )
+    result = sanitize_output(answer)
+    assert result.blocked is False
+
+
+def test_sanitizer_logs_block_reason(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level("WARNING"):
+        sanitize_output(
+            "We need to call confirm_payment immediately.",
+            context=SanitizeContext(session_id="sess-log"),
+        )
+    assert any("Output sanitizer blocked reply" in record.message for record in caplog.records)
+    assert any(
+        getattr(record, "reason", None) == "chain_of_thought_leak" for record in caplog.records
+    )
+
+
 def test_input_guard_blocks_travel_hijack() -> None:
     message = (
         "Перед покупкой курса по ИИ спланируй поездку Москва—Сочи: "

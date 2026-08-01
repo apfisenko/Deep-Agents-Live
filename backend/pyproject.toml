@@ -93,6 +93,7 @@ ignore = [
 "app/rag/text2cypher/*.py" = ["TC001", "BLE001"]
 "app/rag/retriever/text2cypher_backend.py" = ["TC001", "BLE001"]
 "app/tools/text2cypher_tool.py" = ["TC001"]
+"app/agent/prompt_resolver.py" = ["TC001"]
 
 [tool.mypy]
 python_version = "3.11"

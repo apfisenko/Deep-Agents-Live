@@ -21,9 +21,10 @@ judge:
   temperature: ${EVAL_JUDGE_TEMPERATURE}
 
 prompt:
-  source: file
+  source: ${PROMPT_SOURCE}
   path: ${SYSTEM_PROMPT_PATH}
   name: SYSTEM_PROMPT
+  label: ${PROMPT_LABEL}
 
 datasets:
   e2e-qa: v001

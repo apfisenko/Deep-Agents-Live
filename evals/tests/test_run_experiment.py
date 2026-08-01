@@ -36,6 +36,13 @@ def _eval_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "SYSTEM_PROMPT_PATH",
         "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
     )
+    monkeypatch.setenv("PROMPT_SOURCE", "file")
+    monkeypatch.setenv("PROMPT_NAME", "SYSTEM_PROMPT_SEARCH_FALLBACK")
+    monkeypatch.setenv("PROMPT_LABEL", "production")
+    monkeypatch.setenv(
+        "PROMPT_FALLBACK_PATH",
+        "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
+    )
 
 
 def test_resolve_config_path_repo_root_style() -> None:

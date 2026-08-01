@@ -44,31 +44,27 @@ def _suppress_noisy_otlp_logging() -> None:
     )
 
 
-def ensure_langfuse_client(settings: Settings | None = None) -> bool:
-    """Initialize Langfuse SDK once when enabled and reachable. Fail-open."""
+def _init_langfuse_sdk(settings: Settings) -> bool:
+    """Initialize Langfuse SDK singleton when keys are set and host is reachable."""
     global _client_ready
 
     if _client_ready:
         return True
 
-    cfg = settings or get_settings()
-    if not cfg.langfuse_enabled:
+    if not settings.langfuse_public_key or not settings.langfuse_secret_key:
         return False
 
-    if not cfg.langfuse_public_key or not cfg.langfuse_secret_key:
-        return False
-
-    timeout_sec = float(cfg.langfuse_request_timeout_sec)
-    if not is_langfuse_reachable(cfg.langfuse_host, timeout_sec):
+    timeout_sec = float(settings.langfuse_request_timeout_sec)
+    if not is_langfuse_reachable(settings.langfuse_host, timeout_sec):
         return False
 
     try:
         from langfuse import Langfuse
 
         Langfuse(
-            public_key=cfg.langfuse_public_key,
-            secret_key=cfg.langfuse_secret_key,
-            host=cfg.langfuse_host,
+            public_key=settings.langfuse_public_key,
+            secret_key=settings.langfuse_secret_key,
+            host=settings.langfuse_host,
             timeout=int(timeout_sec),
         )
     except Exception:
@@ -78,6 +74,28 @@ def ensure_langfuse_client(settings: Settings | None = None) -> bool:
     _suppress_noisy_otlp_logging()
     _client_ready = True
     return True
+
+
+def ensure_langfuse_client(settings: Settings | None = None) -> bool:
+    """Initialize Langfuse SDK once when tracing is enabled and reachable. Fail-open."""
+    cfg = settings or get_settings()
+    if not cfg.langfuse_enabled:
+        return False
+    return _init_langfuse_sdk(cfg)
+
+
+def get_langfuse_client(settings: Settings | None = None) -> Any | None:
+    """Return Langfuse SDK client when keys/host are available (prompt management). Fail-open."""
+    cfg = settings or get_settings()
+    if not _init_langfuse_sdk(cfg):
+        return None
+    try:
+        from langfuse import get_client
+
+        return get_client()
+    except Exception:
+        logger.exception("Failed to get Langfuse client")
+        return None
 
 
 def get_langfuse_callbacks(settings: Settings | None = None) -> list[Any]:

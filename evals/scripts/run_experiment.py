@@ -198,8 +198,8 @@ def build_run_metadata(
     config_path: Path,
     simulation_mode: str = "isolated",
 ) -> dict[str, str]:
-    prompt_text = resolve_prompt(config.prompt)
     extra = _extra_evaluators(config)
+    resolved = resolve_prompt(config.prompt)
     return {
         "config_id": config.config_id,
         "config_path": str(config_path.relative_to(REPO_ROOT)),
@@ -220,7 +220,9 @@ def build_run_metadata(
         "prompt_source": config.prompt.source,
         "prompt_name": config.prompt.name,
         "prompt_path": config.prompt.path or "",
-        "prompt_resolved_preview": prompt_text[:200],
+        "prompt_label": config.prompt.label or "",
+        "prompt_version": str(resolved.version) if resolved.version is not None else "",
+        "prompt_resolved_preview": resolved.text[:200],
         "agent_api_url": config.agent.api_url,
         "model_name": config.model.name,
         "model_temperature": str(config.model.temperature),

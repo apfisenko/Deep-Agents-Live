@@ -117,6 +117,11 @@ class Settings(BaseSettings):
         default="backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
         validation_alias="SYSTEM_PROMPT_PATH",
     )
+    prompt_fallback_path: str = Field(
+        default="backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
+        validation_alias="PROMPT_FALLBACK_PATH",
+    )
+    prompt_cache_ttl_sec: int = Field(default=60, ge=1, validation_alias="PROMPT_CACHE_TTL_SEC")
     openrouter_http_referer: str = Field(default="", validation_alias="OPENROUTER_HTTP_REFERER")
     openrouter_app_title: str = Field(
         default="Deep-Agents-Live",

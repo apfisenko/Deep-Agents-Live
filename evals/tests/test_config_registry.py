@@ -19,6 +19,13 @@ def _eval_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "SYSTEM_PROMPT_PATH",
         "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
     )
+    monkeypatch.setenv("PROMPT_SOURCE", "file")
+    monkeypatch.setenv("PROMPT_NAME", "SYSTEM_PROMPT_SEARCH_FALLBACK")
+    monkeypatch.setenv("PROMPT_LABEL", "production")
+    monkeypatch.setenv(
+        "PROMPT_FALLBACK_PATH",
+        "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
+    )
     monkeypatch.setattr("app.agent.config_registry.load_repo_env", lambda: None)
     reset_config_registry()
 
@@ -34,6 +41,15 @@ def test_baseline_yaml_parses() -> None:
     assert cfg.prompt.name == "SYSTEM_PROMPT_SEARCH_FALLBACK"
     assert cfg.prompt.path.endswith("SYSTEM_PROMPT_SEARCH_FALLBACK.txt")
     assert cfg.extra_evaluators == ["executed_tools_count"]
+
+
+def test_baseline_yaml_parses_langfuse_prompt_source(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PROMPT_SOURCE", "langfuse")
+    path = EVALS_CONFIGS_DIR / "baseline-react-inmemory.yaml"
+    cfg = RunConfig.from_yaml_path(path)
+    assert cfg.prompt.source == "langfuse"
+    assert cfg.prompt.label == "production"
+    assert cfg.prompt.name == "SYSTEM_PROMPT_SEARCH_FALLBACK"
 
 
 def test_registry_lists_configs() -> None:

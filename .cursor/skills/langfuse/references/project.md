@@ -62,6 +62,16 @@ LANGFUSE_INIT_PROJECT_SECRET_KEY  ↔  LANGFUSE_SECRET_KEY
 Конфиг: `mcp.json` → копия в `.cursor/mcp.json`.
 
 - Загрузка JSONL: `make langfuse-upload-dataset` (`backend/scripts/upload_langfuse_dataset.py`, флаг `--reload`)
+- Загрузка промптов: `make langfuse-upload-prompts` (`backend/scripts/upload_langfuse_prompts.py`) — см. [langfuse-prompt-versioning.md](../../../Docs/guides/langfuse-prompt-versioning.md)
+
+| Промпт (`prompt.name`) | Файл |
+|------------------------|------|
+| `SYSTEM_PROMPT` | `backend/app/agent/prompts/SYSTEM_PROMPT.txt` |
+| `SYSTEM_PROMPT_SEARCH_FIRST` | `.../SYSTEM_PROMPT_SEARCH_FIRST.txt` |
+| `SYSTEM_PROMPT_SEARCH_FALLBACK` | `.../SYSTEM_PROMPT_SEARCH_FALLBACK.txt` |
+| `SYSTEM_PROMPT_GRAPHRAG_ROUTING` | `.../SYSTEM_PROMPT_GRAPHRAG_ROUTING.txt` |
+
+Eval-конфиг с Langfuse через `.env`: `PROMPT_SOURCE=langfuse`, fallback — `PROMPT_FALLBACK_PATH`.
 
 | Файл | Содержимое |
 |------|------------|

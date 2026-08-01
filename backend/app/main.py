@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.agent.prompt_startup import warm_default_agent_prompt
 from app.api.routers.admin import router as admin_router
 from app.api.routers.chat import router as chat_router
 from app.api.routers.health import router as health_router
@@ -30,6 +31,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         extra={"service": "backend", "version": settings.app_version, "env": settings.env},
     )
     await asyncio.to_thread(verify_rag_backend_on_startup, settings)
+    await asyncio.to_thread(warm_default_agent_prompt, settings)
     yield
     logger.info("Shutting down Agent Core", extra={"service": "backend"})
 

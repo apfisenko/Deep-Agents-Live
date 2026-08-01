@@ -5,7 +5,7 @@
 	check-rag-search-e2e check-rag-audience-filter \
 	qdrant-up qdrant-down \
 	graph-up graph-down graph-status graph-shell graph-init-readonly graph-index graph-qa text2cypher-smoke \
-	chat-telegram chat-stream langfuse-upload-dataset \
+	chat-telegram chat-stream langfuse-upload-dataset langfuse-upload-prompts \
 	eval-help eval-validate eval-build eval-sync eval-experiment eval-analyze eval-compare \
 	index-multimodal eval-multimodal index-multimodal-baseline eval-multimodal-baseline \
 	ocr-multimodal-tesseract ocr-multimodal-modern eval-multimodal-a-ocr \
@@ -69,6 +69,7 @@ help:
 	@echo "  check-chat-stream - POST /api/v1/chat/stream (SSE)"
 	@echo "  check-langfuse - Langfuse /api/public/health"
 	@echo "  langfuse-upload-dataset - upload/reload JSONL dataset to Langfuse (DATASET_JSONL, DATASET_NAME)"
+	@echo "  langfuse-upload-prompts - upload agent system prompts to Langfuse Prompt Management"
 	@echo "  check-telegram - TCP/getMe to api.telegram.org (VPN/proxy)"
 	@echo "  check-api      - all checks above"
 	@echo "  check-rag-search-e2e - RAG search smoke (Qdrant up + make index; task 04 p.3)"
@@ -226,6 +227,9 @@ check-langfuse:
 
 check-traces:
 	cd $(BACKEND_DIR) && uv run python scripts/check_api.py traces
+
+langfuse-upload-prompts:
+	cd $(BACKEND_DIR) && uv run python scripts/upload_langfuse_prompts.py
 
 langfuse-upload-dataset:
 	cd $(BACKEND_DIR) && uv run python scripts/upload_langfuse_dataset.py \

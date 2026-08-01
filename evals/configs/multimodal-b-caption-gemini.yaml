@@ -42,9 +42,10 @@ judge:
   temperature: ${EVAL_JUDGE_TEMPERATURE}
 
 prompt:
-  source: file
+  source: ${PROMPT_SOURCE}
   path: ${SYSTEM_PROMPT_PATH}
-  name: SYSTEM_PROMPT_SEARCH_FALLBACK
+  name: ${PROMPT_NAME}
+  label: ${PROMPT_LABEL}
 
 datasets:
   s1-text: v001

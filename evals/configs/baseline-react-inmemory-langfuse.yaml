@@ -1,0 +1,32 @@
+# E-10: эквивалент PROMPT_SOURCE=langfuse в .env (см. baseline-react-inmemory.yaml)
+config_id: baseline-react-inmemory-langfuse
+comment: "Alias: baseline + langfuse prompt; предпочтительно PROMPT_SOURCE=langfuse в .env"
+benchmark_only: true
+
+agent:
+  impl: langchain-react
+  api_url: http://localhost:8000/api/v1/chat
+
+retrieval:
+  backend: in-memory
+
+model:
+  provider: openrouter
+  name: ${LLM_MODEL}
+  temperature: ${LLM_TEMPERATURE}
+
+judge:
+  provider: openrouter
+  name: ${EVAL_JUDGE_MODEL}
+  temperature: ${EVAL_JUDGE_TEMPERATURE}
+
+prompt:
+  source: langfuse
+  name: SYSTEM_PROMPT_SEARCH_FALLBACK
+  label: production
+
+datasets:
+  e2e-qa: v001
+
+extra_evaluators:
+  - executed_tools_count

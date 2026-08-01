@@ -1,6 +1,6 @@
 # Baseline run config (E-7: неприкосновенен после создания)
 config_id: baseline-react-inmemory
-comment: "MVP prod: ReAct + in-memory RAG; prompt from SYSTEM_PROMPT_PATH (.txt)"
+comment: "MVP prod: ReAct + in-memory RAG; prompt from .env (PROMPT_SOURCE, SYSTEM_PROMPT_PATH)"
 benchmark_only: false
 
 agent:
@@ -21,9 +21,10 @@ judge:
   temperature: ${EVAL_JUDGE_TEMPERATURE}
 
 prompt:
-  source: file
+  source: ${PROMPT_SOURCE}
   path: ${SYSTEM_PROMPT_PATH}
-  name: SYSTEM_PROMPT_SEARCH_FALLBACK
+  name: ${PROMPT_NAME}
+  label: ${PROMPT_LABEL}
 
 datasets:
   e2e-qa: v001

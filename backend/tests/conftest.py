@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from app.agent.config_registry import reset_config_registry
 from app.agent.react_agent import AgentRunResult, StreamEvent, reset_agent_runner
+from app.agent.prompt_store import reset_prompt_store
 from app.config import clear_settings_cache
 from app.graph.client import reset_neo4j_driver
 from app.integrations.langfuse import reset_langfuse_callbacks
@@ -36,6 +37,13 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
         "SYSTEM_PROMPT_PATH",
         "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
     )
+    monkeypatch.setenv("PROMPT_SOURCE", "file")
+    monkeypatch.setenv("PROMPT_NAME", "SYSTEM_PROMPT_SEARCH_FALLBACK")
+    monkeypatch.setenv("PROMPT_LABEL", "production")
+    monkeypatch.setenv(
+        "PROMPT_FALLBACK_PATH",
+        "backend/app/agent/prompts/SYSTEM_PROMPT_SEARCH_FALLBACK.txt",
+    )
     monkeypatch.setenv("PDF_OCR_LLM_FALLBACK", "false")
     monkeypatch.setenv("SECURITY_ENABLED", "true")
     monkeypatch.delenv("DOTENV_CONFIG", raising=False)
@@ -44,6 +52,7 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     reset_indexer()
     reset_session_store()
     reset_agent_runner()
+    reset_prompt_store()
     reset_config_registry()
     reset_langfuse_callbacks()
     reset_neo4j_driver()
@@ -53,6 +62,7 @@ def test_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     reset_indexer()
     reset_session_store()
     reset_agent_runner()
+    reset_prompt_store()
     reset_config_registry()
     reset_langfuse_callbacks()
     reset_neo4j_driver()

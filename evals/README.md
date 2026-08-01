@@ -25,7 +25,14 @@
 | `EVAL_JUDGE_MODEL`, `EVAL_JUDGE_TEMPERATURE` | LLM-as-judge для метрик |
 | `EVAL_DATASET_NAME` | Явное базовое имя датасета в Langfuse (опционально, только один slug) |
 | `EVAL_DATASET_PREFIX` | Префикс, добавляемый к базовому имени (опционально) |
-| `LANGFUSE_HOST`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` | Sync, experiment, traces (**self-hosted, :3001**) |
+| `SYSTEM_PROMPT_PATH` | Путь к `.txt` при `PROMPT_SOURCE=file` |
+| `PROMPT_FALLBACK_PATH` | Дефолтный промпт при `PROMPT_SOURCE=langfuse` и недоступном Langfuse |
+| `PROMPT_SOURCE` | `file` \| `langfuse` — источник system prompt |
+| `PROMPT_NAME` | Имя промпта в Langfuse / реестре; fetch по паре с `PROMPT_LABEL` |
+| `PROMPT_LABEL` | Label версии `PROMPT_NAME` при `PROMPT_SOURCE=langfuse` |
+| `LANGFUSE_HOST`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` | Sync, experiment, traces, prompt fetch (**self-hosted, :3001**) |
+
+Промпты из Langfuse: `PROMPT_SOURCE=langfuse` в `.env` — см. [langfuse-prompt-versioning.md](../Docs/guides/langfuse-prompt-versioning.md).
 
 ### Параметры команд
 
