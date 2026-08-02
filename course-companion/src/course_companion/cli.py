@@ -16,6 +16,38 @@ if TYPE_CHECKING:
     from langgraph.graph.state import CompiledStateGraph
 
 
+def _find_mode_in_update(obj: object) -> str | None:
+    """Извлечь mode из nested update dict (router, tools Command, subgraph)."""
+    if not isinstance(obj, dict):
+        return None
+    mode = obj.get("mode")
+    if isinstance(mode, str):
+        return mode
+    for value in obj.values():
+        found = _find_mode_in_update(value)
+        if found is not None:
+            return found
+    return None
+
+
+class _ModeTracker:
+    """Отслеживает смену mode между ходами и внутри stream-чанков."""
+
+    def __init__(self, initial: str = "qa") -> None:
+        self._mode = initial
+
+    @property
+    def mode(self) -> str:
+        return self._mode
+
+    def observe(self, update: dict) -> None:  # type: ignore[type-arg]
+        new_mode = _find_mode_in_update(update)
+        if new_mode is None or new_mode == self._mode:
+            return
+        print(f"[mode]   {self._mode} → {new_mode}", flush=True)  # noqa: T201
+        self._mode = new_mode
+
+
 def _print_router_update(update: dict) -> None:  # type: ignore[type-arg]
     if "router" in update:
         mode = update["router"].get("mode", "?")
@@ -37,7 +69,7 @@ def _print_agent_update(update: dict) -> None:  # type: ignore[type-arg]
             print(content, flush=True)  # noqa: T201
 
 
-def _print_chunk(chunk: tuple) -> None:  # type: ignore[type-arg]
+def _print_chunk(chunk: tuple, mode_tracker: _ModeTracker) -> None:  # type: ignore[type-arg]
     """Форматирует событие графа в строку с тегом.
 
     Формат chunk при stream_mode="updates", subgraphs=True:
@@ -53,6 +85,8 @@ def _print_chunk(chunk: tuple) -> None:  # type: ignore[type-arg]
 
     if not isinstance(update, dict):
         return
+
+    mode_tracker.observe(update)
 
     if not namespace:
         _print_router_update(update)
@@ -72,9 +106,22 @@ def _print_chunk(chunk: tuple) -> None:  # type: ignore[type-arg]
             _print_tools_update(update["tools"])
 
 
-def stream_events(graph: CompiledStateGraph, message: str, thread_id: str) -> None:
+def _initial_mode(graph: CompiledStateGraph, config: dict) -> str:  # type: ignore[type-arg]
+    snapshot = graph.get_state(config)
+    if snapshot.values:
+        return str(snapshot.values.get("mode") or "qa")
+    return "qa"
+
+
+def stream_events(
+    graph: CompiledStateGraph,
+    message: str,
+    thread_id: str,
+    mode_tracker: _ModeTracker | None = None,
+) -> _ModeTracker:
     """Стримит события графа и выводит теги в реальном времени."""
     config = {"configurable": {"thread_id": thread_id}}
+    tracker = mode_tracker or _ModeTracker(_initial_mode(graph, config))
     state = {"messages": [HumanMessage(content=message)]}
     for chunk in graph.stream(  # type: ignore[call-overload]
         state,
@@ -82,7 +129,8 @@ def stream_events(graph: CompiledStateGraph, message: str, thread_id: str) -> No
         stream_mode="updates",
         subgraphs=True,
     ):
-        _print_chunk(chunk)
+        _print_chunk(chunk, tracker)
+    return tracker
 
 
 def main() -> None:
@@ -95,6 +143,7 @@ def main() -> None:
 
     graph = build_graph()
     thread_id = str(uuid4())
+    mode_tracker: _ModeTracker | None = None
     print("Course Companion v0.1 | Ctrl+C для выхода\n")  # noqa: T201
     while True:
         try:
@@ -104,5 +153,5 @@ def main() -> None:
             break
         if not user_input:
             continue
-        stream_events(graph, user_input, thread_id)
+        mode_tracker = stream_events(graph, user_input, thread_id, mode_tracker)
         print()  # noqa: T201
