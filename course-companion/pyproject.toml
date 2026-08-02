@@ -1,0 +1,62 @@
+[project]
+name = "course-companion"
+version = "0.1.0"
+description = "Course Companion — диалоговый CLI-ассистент для студентов курса Deep Agents"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "homework-mentor",
+    "langchain>=0.3",
+    "langchain-openai>=0.2",
+    "langgraph>=0.2",
+    "openai>=1.0",
+    "python-dotenv>=1.0",
+    "pydantic>=2",
+]
+
+[project.scripts]
+companion = "course_companion.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.6",
+    "mypy>=1.11",
+]
+
+[tool.uv.sources]
+homework-mentor = { path = "../ai-homework-mentor", editable = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D",       # docstrings — не требуем
+    "COM812",  # trailing comma
+    "ISC001",  # implicit string concat
+    "ANN",     # annotations — stub, не продакшн
+    "ERA001",  # commented-out code
+    "CPY001",  # copyright notice — не нужен
+    "RUF002",  # ambiguous unicode in docstrings — кириллица ок
+    "RUF001",  # ambiguous unicode in strings — кириллица ок
+    "RUF003",  # ambiguous unicode in comments — кириллица ок
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]  # assert в тестах разрешён
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

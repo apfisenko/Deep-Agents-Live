@@ -1,0 +1,56 @@
+name: multi-agent
+version: "1.0"
+description: Рубрика проверки мультиагентных систем на курсе Deep Agents
+match_keywords:
+  - multi-agent
+  - multi agent
+  - мультиагент
+  - subagents
+  - handoffs
+  - langgraph
+  - deepagents
+
+aspects:
+  - id: subagents
+    name: Субагенты
+    weight: 0.20
+    criteria:
+      - Агенты изолированы — каждый решает одну задачу
+      - Использованы минимум два подхода (declarative + compiled)
+      - Субагенты не взаимодействуют с пользователем напрямую
+
+  - id: handoffs
+    name: Handoffs (передача управления)
+    weight: 0.20
+    criteria:
+      - Реализован механизм переключения режимов без создания нового агента
+      - История диалога сохраняется при переключении
+      - Переход задаётся явным Command, не неявной логикой
+
+  - id: router
+    name: Router (классификатор интента)
+    weight: 0.20
+    criteria:
+      - Router отделён от основной логики агента
+      - Structured output используется для классификации
+      - Реализована sticky-логика (stay) и fail-safe
+
+  - id: skills
+    name: Skills (подключаемая экспертиза)
+    weight: 0.20
+    criteria:
+      - Рубрика описана декларативно (YAML + SKILL.md)
+      - Рубрика подключается без изменения кода агента
+      - Присутствует рубрика для dogfooding-проверки
+
+  - id: custom_workflow
+    name: Custom Workflow
+    weight: 0.20
+    criteria:
+      - Используется явный StateGraph, не магия фреймворка
+      - State типизирован (TypedDict или Pydantic)
+      - Checkpointer подключён для многоходового диалога
+
+scoring:
+  pass_threshold: 0.70
+  output_format: structured

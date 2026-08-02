@@ -5,6 +5,11 @@ rubric:
   by_topic:
     python-cli: rubric-python-cli
     python_cli: rubric-python-cli
+    multi-agent: multi-agent
+    multi-agent-systems: multi-agent
+    multi_agent: multi-agent
+    multiagent: multi-agent
+    мультиагент: multi-agent
 
 # Auto-attached when `when` matches
 ecosystem:
