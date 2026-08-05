@@ -11,7 +11,9 @@ from deepagents.backends import FilesystemBackend
 from langchain_openai import ChatOpenAI
 
 from course_companion.agent.server_modes import QA_PROMPT, build_server_modes_middleware
+from course_companion.checker_config import get_checker_mode
 from course_companion.config import Config
+from course_companion.subagents.a2a_middleware import build_a2a_checker_middleware
 from course_companion.subagents.async_checker import (
     build_async_checker,
     build_homework_checker_subagent,
@@ -36,7 +38,16 @@ def build_deep_companion(*, async_checker: bool = True):
     """Собрать deepagents companion для Agent Server."""
     model = _make_llm()
     modes = build_server_modes_middleware(async_checker=async_checker)
-    checker = build_async_checker() if async_checker else build_homework_checker_subagent()
+    middleware: list = [modes]
+    subagents: list = [build_course_qa_subagent(KB_DIR)]  # type: ignore[list-item]
+
+    if async_checker:
+        if get_checker_mode() == "a2a":
+            middleware.append(build_a2a_checker_middleware())
+        else:
+            subagents.insert(0, build_async_checker())  # type: ignore[arg-type]
+    else:
+        subagents.insert(0, build_homework_checker_subagent())  # type: ignore[arg-type]
 
     session_root = WORKSPACE_DIR / uuid.uuid4().hex[:8]
     session_root.mkdir(parents=True, exist_ok=True)
@@ -48,7 +59,7 @@ def build_deep_companion(*, async_checker: bool = True):
         model=model,
         system_prompt=QA_PROMPT,
         backend=backend,
-        middleware=[modes],
-        subagents=[checker, build_course_qa_subagent(KB_DIR)],  # type: ignore[list-item]
+        middleware=middleware,
+        subagents=subagents,  # type: ignore[arg-type]
         skills=["/skills/"] if SKILLS_SRC.is_dir() else None,
     )

@@ -42,13 +42,14 @@ const API_URL = `${window.location.origin}/api/langgraph`;
 // Поллер ходит на сервер ЧЕКЕРА через свой прокси-путь (см. vite.config.ts):
 // co-deployed это тот же сервер, при распиле — :2025. Код фронта одинаковый.
 const CHECKER_API_URL = `${window.location.origin}/api/checker`;
+const CHECKER_MODE = import.meta.env.VITE_CHECKER_MODE ?? "agent_protocol";
 const ASSISTANT_ID = "companion"; // graph id из langgraph.json
 const THREAD_KEY = "companion-thread-id";
 const AUTO_PREFIX = "[авто]"; // маркер служебных сообщений поллера
 const DRILL_PREFIX = "[drill]"; // маркер служебных сообщений drill-доставки
 const POLL_INTERVAL_MS = 3000;
 
-/** Задача фонового чекера, как её хранит deepagents в канале async_tasks. */
+/** Задача фонового чекера, как её хранит deepagents / A2A middleware. */
 type AsyncTask = {
   task_id: string;
   agent_name: string;
@@ -56,6 +57,8 @@ type AsyncTask = {
   run_id: string;
   status: string;
   created_at: string;
+  transport?: string;
+  a2a_rpc_path?: string;
 };
 
 type CompanionValues = {
@@ -94,6 +97,19 @@ function drillReviewArrived(
 }
 
 const TERMINAL_TASK_STATUSES = new Set(["success", "error", "cancelled"]);
+
+const A2A_STATE_TO_STATUS: Record<string, string> = {
+  submitted: "pending",
+  working: "running",
+  "input-required": "running",
+  completed: "success",
+  failed: "error",
+  canceled: "cancelled",
+};
+
+function taskUsesA2A(task: AsyncTask): boolean {
+  return CHECKER_MODE === "a2a" || task.transport === "a2a";
+}
 
 /** Человеческая подпись статуса задачи (+ маппинг статусов на шве:
  * отменённый ран на сервере чекера — это `interrupted`, не `cancelled`). */
@@ -202,11 +218,8 @@ function useElapsedSeconds(running: boolean): number {
 
 /**
  * Поллер фоновых проверок («результат пришёл сам», §механика):
- * для каждой незавершённой задачи из values.async_tasks спрашивает у сервера
- * чекера статус рана (GET /threads/{id}/runs/{run_id} — task_id и есть
- * thread_id на чекере) и по success один раз вызывает onDone. Живые статусы
- * возвращает для карточек. «Само» кто-то должен драйвить — здесь это клиент;
- * серверная альтернатива — webhook (см. examples/webhook_receiver.py).
+ * Agent Protocol — GET /threads/{id}/runs/{run_id};
+ * A2A — JSON-RPC tasks/get на rpc-path чекера.
  */
 function useCheckerPoller(
   tasks: Record<string, AsyncTask>,
@@ -217,14 +230,11 @@ function useCheckerPoller(
   const notifiedRef = useRef<Set<string>>(new Set());
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
-  // дедуп переживает перезагрузку: авто-сообщение уже в истории треда →
-  // второе не шлём, даже если companion ещё не успел обновить статус задачи
   for (const id of alreadyNotified) notifiedRef.current.add(id);
 
-  // ключ эффекта: какие задачи сейчас незавершённые (по мнению супервизора)
   const pendingKey = Object.values(tasks)
     .filter((t) => !TERMINAL_TASK_STATUSES.has(t.status))
-    .map((t) => `${t.task_id}:${t.run_id}`)
+    .map((t) => `${t.task_id}:${t.run_id}:${t.transport ?? CHECKER_MODE}`)
     .sort()
     .join(",");
 
@@ -235,16 +245,42 @@ function useCheckerPoller(
     );
     let alive = true;
 
+    async function pollAgentProtocol(task: AsyncTask) {
+      const res = await fetch(
+        `${CHECKER_API_URL}/threads/${task.thread_id}/runs/${task.run_id}`
+      );
+      if (!res.ok) return null;
+      const run = (await res.json()) as { status?: string };
+      return run.status ?? "unknown";
+    }
+
+    async function pollA2A(task: AsyncTask) {
+      const rpcPath = task.a2a_rpc_path ?? "/a2a";
+      const res = await fetch(`${CHECKER_API_URL}${rpcPath}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: `poll-${task.task_id}`,
+          method: "tasks/get",
+          params: { id: task.task_id },
+        }),
+      });
+      if (!res.ok) return null;
+      const body = (await res.json()) as {
+        result?: { status?: { state?: string } };
+      };
+      const state = body.result?.status?.state ?? "working";
+      return A2A_STATE_TO_STATUS[state] ?? state;
+    }
+
     async function poll() {
       for (const task of pending) {
         try {
-          const res = await fetch(
-            `${CHECKER_API_URL}/threads/${task.thread_id}/runs/${task.run_id}`
-          );
-          if (!res.ok) continue;
-          const run = (await res.json()) as { status?: string };
-          const status = run.status ?? "unknown";
-          if (!alive) return;
+          const status = taskUsesA2A(task)
+            ? await pollA2A(task)
+            : await pollAgentProtocol(task);
+          if (status == null || !alive) return;
           setLiveStatuses((prev) =>
             prev[task.task_id] === status
               ? prev

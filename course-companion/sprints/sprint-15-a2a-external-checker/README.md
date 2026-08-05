@@ -2,7 +2,7 @@
 
 > **Версия roadmap:** v1.0-scaling
 > **Roadmap:** [../../roadmap.md](../../roadmap.md)
-> **Статус:** 📋 Planned
+> **Статус:** ✅ Done (уровень B)
 > **Предшественник:** [Sprint 12](../sprint-12-service-split-a2a/README.md) (design doc)
 > **Scope:** согласовать отдельно — **Design + spike (A)** или **полная реализация (B)**
 
@@ -57,19 +57,19 @@ Agent Protocol работает, пока обе стороны наши. Checke
 
 | # | Задача | Статус | Plan | Summary |
 |---|--------|--------|------|---------|
-| 01 | a2a-client-core | 📋 | [plan](tasks/01-a2a-client-core/plan.md) | — |
-| 02 | job-tools-facade | 📋 | [plan](tasks/02-job-tools-facade/plan.md) | — |
-| 03 | env-mode-switch | 📋 | [plan](tasks/03-env-mode-switch/plan.md) | — |
-| 04 | frontend-a2a-poller | 📋 | [plan](tasks/04-frontend-a2a-poller/plan.md) | — |
-| 05 | tests-session-log | 📋 | [plan](tasks/05-tests-session-log/plan.md) | — |
+| 01 | a2a-client-core | ✅ | [plan](tasks/01-a2a-client-core/plan.md) | [summary](./summary.md) |
+| 02 | job-tools-facade | ✅ | [plan](tasks/02-job-tools-facade/plan.md) | [summary](./summary.md) |
+| 03 | env-mode-switch | ✅ | [plan](tasks/03-env-mode-switch/plan.md) | [summary](./summary.md) |
+| 04 | frontend-a2a-poller | ✅ | [plan](tasks/04-frontend-a2a-poller/plan.md) | [summary](./summary.md) |
+| 05 | tests-session-log | ✅ | [plan](tasks/05-tests-session-log/plan.md) | [summary](./summary.md) |
 
 ---
 
 ## Задача 01: a2a-client-core
 
-- [ ] `src/course_companion/subagents/a2a_checker.py`
-- [ ] GET `/.well-known/agent-card.json`
-- [ ] JSON-RPC: `message/send`, `tasks/get`, `tasks/cancel`
+- [x] `src/course_companion/subagents/a2a_checker.py`
+- [x] GET `/.well-known/agent-card.json`
+- [x] JSON-RPC: `message/send`, `tasks/get`, `tasks/cancel`
 
 ---
 
@@ -99,14 +99,12 @@ A2A_CHECKER_URL=http://...
 
 ## Задача 04: frontend-a2a-poller
 
-- [ ] При `CHECKER_MODE=a2a` — poll `tasks/get` вместо LangGraph runs
-
----
+- [x] При `CHECKER_MODE=a2a` — poll `tasks/get` вместо LangGraph runs
 
 ## Задача 05: tests-session-log
 
-- [ ] Mock JSON-RPC server
-- [ ] `examples/phase6/a2a-client-log.txt`
+- [x] Mock JSON-RPC server
+- [x] `examples/phase6/a2a-client-log.txt`
 
 ---
 
@@ -120,4 +118,4 @@ A2A_CHECKER_URL=http://...
 
 ## Итог (заполняется после закрытия)
 
-—
+[Sprint 15 закрыт — summary.md](./summary.md): A2A-клиент чужого checker, `CHECKER_MODE=a2a`, 5 job-tools, frontend poller, ADR 010.

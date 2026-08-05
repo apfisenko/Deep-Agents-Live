@@ -224,7 +224,7 @@ Course Companion поставляет студенту курса Deep Agents е
 | 12 | service-split-a2a | S3 | Распил + A2A-витрина + graceful degrade | ✅ | [README](sprints/sprint-12-service-split-a2a/README.md) |
 | 13 | drill-a2ui | S4 | Drill + A2UI, mid-drill feedback | ✅ | [README](sprints/sprint-13-drill-a2ui/README.md) |
 | 14 | docker-compose | S5 | `docker compose up` — упаковка (опц.) | ✅ | [README](sprints/sprint-14-docker-compose/README.md) · [summary](sprints/sprint-14-docker-compose/summary.md) |
-| 15 | a2a-external-checker | S6 | A2A-клиент чужого checker (опц.) | 📋 | [README](sprints/sprint-15-a2a-external-checker/README.md) |
+| 15 | a2a-external-checker | S6 | A2A-клиент чужого checker (опц.) | ✅ | [README](sprints/sprint-15-a2a-external-checker/README.md) · [summary](sprints/sprint-15-a2a-external-checker/summary.md) |
 
 ### Сводный DoD продукта v1 scaling (S10–S13 обязательны)
 
@@ -304,3 +304,4 @@ Course Companion поставляет студенту курса Deep Agents е
 | 2026-08-05 | Sprint 10 закрыт: Agent Server + веб-чат (S1 scaling) |
 | 2026-08-05 | Sprint 11 закрыт: async checker co-deployed, AsyncSubAgent + poller E2E |
 | 2026-08-05 | v1.0-scaling: спланированы спринты 10–15 (T12 масштабирование), README в `sprints/sprint-10…15/` |
+| 2026-08-05 | Sprint 15 закрыт: A2A-клиент (`CHECKER_MODE=a2a`), job-tools facade, frontend poller, ADR 010 |

@@ -1,0 +1,28 @@
+# A2A external checker — session log (mock JSON-RPC, Sprint 15)
+# Сценарий: companion в CHECKER_MODE=a2a, job-tools → mock A2A server.
+
+$ pytest tests/a2a/ -q
+tests/a2a/test_a2a_checker.py .....
+tests/a2a/test_a2a_job_tools.py ....
+tests/a2a/test_checker_config.py .....
+8 passed
+
+# 1. Discovery (кеш agent card)
+GET http://localhost:2025/.well-known/agent-card.json
+-> {"name":"checker","url":"http://localhost:2025/a2a/<uuid>"}
+
+# 2. start_async_task → message/send
+POST http://localhost:2025/a2a/<uuid>
+{"jsonrpc":"2.0","method":"message/send","params":{"message":{"role":"user","parts":[{"kind":"text","text":"submission: ./hw\ntopic: python-cli"}]}}}
+-> task_id=ctx-1:run-1, status=working, transport=a2a
+
+# 3. Frontend poller → tasks/get (VITE_CHECKER_MODE=a2a)
+POST http://localhost:2025/a2a/<uuid>
+{"jsonrpc":"2.0","method":"tasks/get","params":{"id":"ctx-1:run-1"}}
+-> status.state=completed → авто [авто] в тред companion
+
+# 4. check_async_task → artifacts TextPart → разбор в чате
+# 5. update_async_task (default) → tasks/cancel + message/send merged brief
+# 6. A2A_ALLOW_FOLLOWUP=true → follow-up message/send на тот же taskId
+
+# Переключение: CHECKER_MODE=agent_protocol (default) — прежний AsyncSubAgent + GET /runs
