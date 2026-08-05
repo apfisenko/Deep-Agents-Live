@@ -1,0 +1,87 @@
+# Распределённая система = docker compose up: три контейнера —
+# companion (:2024), checker (:2025), frontend (:5173).
+#
+# companion и checker собираются из ОДНОГО Python-образа (Dockerfile в корне):
+# кодовая база общая, сервис определяется командой запуска — свой --config,
+# свой порт, свой жизненный цикл. Тот же принцип, что в портовом запуске
+# (README, глава «Распил»), только процессы теперь в контейнерах, а адреса
+# на швах — hostname'ы compose-сети вместо localhost.
+#
+# .env с ключом модели НЕ запекается в образ — монтируется при старте
+# (см. volumes). Секреты в образах не живут.
+#
+# Честно: внутри контейнеров — dev-сервер (`langgraph dev`, state в памяти,
+# `docker compose down` = все треды пропали). Это учебный стенд, не прод;
+# прод-путь описан в README.
+
+services:
+  checker:
+    build: .
+    command:
+      - uv
+      - run
+      - langgraph
+      - dev
+      - --config
+      - langgraph.checker.json
+      - --host
+      - 0.0.0.0
+      - --port
+      - "2025"
+      - --no-reload
+      - --no-browser
+      - --n-jobs-per-worker
+      - "10"
+    ports:
+      - "2025:2025" # наружу — ради A2A-витрины: curl agent card с хоста
+    volumes:
+      - ./.env:/app/.env:ro
+      # Артефакты проверок (заметки ревьюеров, финальный отчёт) пишет чекер,
+      # а читает companion в режиме review — контейнерам нужен общий том.
+      # В портовом запуске это «бесплатно» (одна файловая система) — в
+      # распределённой системе за общие файлы приходится платить явно.
+      - mentor-workspace:/app/vendor/ai-homework-mentor/.mentor-workspace
+
+  companion:
+    build: .
+    command:
+      - uv
+      - run
+      - langgraph
+      - dev
+      - --config
+      - langgraph.companion.json
+      - --host
+      - 0.0.0.0
+      - --port
+      - "2024"
+      - --no-reload
+      - --no-browser
+      - --n-jobs-per-worker
+      - "10"
+    environment:
+      # шов companion -> checker: AsyncSubAgent(url=...) целит в hostname
+      # compose-сервиса, не в localhost
+      CHECKER_URL: http://checker:2025
+    ports:
+      - "2024:2024"
+    volumes:
+      - ./.env:/app/.env:ro
+      - mentor-workspace:/app/vendor/ai-homework-mentor/.mentor-workspace
+    depends_on:
+      - checker
+
+  frontend:
+    build: ./frontend
+    environment:
+      # прокси-цели Vite (каналы страницы): чат+формы -> companion,
+      # поллер фоновых проверок -> checker
+      LANGGRAPH_PROXY_TARGET: http://companion:2024
+      CHECKER_PROXY_TARGET: http://checker:2025
+    ports:
+      - "5173:5173"
+    depends_on:
+      - companion
+
+volumes:
+  mentor-workspace:

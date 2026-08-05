@@ -1,0 +1,25 @@
+# Walkthrough: split + async + drill + mid-drill feedback
+
+Сценарий ступени 4 (Sprint 13). Ручной прогон — три процесса:
+
+```powershell
+.\make.ps1 checker
+.\make.ps1 companion
+cd frontend; npm install --legacy-peer-deps; npm run dev
+# или: .\make.ps1 frontend
+```
+
+## Шаги
+
+1. **Сдать ДЗ** — карточка фоновой проверки появляется в UI.
+2. **«Хочу потренироваться»** — router → drill, companion вызывает `show_drill_case`,
+   `DrillPanel` монтируется, форма генерируется ~30–40 с (POST /drill/a2ui SSE).
+3. **Поллер mid-drill** — пока форма открыта, checker завершает run → `[авто]` →
+   `check_async_task` → фидбек в чат, режим остаётся drill.
+4. **Submit формы** — userAction → delivery → `[drill]` → разбор в чате, панель закрывается.
+
+## Автотесты (без LLM)
+
+- `tests/drill/` — generator, routes, delivery
+- `tests/test_drill_integration.py` — webapp mount, skill, show_drill_case
+- `tests/test_drill_modes.py` — SERVICE_PREFIXES, tool matrix

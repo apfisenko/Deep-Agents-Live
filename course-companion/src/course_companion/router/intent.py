@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 # "review" намеренно отсутствует — это состояние флоу (пайплайна), не интент пользователя.
-RouteDecision = Literal["qa", "homework", "stay"]
+RouteDecision = Literal["qa", "homework", "drill", "stay"]
 
 
 class Intent(BaseModel):

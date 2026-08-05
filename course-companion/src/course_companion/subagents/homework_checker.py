@@ -18,6 +18,7 @@ from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
 
+from course_companion.paths import normalize_submission_path
 from course_companion.skills.resolver import resolve_rubric
 from mentor.agent.orchestrator import MentorOrchestrator
 
@@ -94,6 +95,8 @@ def _score_from_feedback(final_feedback: Any) -> float | None:
     except AttributeError:
         logger.warning("_score_from_feedback: unexpected FinalFeedback structure", exc_info=True)
         return None
+
+
 def _fix_plan_items(fix_plan: Any) -> list[dict[str, Any]]:
     """Собрать список шагов fix_plan из FixPlan (required + optional)."""
     if fix_plan is None:
@@ -132,6 +135,68 @@ def _feedback_items(final_feedback: Any) -> list[dict[str, Any]]:
         return []
 
 
+def _run_mentor_from_brief(brief: str, *, fallback_path: str = "", fallback_topic: str = "") -> str:
+    """Запустить ментор и вернуть AIMessage content."""
+    parsed_submission, parsed_topic = _parse_brief(brief)
+    effective_path = normalize_submission_path(parsed_submission or fallback_path)
+    effective_topic = parsed_topic or fallback_topic
+
+    try:
+        rubric_meta = resolve_rubric(effective_topic)
+        rubric_name = rubric_meta.get("name", effective_topic)
+        threshold = float(rubric_meta.get("scoring", {}).get("pass_threshold", 0.70))
+    except FileNotFoundError:
+        rubric_name = effective_topic
+        threshold = 0.70
+        logger.debug("No rubric found for topic %r, using defaults", effective_topic)
+
+    try:
+        result = MentorOrchestrator(
+            rubric=rubric_name,
+            workspace=effective_path,
+        ).run()
+        report = _resolve_paths_in_reply(result.reply, result.events.events)
+        score = _score_from_feedback(result.final_feedback)
+        fix_plan = _fix_plan_items(result.fix_plan)
+        feedback = _feedback_items(result.final_feedback)
+        if score is not None:
+            status = "PASS" if score >= threshold else "FAIL"
+            logger.info(
+                "homework check score=%.2f status=%s required_fixes=%d",
+                score,
+                status,
+                sum(1 for f in fix_plan if f.get("priority") == "required"),
+            )
+        meta = json.dumps(
+            {
+                "score": score,
+                "fix_plan": fix_plan,
+                "feedback": feedback,
+            },
+            ensure_ascii=False,
+        )
+    except (ReviewError, AgentError, TypeError) as exc:
+        logger.exception("homework check failed")
+        return f"[checker error] {exc}"
+    else:
+        return f"{report}\n<!-- hw_metadata:{meta} -->"
+
+
+def build_homework_checker_graph() -> CompiledStateGraph[Any, Any, Any, Any]:
+    """Граф-адаптер для deepagents CompiledSubAgent (бриф в HumanMessage)."""
+
+    def _run_mentor_node(state: HomeworkCheckerState) -> dict[str, Any]:
+        last = state["messages"][-1]
+        report = _run_mentor_from_brief(str(last.content))
+        return {"messages": [AIMessage(content=report)]}
+
+    graph: StateGraph = StateGraph(HomeworkCheckerState)
+    graph.add_node("run_mentor", _run_mentor_node)
+    graph.add_edge(START, "run_mentor")
+    graph.add_edge("run_mentor", END)
+    return graph.compile()
+
+
 def build_homework_checker(
     path: str,
     topic: str,
@@ -144,46 +209,7 @@ def build_homework_checker(
 
     def _run_mentor_node(state: HomeworkCheckerState) -> dict[str, Any]:
         last = state["messages"][-1]
-        parsed_submission, parsed_topic = _parse_brief(str(last.content))
-        effective_path = parsed_submission or path
-        effective_topic = parsed_topic or topic
-
-        # Resolve rubric for canonical name and pass threshold
-        try:
-            rubric_meta = resolve_rubric(effective_topic)
-            rubric_name = rubric_meta.get("name", effective_topic)
-            threshold = float(rubric_meta.get("scoring", {}).get("pass_threshold", 0.70))
-        except FileNotFoundError:
-            rubric_name = effective_topic
-            threshold = 0.70
-            logger.debug("No rubric found for topic %r, using defaults", effective_topic)
-
-        try:
-            result = MentorOrchestrator(
-                rubric=rubric_name,
-                workspace=effective_path,
-            ).run()
-            report = _resolve_paths_in_reply(result.reply, result.events.events)
-            score = _score_from_feedback(result.final_feedback)
-            fix_plan = _fix_plan_items(result.fix_plan)
-            feedback = _feedback_items(result.final_feedback)
-            if score is not None:
-                status = "PASS" if score >= threshold else "FAIL"
-                logger.info(
-                    "homework check score=%.2f status=%s required_fixes=%d",
-                    score,
-                    status,
-                    sum(1 for f in fix_plan if f.get("priority") == "required"),
-                )
-            meta = json.dumps({
-                "score": score,
-                "fix_plan": fix_plan,
-                "feedback": feedback,
-            }, ensure_ascii=False)
-            report = f"{report}\n<!-- hw_metadata:{meta} -->"
-        except (ReviewError, AgentError, TypeError) as exc:
-            logger.exception("homework check failed")
-            report = f"[checker error] {exc}"
+        report = _run_mentor_from_brief(str(last.content), fallback_path=path, fallback_topic=topic)
         return {"messages": [AIMessage(content=report)]}
 
     graph: StateGraph = StateGraph(HomeworkCheckerState)

@@ -6,3 +6,7 @@ dist/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+.logs/
+.companion-workspace/
+frontend/node_modules/
+frontend/dist/

@@ -1,0 +1,16 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "companion": "./src/course_companion/server.py:graph"
+  },
+  "env": ".env",
+  "webhooks": {
+    "url": {
+      "disable_loopback": false,
+      "require_https": false
+    }
+  },
+  "http": {
+    "app": "./src/course_companion/webapp.py:app"
+  }
+}

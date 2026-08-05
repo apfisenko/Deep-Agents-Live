@@ -32,8 +32,7 @@ def test_complete_homework() -> None:
     assert "hw_artifacts" in cmd.update
     assert cmd.update["hw_artifacts"] is artifacts
     assert any(
-        getattr(m, "tool_call_id", None) == "test-call-id"
-        for m in cmd.update.get("messages", [])
+        getattr(m, "tool_call_id", None) == "test-call-id" for m in cmd.update.get("messages", [])
     )
 
 

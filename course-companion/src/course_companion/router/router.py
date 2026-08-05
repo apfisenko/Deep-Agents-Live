@@ -17,6 +17,7 @@ ROUTER_SYSTEM_PROMPT = """\
 Ты — классификатор интента студента. Определи, что хочет сделать студент:
 - "qa": задать вопрос о курсе (расписание, программа, FAQ)
 - "homework": сдать домашнее задание (есть путь к коду или явное желание проверить)
+- "drill": потренироваться — просит кейс/задачу/тренажёр («хочу потренироваться», «дай кейс»)
 - "stay": продолжить текущий диалог (уточнение, ответ на вопрос, неясный интент)
 
 Текущий режим: {current_mode}
@@ -51,7 +52,9 @@ def route(
     """
     try:
         active_llm = llm or _get_default_llm()
-        structured_llm = active_llm.with_structured_output(Intent)
+        structured_llm = active_llm.with_structured_output(Intent).with_config(
+            {"tags": ["nostream"]}
+        )
         prompt = _build_prompt(router_input)
         result = structured_llm.invoke(prompt)
         if isinstance(result, Intent):

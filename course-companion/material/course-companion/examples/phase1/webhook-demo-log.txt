@@ -1,0 +1,25 @@
+Демо background run + webhook (фаза 1, живой прогон 2026-07-10)
+================================================================
+
+Сетап: Agent Server `uv run langgraph dev` (:2024), приёмник
+`uv run uvicorn examples.webhook_receiver:app --port 8080`,
+затем `uv run python examples/run_background_webhook.py`.
+
+--- окно клиента (run_background_webhook.py) ---
+[17:13:31] background run создан: 019f4c60-5d0a-7f93-be60-0d7f015e934f (status=pending)
+[17:13:31] клиент свободен — о завершении сообщит webhook (см. окно приёмника)
+[17:13:41] runs.join подтвердил завершение; финальный ответ: В теме 12 курса рассматривается **Масштабирование агентных систем**.
+
+Основные вопросы темы:
+* Асинхронная коммуникация…
+
+--- окно приёмника (webhook_receiver.py) ---
+INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
+[17:13:41] [webhook] run 019f4c60-5d0a-7f93-be60-0d7f015e934f → success
+INFO:     127.0.0.1:34724 - "POST /webhook HTTP/1.1" 200 OK
+
+Итого: `runs.create(..., webhook=...)` вернулся мгновенно (status=pending),
+ран ушёл в фон; через ~10 секунд сервер САМ постучался в приёмник со статусом
+success — поллинг не понадобился. Нюанс локалки: loopback-webhook'и по
+умолчанию заблокированы (SSRF-защита) — в langgraph.json включён опт-ин
+webhooks.url.{disable_loopback,require_https}, см. докстринг демо-скрипта.

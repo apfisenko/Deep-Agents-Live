@@ -1,0 +1,89 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "drill-example-case",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "drill-example-case",
+      "components": [
+        { "id": "root", "component": "Card", "child": "form-col" },
+        {
+          "id": "form-col",
+          "component": "Column",
+          "children": ["title", "scenario", "axis-first_axis_id", "axis-second_axis_id", "rationale", "submit-btn"]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "variant": "h3",
+          "text": "[Case title]"
+        },
+        {
+          "id": "scenario",
+          "component": "Text",
+          "text": "[Full case scenario text, verbatim from the case]"
+        },
+        {
+          "id": "axis-first_axis_id",
+          "component": "ChoicePicker",
+          "label": "[Axis 1 question text]",
+          "variant": "mutuallyExclusive",
+          "options": [
+            { "label": "[Option A label]", "value": "option_a_value" },
+            { "label": "[Option B label]", "value": "option_b_value" },
+            { "label": "[Option C label]", "value": "option_c_value" }
+          ],
+          "value": { "path": "/first_axis_id" }
+        },
+        {
+          "id": "axis-second_axis_id",
+          "component": "ChoicePicker",
+          "label": "[Axis 2 question text]",
+          "variant": "mutuallyExclusive",
+          "options": [
+            { "label": "[Option A label]", "value": "option_a_value" },
+            { "label": "[Option B label]", "value": "option_b_value" }
+          ],
+          "value": { "path": "/second_axis_id" }
+        },
+        {
+          "id": "rationale",
+          "component": "TextField",
+          "label": "[Free-form question text]",
+          "variant": "longText",
+          "value": { "path": "/rationale" }
+        },
+        {
+          "id": "submit-btn",
+          "component": "Button",
+          "variant": "primary",
+          "child": "submit-label",
+          "action": {
+            "event": {
+              "name": "submit_drill_answer",
+              "context": {
+                "first_axis_id": { "path": "/first_axis_id" },
+                "second_axis_id": { "path": "/second_axis_id" },
+                "rationale": { "path": "/rationale" }
+              }
+            }
+          }
+        },
+        { "id": "submit-label", "component": "Text", "text": "Отправить" }
+      ]
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateDataModel": {
+      "surfaceId": "drill-example-case",
+      "path": "/",
+      "value": { "first_axis_id": [], "second_axis_id": [], "rationale": "" }
+    }
+  }
+]

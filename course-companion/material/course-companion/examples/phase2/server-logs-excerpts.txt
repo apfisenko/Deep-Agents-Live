@@ -1,0 +1,11 @@
+Выдержки из логов серверов (полные логи — runtime-артефакты, не коммитим):
+
+co-deployed, дефолт (сцена «до» грабли слотов):
+Starting 1 background workers
+
+co-deployed, --n-jobs-per-worker 10 (сцена «после»):
+Starting 10 background workers
+
+распил: companion :2024 при недоступном чекере (сценарий down) —
+ошибка подключения в туле, ран НЕ падает:
+Failed to launch async subagent 'homework-checker-async': All connection attempts failed

@@ -1,0 +1,30 @@
+INFO:     Started server process [150100]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8123 (Press CTRL+C to quit)
+INFO:     127.0.0.1:38304 - "GET /devstand/case HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40562 - "GET /devstand/case HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40564 - "GET /devstand/case HTTP/1.1" 200 OK
+2026-07-10 18:27:02,025 INFO companion.drill.routes generating form for case protocol-seams-01
+INFO:     127.0.0.1:60610 - "POST /drill/a2ui HTTP/1.1" 200 OK
+2026-07-10 18:27:04,261 INFO httpx HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:50314 - "GET /devstand/case HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50324 - "GET /devstand/case HTTP/1.1" 200 OK
+2026-07-10 18:28:31,537 INFO companion.drill.routes generating form for case protocol-seams-01
+INFO:     127.0.0.1:56592 - "POST /drill/a2ui HTTP/1.1" 200 OK
+2026-07-10 18:28:32,921 INFO httpx HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-10 18:31:19,644 INFO companion.drill.routes userAction: {"name": "submit_drill_answer", "surfaceId": "drill-protocol-seams-01", "sourceComponentId": "submit-btn", "timestamp": "2026-07-10T15:31:19.636Z", "context": {"billing_seam": ["a2a"], "ui_channel": ["a2ui"], "rationale": "Пост-ревью smoke: чужой фреймворк на шве биллинга — A2A; формы из рантайма — A2UI."}}
+INFO:     127.0.0.1:48134 - "POST /drill/a2ui HTTP/1.1" 200 OK
+2026-07-10 18:31:19,645 INFO drill.devstand STUB delivery: runs.create -> {'thread_id': 'devstand-thread-1', 'assistant_id': 'companion', 'input': {'messages': [{'role': 'user', 'content': '[drill] Студент отправил ответ по кейсу (surfaceId=drill-protocol-seams-01):\n{\n  "billing_seam": [\n    "a2a"\n  ],\n  "ui_channel": [\n    "a2ui"\n  ],\n  "rationale": "Пост-ревью smoke: чужой фреймворк на шве биллинга — A2A; формы из рантайма — A2UI."\n}\nДай разбор по аргументации.'}]}, 'multitask_strategy': 'enqueue'}
+2026-07-10 18:31:19,645 INFO companion.drill.delivery userAction delivered to thread devstand-thread-1 (assistant companion)
+INFO:     127.0.0.1:48142 - "GET /devstand/delivered HTTP/1.1" 200 OK
+2026-07-10 18:32:19,421 INFO companion.drill.routes userAction: {"name": "submit_drill_answer", "surfaceId": "drill-protocol-seams-01", "sourceComponentId": "submit-btn", "timestamp": "2026-07-10T15:32:19.408Z", "context": {"billing_seam": ["a2a"], "ui_channel": ["a2ui"], "rationale": "Пост-ревью smoke: чужой фреймворк на шве биллинга — A2A; формы из рантайма — A2UI."}}
+INFO:     127.0.0.1:34128 - "POST /drill/a2ui HTTP/1.1" 200 OK
+2026-07-10 18:32:19,422 INFO drill.devstand STUB delivery: runs.create -> {'thread_id': 'devstand-thread-1', 'assistant_id': 'companion', 'input': {'messages': [{'role': 'user', 'content': '[drill] Студент отправил ответ по кейсу (surfaceId=drill-protocol-seams-01):\n{\n  "billing_seam": [\n    "a2a"\n  ],\n  "ui_channel": [\n    "a2ui"\n  ],\n  "rationale": "Пост-ревью smoke: чужой фреймворк на шве биллинга — A2A; формы из рантайма — A2UI."\n}\nДай разбор по аргументации.'}]}, 'multitask_strategy': 'enqueue'}
+2026-07-10 18:32:19,422 INFO companion.drill.delivery userAction delivered to thread devstand-thread-1 (assistant companion)
+INFO:     127.0.0.1:34144 - "GET /devstand/delivered HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39402 - "GET /devstand/delivered HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [150100]

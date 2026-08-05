@@ -1,0 +1,33 @@
+INFO:     Started server process [136908]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8123 (Press CTRL+C to quit)
+INFO:     127.0.0.1:43024 - "GET /devstand/case HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41982 - "GET /devstand/case HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41994 - "GET /devstand/case HTTP/1.1" 200 OK
+2026-07-10 18:03:08,533 INFO companion.drill.routes generating form for case protocol-seams-01
+INFO:     127.0.0.1:40058 - "POST /drill/a2ui HTTP/1.1" 200 OK
+2026-07-10 18:03:11,004 INFO httpx HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-10 18:04:53,447 INFO companion.drill.routes userAction: {"name": "submit_drill_answer", "surfaceId": "drill-protocol-seams-01", "sourceComponentId": "submit-btn", "timestamp": "2026-07-10T15:04:53.440Z", "context": {"billing_seam": ["a2a"], "ui_channel": ["a2ui"], "rationale": "Биллинг делает чужая команда на другом фреймворке — значит, шов межвендорный, беру A2A (agent card + task lifecycle покрывают долгую проверку). Формы известны только в рантайме — значит, декларативный UI от агента, беру A2UI. Плачу: на A2A теряю штатный steering, на A2UI — завишу от хрупкой экосистемы версий."}}
+INFO:     127.0.0.1:51492 - "POST /drill/a2ui HTTP/1.1" 200 OK
+2026-07-10 18:04:53,448 INFO drill.devstand STUB delivery: runs.create -> {'thread_id': 'devstand-thread-1', 'assistant_id': 'companion', 'input': {'messages': [{'role': 'user', 'content': '[drill] Студент отправил ответ по кейсу (surfaceId=drill-protocol-seams-01):\n{\n  "billing_seam": [\n    "a2a"\n  ],\n  "ui_channel": [\n    "a2ui"\n  ],\n  "rationale": "Биллинг делает чужая команда на другом фреймворке — значит, шов межвендорный, беру A2A (agent card + task lifecycle покрывают долгую проверку). Формы известны только в рантайме — значит, декларативный UI от агента, беру A2UI. Плачу: на A2A теряю штатный steering, на A2UI — завишу от хрупкой экосистемы версий."\n}\nДай разбор по аргументации.'}]}, 'multitask_strategy': 'enqueue'}
+2026-07-10 18:04:53,448 INFO companion.drill.delivery userAction delivered to thread devstand-thread-1 (assistant companion)
+INFO:     127.0.0.1:51494 - "GET /devstand/delivered HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49726 - "GET /devstand/delivered HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58776 - "GET /devstand/delivered HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40092 - "GET /devstand/case HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40108 - "GET /devstand/case HTTP/1.1" 200 OK
+2026-07-10 18:06:16,261 INFO companion.drill.routes generating form for case protocol-seams-01
+INFO:     127.0.0.1:41320 - "POST /drill/a2ui HTTP/1.1" 200 OK
+2026-07-10 18:06:17,605 INFO httpx HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-07-10 18:07:43,546 INFO companion.drill.routes userAction: {"name": "submit_drill_answer", "surfaceId": "drill-protocol-seams-01", "sourceComponentId": "submit-btn", "timestamp": "2026-07-10T15:07:43.542Z", "context": {"billing_seam": ["agent_protocol"], "ui_channel": ["state_stream"], "rationale": "Прогон №2: беру Agent Protocol, если команды договорятся жить в одном стеке, и стриминг стейта для анкет — платой будет ручная работа фронта под каждый тип анкеты."}}
+INFO:     127.0.0.1:37494 - "POST /drill/a2ui HTTP/1.1" 200 OK
+2026-07-10 18:07:43,547 INFO drill.devstand STUB delivery: runs.create -> {'thread_id': 'devstand-thread-1', 'assistant_id': 'companion', 'input': {'messages': [{'role': 'user', 'content': '[drill] Студент отправил ответ по кейсу (surfaceId=drill-protocol-seams-01):\n{\n  "billing_seam": [\n    "agent_protocol"\n  ],\n  "ui_channel": [\n    "state_stream"\n  ],\n  "rationale": "Прогон №2: беру Agent Protocol, если команды договорятся жить в одном стеке, и стриминг стейта для анкет — платой будет ручная работа фронта под каждый тип анкеты."\n}\nДай разбор по аргументации.'}]}, 'multitask_strategy': 'enqueue'}
+2026-07-10 18:07:43,547 INFO companion.drill.delivery userAction delivered to thread devstand-thread-1 (assistant companion)
+INFO:     127.0.0.1:37506 - "GET /devstand/delivered HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58322 - "GET /devstand/delivered HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47282 - "GET /devstand/case HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [136908]

@@ -1,0 +1,13 @@
+{
+  "command": "make check-self-verbose",
+  "topic": "DeepAgents homework mentor",
+  "rubric": "deep-agents",
+  "model": "deepseek/deepseek-v4-flash",
+  "elapsed_s": 357.3,
+  "workspace_id": "20260701-113240-ffea4e11cffd",
+  "subagents_delegated": 5,
+  "aspects_covered": 5,
+  "parent_context_peak_tokens": 50478,
+  "run_at": "2026-07-01T11:32:40Z",
+  "exit_code": 0
+}

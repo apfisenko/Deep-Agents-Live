@@ -1,0 +1,70 @@
+# make check-self-verbose — dogfooding 2026-07-01
+# model: deepseek/deepseek-v4-flash | elapsed: 357.3s | subagents: 5/5
+# workspace: 20260701-113240-ffea4e11cffd
+
+│ покрывают `parse` (5 тестов), `rubric`/`skills_loader` (7 тестов), `synthesis`/`_fallback_synthesis` (5 тестов). Рекомендации: добавить `pytest-cov`, расширить ruff до `select = ["ALL"]` с явными ignore,  │
+│ добавить mock-тесты на `clone_github_repo`/`acquire_code`. Полные findings — в `/notes/code-quality.md`.                                                                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                          Context window (parent orchestrator only)                          
+┏━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Turn ┃ Step         ┃ Prompt ┃      Δ ┃ % window ┃ Event                                  ┃
+┡━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│    1 │ agent-review │  6,627 │      — │     5.2% │                                        │
+│    2 │ agent-review │  7,469 │   +842 │     5.8% │                                        │
+│    3 │ agent-review │  9,147 │ +1,678 │     7.1% │                                        │
+│    4 │ agent-review │  9,858 │   +711 │     7.7% │                                        │
+│    5 │ agent-review │ 15,601 │ +5,743 │    12.2% │                                        │
+│    6 │ agent-review │ 20,560 │ +4,959 │    16.1% │                                        │
+│    7 │ agent-review │ 23,939 │ +3,379 │    18.7% │                                        │
+│    8 │ agent-review │ 25,523 │ +1,584 │    19.9% │                                        │
+│    9 │ agent-review │ 29,683 │ +4,160 │    23.2% │                                        │
+│   10 │ agent-review │ 31,308 │ +1,625 │    24.5% │                                        │
+│   11 │ agent-review │ 33,698 │ +2,390 │    26.3% │                                        │
+│   12 │ agent-review │ 34,893 │ +1,195 │    27.3% │                                        │
+│   13 │ agent-review │ 35,110 │   +217 │    27.4% │                                        │
+│   14 │ agent-review │ 37,412 │ +2,302 │    29.2% │                                        │
+│   15 │ agent-review │ 40,067 │ +2,655 │    31.3% │                                        │
+│   16 │ agent-review │ 40,423 │   +356 │    31.6% │                                        │
+│   17 │ agent-review │ 48,847 │ +8,424 │    38.2% │                                        │
+│   18 │ agent-review │ 50,318 │ +1,471 │    39.3% │                                        │
+│   19 │ agent-review │ 50,478 │   +160 │    39.4% │                                        │
+│    — │ acquire-code │      — │      — │        — │ OFFLOAD /code-index.md (saved ~38 tok) │
+└──────┴──────────────┴────────┴────────┴──────────┴────────────────────────────────────────┘
+Parent context peak: 50,478 tokens (39.4% of 128,000) — vs S03 single-agent baseline: ~9,000 tokens
+Total context events: 0 summarizations, 1 offloads, 5 subagent delegations
+╭───────────────────────────────────────────────────────────────────────────────────────────────── Reflection ─────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Покрытие: 5/5 аспектов покрыто заметками                                                                                                                                                                     │
+│ Делегировано: 5/5                                                                                                                                                                                            │
+│ Противоречий: 0                                                                                                                                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────────────────────────────────────────────── ✅ Что хорошо ────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ • Оркестрация: создаётся ровно один subagent-рецензент на каждый аспект rubric, делегирование только через task, write_todos перед делегированием — всё соответствует критериям.                             │
+│ • Agent harness: create_deep_agent() получает полный набор параметров, все промпты вынесены в YAML-файлы, harness profile корректно регистрируется до вызова agent.                                          │
+│ • Рабочая директория сессии: чёткая структура (code, notes, output, skills), уникальная сессионная директория, skills материализуются под /skills/, code-index offload-ится в workspace.                     │
+│ • Context engineering: SummarizationMiddleware настроен с trigger fraction 0.55, parent и subagent токены разделены, skill reads трекаются, полная observability прогресса и метрик контекста.               │
+│ • Качество кода: make ci запускает ruff и pytest, все 14 модулей имеют полные type hints и соблюдают single responsibility, тесты покрывают parse, rubric, synthesis.                                        │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                                                                              ⚠️  Нужно исправить                                                                                               
+┏━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ # ┃ Приоритет  ┃ Аспект             ┃ Навык                ┃ Замечание                                                                                                                                       ┃
+┡━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ 1 │ 🔴 высокий │ `memory-workspace` │ `deep-agents-memory` │ .env отсутствует в SKIP_DIRS и не игнорируется в copy_local_directory(). Файл физически копируется в workspace, хотя не индексируется. (No      │
+│   │            │                    │                      │ secrets committed or copied to workspace) файлы: /code/mentor/agent/tools/parse.py                                                              │
+│ 2 │ 🔴 высокий │ `memory-workspace` │ `deep-agents-memory` │ Workspace.ensure_layout() не создаёт skills/ — директория создаётся лениво внутри materialize_workspace_skills(), что может сбивать с толку.    │
+│   │            │                    │                      │ (Clear workspace layout per session) файлы: /code/mentor/agent/tools/workspace.py                                                               │
+│ 3 │ 🔴 высокий │ `code-quality`     │ `modern-python`      │ Нет pytest-cov в dev-зависимостях — покрытие не измеряется в CI. Ruff использует ограниченный набор правил вместо select = ['ALL'] с явными     │
+│   │            │                    │                      │ ignore. (uv + ruff + pytest via make ci) файлы: /code/pyproject.toml, /code/Makefile                                                            │
+│ 4 │ 🔴 высокий │ `code-quality`     │ `modern-python`      │ Не тестируются: clone_github_repo, acquire_code (требуют network), _matches_topic напрямую, synthesize_review с mock LLM. (Tests for parse,     │
+│   │            │                    │                      │ rubric, synthesis) файлы: /code/tests/test_parse.py, /code/tests/test_rubric.py, /code/tests/test_synthesis.py                                  │
+│ 5 │ 🟡 средний │ `agent-core`       │ `deep-agents-core`   │ Параметр harness_profile не передан явно в create_deep_agent() — профиль зарегистрирован глобально для 'openai'. Может привести к путанице при  │
+│   │            │                    │                      │ разных именах моделей. (Harness profile restricts unsafe tools) файлы: /code/mentor/agent/orchestrator.py                                       │
+│ 6 │ 🟡 средний │ `memory-workspace` │ `deep-agents-memory` │ code/ не копируется из source обратно в workspace при SourceType.LOCAL_PATH, если source совпадает с проектом (dogfooding). (Clear workspace    │
+│   │            │                    │                      │ layout per session) файлы: /code/mentor/agent/tools/parse.py                                                                                    │
+└───┴────────────┴────────────────────┴──────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+╭───────────────────────────────────────────────────────────────────────────────────────────── ➡️  Следующий шаг ──────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Исправьте утечку .env в SKIP_DIRS, добавьте pytest-cov и расширьте набор правил ruff, а затем явно передавайте harness_profile в create_deep_agent().                                                        │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Отчёт сохранён: /Users/akozhin/ai/llmstart/llmstart-deep-agents-live/ai-homework-mentor/.mentor-workspace/20260701-113240-ffea4e11cffd/output/report.md
+2026-07-01 14:38:37,744 INFO [mentor] mentor check completed in 357.3s
+~/ai/llmstart/llmstart-deep-agents-live/ai-homework-mentor % 

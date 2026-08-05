@@ -10,9 +10,11 @@ from course_companion.router.router import route
 
 
 def _make_mock_llm(return_value: Intent) -> MagicMock:
-    """Mock LLM, чей with_structured_output().invoke() возвращает заданный Intent."""
+    """Mock LLM: with_structured_output().with_config().invoke() → Intent."""
+    mock_configured = MagicMock()
+    mock_configured.invoke.return_value = return_value
     mock_structured = MagicMock()
-    mock_structured.invoke.return_value = return_value
+    mock_structured.with_config.return_value = mock_configured
     mock_llm = MagicMock()
     mock_llm.with_structured_output.return_value = mock_structured
     return mock_llm
@@ -20,11 +22,20 @@ def _make_mock_llm(return_value: Intent) -> MagicMock:
 
 def _make_broken_llm() -> MagicMock:
     """Mock LLM, чей invoke() бросает RuntimeError."""
+    mock_configured = MagicMock()
+    mock_configured.invoke.side_effect = RuntimeError("API error")
     mock_structured = MagicMock()
-    mock_structured.invoke.side_effect = RuntimeError("API error")
+    mock_structured.with_config.return_value = mock_configured
     mock_llm = MagicMock()
     mock_llm.with_structured_output.return_value = mock_structured
     return mock_llm
+
+
+def test_router_nostream_tag() -> None:
+    mock = _make_mock_llm(Intent(decision="qa"))
+    route(RouterInput(recent_messages=["вопрос"], current_mode="qa"), llm=mock)
+    structured = mock.with_structured_output.return_value
+    structured.with_config.assert_called_once_with({"tags": ["nostream"]})
 
 
 def test_homework_intent() -> None:
@@ -52,6 +63,15 @@ def test_stay_intent() -> None:
         llm=mock,
     )
     assert result.decision == "stay"
+
+
+def test_drill_intent() -> None:
+    mock = _make_mock_llm(Intent(decision="drill"))
+    result = route(
+        RouterInput(recent_messages=["хочу потренироваться"], current_mode="qa"),
+        llm=mock,
+    )
+    assert result.decision == "drill"
 
 
 def test_failsafe() -> None:

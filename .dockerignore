@@ -11,4 +11,22 @@ backend/.venv
 **/.pytest_cache
 **/.mypy_cache
 *.md
+!course-companion/README.md
 design*.png
+
+# course-companion compose build (context = repo root)
+course-companion/.venv
+course-companion/.logs
+course-companion/.companion-workspace
+course-companion/frontend/node_modules
+course-companion/frontend/dist
+course-companion/material
+course-companion/ai-homework-mentor
+course-companion/reviews
+course-companion/sprints
+ai-homework-mentor/.venv
+ai-homework-mentor/workspace
+ai-homework-mentor/reports
+ai-homework-mentor/.pytest_cache
+ai-homework-mentor/.ruff_cache
+ai-homework-mentor/.mypy_cache

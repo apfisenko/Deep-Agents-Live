@@ -1,7 +1,7 @@
 # Roadmap — Course Companion
 
 > **Vision:** [./concept/vision.md](./concept/vision.md)
-> **Последнее обновление:** 2026-08-02
+> **Последнее обновление:** 2026-08-05
 
 ---
 
@@ -207,7 +207,57 @@ Course Companion поставляет студенту курса Deep Agents е
 
 ---
 
-## Карта зависимостей
+## v1.0-scaling — Масштабирование (Тема 12) ✅
+
+**Старт:** CLI-монолит после Sprint 09 (router → companion, sync checker, handoffs qa/homework/review).
+
+**Цель:** два сервиса, веб-чат, фоновая проверка, протоколы на швах (Agent Server API, Agent Protocol, A2A, A2UI).
+
+**Принцип:** протокол — функция границы, а не моды. Пайплайн ментора (`vendor/ai-homework-mentor`) не переписываем.
+
+**Окружение:** Python **3.11** · `make.ps1` на Windows · Docker — Sprint 14 через **WSL**.
+
+| # | Sprint | Ступень | Цель | Статус | Документ |
+|---|--------|---------|------|--------|----------|
+| 10 | agent-as-service | S1 | Agent Server + веб-чат, sync check сохранён | ✅ | [README](sprints/sprint-10-agent-as-service/README.md) |
+| 11 | async-checker | S2 | Фоновая проверка, co-deployed | ✅ | [README](sprints/sprint-11-async-checker/README.md) |
+| 12 | service-split-a2a | S3 | Распил + A2A-витрина + graceful degrade | ✅ | [README](sprints/sprint-12-service-split-a2a/README.md) |
+| 13 | drill-a2ui | S4 | Drill + A2UI, mid-drill feedback | ✅ | [README](sprints/sprint-13-drill-a2ui/README.md) |
+| 14 | docker-compose | S5 | `docker compose up` — упаковка (опц.) | ✅ | [README](sprints/sprint-14-docker-compose/README.md) · [summary](sprints/sprint-14-docker-compose/summary.md) |
+| 15 | a2a-external-checker | S6 | A2A-клиент чужого checker (опц.) | 📋 | [README](sprints/sprint-15-a2a-external-checker/README.md) |
+
+### Сводный DoD продукта v1 scaling (S10–S13 обязательны)
+
+| # | Критерий | Sprint |
+|---|----------|--------|
+| 1 | Agent Server + браузерный чат + threads | 10 |
+| 2 | Фоновая проверка + поллер «фидбек сам» | 11 |
+| 3 | Распил :2024/:2025 + мягкий отказ | 12 |
+| 4 | A2A agent card на checker | 12 |
+| 5 | Drill + A2UI + разбор по аргументации | 13 |
+| 6 | Фидбек mid-drill | 13 |
+| 7 | CLI sync checker сохранён | 10–13 |
+| 8 | `docker compose up` walkthrough | 14 (опц.) ✅ |
+
+### Карта зависимостей (T11 → T12)
+
+```
+09-dogfooding (CLI монолит)
+    └── 10-agent-as-service (S1: threads/runs обязательны)
+            └── 11-async-checker (S2: co-deployed async)
+                    └── 12-service-split-a2a (S3: HTTP split)
+                            └── 13-drill-a2ui (S4: web + split + poller)
+                                    └── 14-docker-compose (S5, опц.)
+                            └── 15-a2a-external-checker (S6, опц.; design в S3)
+```
+
+**Жёсткий порядок:** S1 → S2 → S3 → S4. Нельзя async checker раньше Agent Server; нельзя распил раньше co-deployed async; нельзя A2UI drill раньше веб-чата и state visible фронту.
+
+**Эталон:** `material/PRACTICE-GUIDE.md`, `material/PRACTICE.md`, `material/course-companion/`.
+
+---
+
+## Карта зависимостей (T11 · v0.x)
 
 ```
 01-scaffold
@@ -219,18 +269,21 @@ Course Companion поставляет студенту курса Deep Agents е
                                             └── 07-integration
                                                     └── [08-rubric ← если не из ДЗ-08]
                                                             └── 09-dogfooding
+                                                                    └── 10-agent-as-service …
 ```
 
 ---
 
-## Вне v1 (backlog)
+## Вне v1 scaling (backlog)
 
 | Идея | Обоснование |
 |------|-------------|
-| Persistent-хранилище сессий | In-memory достаточно для CLI v1 |
-| Веб-UI | CLI — достаточный интерфейс для образовательного продукта |
-| Async-субагенты (параллельные reviewer'ы) | Не нужно до подтверждения проблемы с производительностью |
-| Распределённые агенты / A2A | Другой уровень сложности, отдельный продукт |
+| Langfuse / полный observability | Не в обязательный план T12 |
+| `langgraph up` + Postgres/Redis | Prod-лицензия; dev-сервер достаточен для практики |
+| Auth на швах | Вне scope учебного стенда |
+| Кастомный agent card | Нативная витрина достаточна для S3 |
+| Перепись пайплайна ментора | `vendor/ai-homework-mentor` заморожен |
+| Persistent-хранилище threads (prod) | In-memory в dev; ADR 005 для CLI |
 | Авторизация и мультипользовательность | Вне scope курсового инструмента |
 
 ---
@@ -248,3 +301,6 @@ Course Companion поставляет студенту курса Deep Agents е
 | 2026-08-02 | v0.7 закрыт: E2E-тест четырёх ходов, session-log, ADR 001–005, README обновлён; 36 тестов зелёных |
 | 2026-08-02 | v0.8 закрыт: рубрика multi-agent, resolve_rubric с fuzzy-matching, 43 теста зелёных |
 | 2026-08-02 | v1.0 закрыт: dogfooding-сессия, цепочка Router→homework→review→qa, dogfooding-session.md |
+| 2026-08-05 | Sprint 10 закрыт: Agent Server + веб-чат (S1 scaling) |
+| 2026-08-05 | Sprint 11 закрыт: async checker co-deployed, AsyncSubAgent + poller E2E |
+| 2026-08-05 | v1.0-scaling: спланированы спринты 10–15 (T12 масштабирование), README в `sprints/sprint-10…15/` |

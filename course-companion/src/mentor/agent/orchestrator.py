@@ -5,6 +5,8 @@ from __future__ import annotations
 from homework_mentor.orchestrator import ReviewRunResult, run_review
 from homework_mentor.pipeline import run_homework_session
 
+from course_companion.paths import normalize_submission_path, split_workspace_input
+
 
 class MentorOrchestrator:
     """Точка входа в homework_mentor для course-companion.
@@ -21,9 +23,11 @@ class MentorOrchestrator:
 
     def run(self) -> ReviewRunResult:
         """Запустить проверку ДЗ и вернуть результат."""
+        path_line, raw_text = split_workspace_input(self.workspace)
+        normalized_path = normalize_submission_path(path_line)
         result = run_homework_session(
-            raw_text=self.workspace,
-            explicit_path=self.workspace,
+            raw_text=raw_text,
+            explicit_path=normalized_path,
             topic_extractor=lambda _: self.rubric,
         )
         review = result.review

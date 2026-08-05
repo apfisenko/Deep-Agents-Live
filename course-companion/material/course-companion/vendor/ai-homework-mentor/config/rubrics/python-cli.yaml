@@ -1,0 +1,32 @@
+# Python CLI / Telegram bot rubric
+# rubric_skill: project SKILL.md (skills/rubrics/python-cli/SKILL.md)
+# aspect_skills: public skills per reviewer subagent
+topic: python-cli
+title: Python CLI / Telegram bot
+rubric_skill: rubric-python-cli
+aspect_skills:
+  structure: [modern-python]
+  integration: [modern-python]
+  code-quality: [modern-python]
+match_keywords:
+  - python
+  - cli
+  - bot
+  - telegram
+  - aiogram
+aspects:
+  - id: structure
+    title: Project structure
+    criteria:
+      - Separation of config, client, and handlers
+      - Clear package layout
+  - id: integration
+    title: External integration
+    criteria:
+      - HTTP client usage and error handling
+      - Configuration via environment variables
+  - id: code-quality
+    title: Python code quality
+    criteria:
+      - Type hints where appropriate
+      - Async patterns used correctly

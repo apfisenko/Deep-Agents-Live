@@ -1,0 +1,19 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "companion": "./companion/server.py:graph",
+    "checker": "./checker_service/service.py:graph"
+  },
+  "env": ".env",
+  "webhooks": {
+    "url": {
+      "disable_loopback": false,
+      "require_https": false
+    }
+  },
+  "http": {
+    "app": "./companion/webapp.py:app"
+  }
+}

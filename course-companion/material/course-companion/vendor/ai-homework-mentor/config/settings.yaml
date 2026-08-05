@@ -1,0 +1,18 @@
+app:
+  name: ai-homework-mentor
+  version: "0.1.0"
+
+llm:
+  max_tokens: 4096
+  temperature: 0.2
+
+context:
+  summarization_trigger_fraction: 0.55
+  max_context_tokens: 128000
+  s03_single_agent_peak_tokens: 9000
+
+workspace:
+  base_dir: .mentor-workspace
+
+logging:
+  format: human

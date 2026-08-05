@@ -107,7 +107,7 @@ def _print_chunk(chunk: tuple, mode_tracker: _ModeTracker) -> None:  # type: ign
 
 
 def _initial_mode(graph: CompiledStateGraph, config: dict) -> str:  # type: ignore[type-arg]
-    snapshot = graph.get_state(config)
+    snapshot = graph.get_state(config)  # type: ignore[arg-type]
     if snapshot.values:
         return str(snapshot.values.get("mode") or "qa")
     return "qa"

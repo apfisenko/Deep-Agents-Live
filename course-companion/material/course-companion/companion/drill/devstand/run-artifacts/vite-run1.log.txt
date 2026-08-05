@@ -1,0 +1,9 @@
+
+> drill-devstand-client@0.0.1 dev
+> vite
+
+
+  VITE v8.1.4  ready in 386 ms
+
+  ➜  Local:   http://localhost:5273/
+  ➜  Network: use --host to expose

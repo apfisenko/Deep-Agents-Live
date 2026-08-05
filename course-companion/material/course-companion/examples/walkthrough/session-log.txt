@@ -1,0 +1,63 @@
+Walkthrough «одна сессия» — живой прогон в docker compose (2026-07-11)
+=======================================================================
+
+Конфигурация: docker compose up (три контейнера: companion :2024, checker
+:2025, frontend :5173). Модель: google/gemini-3.5-flash через OpenRouter;
+LangSmith-ключ НЕ задан. Браузер: Playwright, http://localhost:5173.
+Логи серверов: оба контейнера — «Starting 10 background workers».
+
+Тред 019f5084 (весь сценарий — одна сессия, время локальное):
+
+12:31:35  сдал домашку (vendor/ai-homework-mentor, «мультиагентные паттерны»)
+12:31:41  ран чекера стартовал В КОНТЕЙНЕРЕ ЧЕКЕРА (лог: checker_service:
+          submission='vendor/ai-homework-mentor' topic='мультиагентные
+          паттерны'); проверка шла 125.7 с (run_exec_ms=125660)
+12:31:5x  ответ companion: полный task_id, «можете продолжать общение»;
+          карточка «homework-checker-async · проверяется…» в шапке;
+          чат свободен — кадр 01-task-started-chat-free.png (12:32:07)
+12:32:12  «что будет в теме 12?» → субагент course-qa ответил за ~35 с,
+          пока чекер работал — кадр 02-qa-while-checking.png
+12:33:00  «хочу потренироваться» → router: homework → drill; companion
+          прочитал SKILL.md скилла scaling-case-drill и три его справки
+          references/ (чипы read_file — progressive disclosure),
+          вызвал show_drill_case — кейс упал в канал drill_case
+12:33:1x  фронт увидел values.drill_case → POST /api/drill/a2ui →
+          отдельный LLM-вызов, A2UI-форма проявилась инкрементально
+          (3 оси + свободный вопрос) — кадр 03-drill-form.png
+12:33:46  ЧЕКЕР ДОСЧИТАЛ (лог: Background run succeeded) → фронт-поллер
+          увидел success на :2025 → авто-сообщение в тред (enqueue);
+          router: служебное сообщение — остаёмся в drill
+12:34:0x  companion вызвал check_async_task и отдал фидбек проверки В ЧАТ
+          ПОСРЕДИ ДРИЛЛА; форма жива, режим drill не сбился; сам предложил
+          вернуться к кейсу — КУЛЬМИНАЦИЯ: 04-feedback-mid-drill.png
+12:35-36  заполнил форму (выбор по трём осям + обоснование) —
+          кадр 05-drill-form-filled.png; отправил 12:36:24
+12:36:2x  userAction → POST /api/drill/a2ui {action, threadId} → доставка
+          в тред companion (enqueue); в чате служебное «[drill] Студент
+          отправил ответ…»
+12:37:05  разбор по аргументации в чате (по каждой оси: выбор ↔ факты
+          кейса, «чем платим», итог «Зачёт!»); панель формы закрылась —
+          кадр 06-drill-review.png
+12:38:00  «закончим тренировку, какая тема перед масштабированием?» →
+          router: drill → qa → course-qa ответил («Тема 11 —
+          Мультиагентные паттерны») — кадр 07-exit-drill-qa.png
+
+Финальный аккорд — A2A-витрина с хоста в контейнер чекера:
+
+$ curl -s -X POST http://localhost:2025/assistants/search -d '{}'
+    → assistant_id=2c6dc5f4-ff5b-53fe-b5cf-6008f827568c (graph_id=checker)
+$ curl 'http://localhost:2025/.well-known/agent-card.json?assistant_id=2c6dc5f4-ff5b-53fe-b5cf-6008f827568c'
+    → {"name": "checker", "capabilities": {"streaming": true, ...},
+       "supportedInterfaces": [{"protocolBinding": "jsonrpc",
+       "protocolVersion": "1.0", ...}], ...}
+
+Итого: от сдачи до самопришедшего фидбека ~2.5 мин, из них чат занят
+секунды; консоль браузера за сессию — 0 ошибок; кадр «до» (заблокированный
+чат из конфигурации без фонового чекера) — 00-before-chat-blocked.png.
+
+Примечание к кадрам дрилла: 03–06 переcняты 2026-07-12 на распил-конфигурации
+(make checker + make companion + make frontend, тред 019f5741) уже с настоящим
+скиллом scaling-case-drill — кейс «Аналитический ассистент ритейлера»,
+выборы: Фоновая джоба / Стриминг / Стриминг стейта + свои компоненты; ход
+сценария и тайминги сессии выше — без изменений (в этом прогоне чекер
+досчитал за ~80 с, поэтому на кадре 03 карточка уже «готово»).

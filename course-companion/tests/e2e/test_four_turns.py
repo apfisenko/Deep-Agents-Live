@@ -23,6 +23,7 @@ from course_companion.graph.state import CourseCompanionState, HWArtifacts
 # Вспомогательный граф с детерминированными заглушками
 # ---------------------------------------------------------------------------
 
+
 def _build_four_turn_graph() -> object:
     """Граф с mock-узлами для сценария четырёх ходов.
 
@@ -44,9 +45,13 @@ def _build_four_turn_graph() -> object:
         n = len(state.get("messages", []))  # type: ignore[arg-type]
 
         if mode == "qa":
-            return {"messages": [AIMessage(
-                content="[tool] read_kb_doc: homework.md\nДедлайн ДЗ-3 — 15 сентября."
-            )]}
+            return {
+                "messages": [
+                    AIMessage(
+                        content="[tool] read_kb_doc: homework.md\nДедлайн ДЗ-3 — 15 сентября."
+                    )
+                ]
+            }
 
         if mode == "homework":
             hw = HWArtifacts(
@@ -59,14 +64,16 @@ def _build_four_turn_graph() -> object:
             return {
                 "mode": "review",
                 "hw_artifacts": hw,
-                "messages": [AIMessage(
-                    content=(
-                        "[task] → homework-checker\n"
-                        "[task] ✓ 1 аспект, балл 0.74\n"
-                        "[mode] homework → review\n"
-                        "Проверка завершена. Балл: 0.74"
+                "messages": [
+                    AIMessage(
+                        content=(
+                            "[task] → homework-checker\n"
+                            "[task] ✓ 1 аспект, балл 0.74\n"
+                            "[mode] homework → review\n"
+                            "Проверка завершена. Балл: 0.74"
+                        )
                     )
-                )],
+                ],
             }
 
         if mode == "review":
@@ -76,16 +83,21 @@ def _build_four_turn_graph() -> object:
             if n >= _turn4_threshold:
                 return {
                     "mode": "qa",
-                    "messages": [AIMessage(
-                        content="[mode] review → qa\nВозврат в режим вопросов по курсу."
-                    )],
+                    "messages": [
+                        AIMessage(content="[mode] review → qa\nВозврат в режим вопросов по курсу.")
+                    ],
                 }
-            return {"messages": [AIMessage(
-                content=(
-                    "[tool] explain_feedback: soc\n"
-                    "Зоны ответственности нарушены — агенты должны иметь чётко разделённые функции."
-                )
-            )]}
+            return {
+                "messages": [
+                    AIMessage(
+                        content=(
+                            "[tool] explain_feedback: soc\n"
+                            "Зоны ответственности нарушены — "
+                            "агенты должны иметь чётко разделённые функции."
+                        )
+                    )
+                ]
+            }
 
         return {"messages": [AIMessage(content="OK")]}
 
@@ -102,6 +114,7 @@ def _build_four_turn_graph() -> object:
 # Фикстура
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def graph_with_mocks() -> object:
     return _build_four_turn_graph()
@@ -110,6 +123,7 @@ def graph_with_mocks() -> object:
 # ---------------------------------------------------------------------------
 # Тест
 # ---------------------------------------------------------------------------
+
 
 def test_four_turns(graph_with_mocks: object) -> None:
     """E2E: четыре хода через весь стек с корректными переходами режимов."""

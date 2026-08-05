@@ -3,7 +3,7 @@ name = "course-companion"
 version = "0.1.0"
 description = "Course Companion — диалоговый CLI-ассистент для студентов курса Deep Agents"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "homework-mentor",
     "langchain>=0.3",
@@ -12,6 +12,10 @@ dependencies = [
     "openai>=1.0",
     "python-dotenv>=1.0",
     "pydantic>=2",
+    "deepagents>=0.6.12",
+    "fastapi>=0.115",
+    "a2ui-agent-sdk==0.4.0",
+    "langgraph-sdk>=0.2",
 ]
 
 [project.scripts]
@@ -23,6 +27,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "langgraph-cli[inmem]>=0.2",
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
     "ruff>=0.6",
@@ -34,7 +39,7 @@ homework-mentor = { path = "../ai-homework-mentor", editable = true }
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -52,9 +57,17 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101"]  # assert в тестах разрешён
+"tests/checker_service/**" = ["S108", "RUF012", "RUF059"]
+"tests/async/**" = ["SLF001"]
+"tests/split/**" = ["SLF001"]
+"tests/drill/**" = ["SLF001", "PLR2004", "INP001", "PT018", "I001", "F401", "A002", "PLC0415"]
+"tests/test_drill_integration.py" = ["PLC0415", "PT018"]
+"tests/test_drill_modes.py" = ["PLC0415"]
+"src/course_companion/drill/**" = ["PLC0415", "TRY300", "TRY003", "EM102", "FBT001", "C901", "TRY400", "TC001", "TC003"]
+"src/course_companion/agent/server_modes.py" = ["TC001"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.11"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

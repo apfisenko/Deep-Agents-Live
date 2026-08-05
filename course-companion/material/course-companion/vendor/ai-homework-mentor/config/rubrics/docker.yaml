@@ -1,0 +1,29 @@
+# Docker rubric
+# rubric_skill: project SKILL.md (skills/rubrics/docker/SKILL.md)
+# aspect_skills: public skills per reviewer subagent
+topic: docker
+title: Docker
+rubric_skill: rubric-docker
+aspect_skills:
+  dockerfile: [docker-expert]
+  compose: [docker-expert]
+  code-quality: [modern-python]
+match_keywords:
+  - docker
+  - compose
+  - container
+aspects:
+  - id: dockerfile
+    title: Dockerfile
+    criteria:
+      - Multi-stage or minimal image where appropriate
+      - Non-root user, healthcheck if applicable
+  - id: compose
+    title: Docker Compose
+    criteria:
+      - Services defined clearly
+      - Environment variables, not secrets in image
+  - id: code-quality
+    title: Supporting code
+    criteria:
+      - App starts correctly in container context

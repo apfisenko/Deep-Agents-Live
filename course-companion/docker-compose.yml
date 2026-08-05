@@ -1,0 +1,131 @@
+# Распределённая система = docker compose up: три контейнера —
+# companion (:2024), checker (:2025), frontend (:5173).
+#
+# companion и checker собираются из ОДНОГО Python-образа (Dockerfile):
+# кодовая база общая, сервис определяется командой запуска — свой --config,
+# свой порт, свой жизненный цикл. Тот же принцип, что в портовом запуске
+# (README, глава «Распил»), только процессы теперь в контейнерах, а адреса
+# на швах — hostname'ы compose-сети вместо localhost.
+#
+# .env с ключом модели НЕ запекается в образ — монтируется при старте
+# (см. volumes). Секреты в образах не живут.
+#
+# Честно: внутри контейнеров — dev-сервер (`langgraph dev`, state в памяти,
+# `docker compose down` = все треды пропали). Это учебный стенд, не прод;
+# prod-путь описан в README.
+
+services:
+  checker:
+    build:
+      context: ..
+      dockerfile: course-companion/Dockerfile
+    restart: unless-stopped
+    command:
+      - uv
+      - run
+      - langgraph
+      - dev
+      - --config
+      - langgraph.checker.json
+      - --host
+      - 0.0.0.0
+      - --port
+      - "2025"
+      - --no-reload
+      - --no-browser
+      - --n-jobs-per-worker
+      - "10"
+    environment:
+      REPO_MOUNT_ROOT: /workspace/repo
+    ports:
+      - "2025:2025" # наружу — ради A2A-витрины: curl agent card с хоста
+    volumes:
+      - ./.env:/app/course-companion/.env:ro
+      - ../:/workspace/repo:ro
+      # Артефакты проверок пишет чекер в ai-homework-mentor/workspace/,
+      # companion в review может читать с диска — контейнерам нужен общий том.
+      - mentor-workspace:/app/ai-homework-mentor/workspace
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:2025/info')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+
+  companion:
+    build:
+      context: ..
+      dockerfile: course-companion/Dockerfile
+    restart: unless-stopped
+    command:
+      - uv
+      - run
+      - langgraph
+      - dev
+      - --config
+      - langgraph.companion.json
+      - --host
+      - 0.0.0.0
+      - --port
+      - "2024"
+      - --no-reload
+      - --no-browser
+      - --n-jobs-per-worker
+      - "10"
+    environment:
+      CHECKER_URL: http://checker:2025
+      REPO_MOUNT_ROOT: /workspace/repo
+    ports:
+      - "2024:2024"
+    volumes:
+      - ./.env:/app/course-companion/.env:ro
+      - ../:/workspace/repo:ro
+      - mentor-workspace:/app/ai-homework-mentor/workspace
+    depends_on:
+      checker:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:2024/info')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      LANGGRAPH_PROXY_TARGET: http://companion:2024
+      CHECKER_PROXY_TARGET: http://checker:2025
+    ports:
+      - "5173:5173"
+    depends_on:
+      companion:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:5173').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  mentor-workspace:

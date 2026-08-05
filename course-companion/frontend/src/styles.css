@@ -1,0 +1,825 @@
+/* Минимальный чистый чат — учебный стенд, не продукт (KISS).
+   Фаза 3.5: единая система дизайн-токенов вместо разрозненных значений. */
+
+/* ---------- Токены ---------- */
+
+:root {
+  /* палитра: нейтральные серые + один акцент */
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-subtle: #f8f9fb;
+  --border: #e3e6eb;
+  --border-strong: #cfd4db;
+  --text: #1c1e21;
+  --text-2: #5c6066;
+  --text-3: #8a8e94;
+  --accent: #1a56b0;
+  --accent-hover: #174c9c;
+  --accent-active: #133f82;
+  --accent-soft: #e7f0fe;
+  --accent-disabled: #a8bedd;
+  --focus-ring: rgba(26, 86, 176, 0.14);
+  --success: #1b7f3b;
+  --warn: #8a6d00;
+  --warn-soft: #fff8e6;
+  --warn-border: #ecd9a2;
+  --danger: #b3261e;
+  --danger-soft: #fdecec;
+  --danger-border: #f2c4c1;
+  --code-bg: #eef1f5;
+
+  /* типографика: 3 размера + моно */
+  --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-body: 15px;
+  --fs-small: 13px;
+  --fs-micro: 11px;
+
+  /* шкала отступов */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+
+  /* радиусы и тени */
+  --r-s: 8px;
+  --r-m: 12px;
+  --r-full: 999px;
+  --shadow-1: 0 1px 2px rgba(23, 26, 31, 0.05);
+  --shadow-2: 0 2px 10px rgba(23, 26, 31, 0.07);
+}
+
+/* ---------- База: сброс браузерных дефолтов ---------- */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+textarea,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:is(button, textarea, input, a):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Каркас ---------- */
+
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+header h1 {
+  font-size: 15px;
+  font-weight: 650;
+  margin: 0;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-small);
+  color: var(--text-2);
+}
+
+.thread {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.badge {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: var(--r-full);
+  padding: 2px 10px;
+  font-weight: 500;
+}
+
+/* вторичная кнопка (header) */
+.meta button {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--r-s);
+  padding: 5px 12px;
+  font-size: var(--fs-small);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.meta button:hover:not(:disabled) {
+  background: var(--surface-subtle);
+  border-color: #b9c0ca;
+}
+
+.meta button:active:not(:disabled) {
+  background: #edeff3;
+}
+
+.meta button:disabled {
+  opacity: 0.5;
+}
+
+/* ---------- Лента сообщений ---------- */
+
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.empty {
+  margin: auto;
+  max-width: 360px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: var(--fs-small);
+  line-height: 1.6;
+}
+
+.message {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: var(--r-m);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  overflow-wrap: anywhere;
+}
+
+.message.human {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.message p {
+  margin: 0;
+}
+
+/* переносы строк — только в plain-тексте пользователя (в Markdown
+   pre-wrap дублировал бы межблочные переводы строк огромными дырами) */
+.message.human p {
+  white-space: pre-wrap;
+}
+
+.author {
+  display: block;
+  font-size: var(--fs-micro);
+  opacity: 0.65;
+  margin-bottom: var(--sp-1);
+}
+
+/* чипы tool-вызовов */
+.tools {
+  list-style: none;
+  margin: 0 0 var(--sp-2);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tool {
+  font-size: 12px;
+  font-family: var(--mono);
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  padding: 3px 10px;
+  color: var(--text-2);
+}
+
+.tool.running {
+  background: var(--warn-soft);
+  border-color: var(--warn-border);
+  color: var(--warn);
+}
+
+.tool.error {
+  background: var(--danger-soft);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+/* статус-строка бегущего рана */
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-small);
+  color: var(--text-2);
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--r-s);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-small);
+}
+
+/* ---------- Композер ---------- */
+
+.composer {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.composer textarea {
+  flex: 1;
+  resize: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-s);
+  padding: var(--sp-2) var(--sp-3);
+  line-height: 1.45;
+  background: var(--surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.composer textarea::placeholder {
+  color: var(--text-3);
+}
+
+.composer textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.composer textarea:disabled {
+  background: var(--surface-subtle);
+  color: var(--text-3);
+}
+
+/* основная кнопка */
+.composer button {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--r-s);
+  padding: 0 var(--sp-4);
+  font-weight: 500;
+  transition: background-color 0.15s;
+}
+
+.composer button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.composer button:active:not(:disabled) {
+  background: var(--accent-active);
+}
+
+.composer button:disabled {
+  background: var(--accent-disabled);
+}
+
+/* ---------- Карточки фоновых проверок (values.async_tasks + поллер) ---------- */
+
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-subtle);
+}
+
+.task-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-small);
+  border: 1px solid var(--border);
+  border-radius: var(--r-s);
+  padding: 6px 12px;
+  background: var(--surface);
+}
+
+.task-card.busy {
+  border-color: var(--warn-border);
+  background: var(--warn-soft);
+}
+
+.task-name {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.task-status.st-success {
+  color: var(--success);
+}
+
+.task-status.st-error {
+  color: var(--danger);
+}
+
+.task-status.st-cancelled,
+.task-status.st-interrupted {
+  color: var(--warn);
+}
+
+.task-id {
+  margin-left: auto;
+  color: var(--text-3);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* ---------- Карточки субагентов (stream.subagents + useMessages) ---------- */
+
+.subagent {
+  border: 1px solid var(--border);
+  border-radius: var(--r-s);
+  margin: var(--sp-1) 0 var(--sp-2);
+  background: var(--surface-subtle);
+  font-size: var(--fs-small);
+  overflow: hidden;
+}
+
+.subagent.running {
+  border-color: var(--warn-border);
+  background: var(--warn-soft);
+}
+
+.subagent.error {
+  border-color: var(--danger-border);
+}
+
+.subagent > button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  padding: 6px 12px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.subagent > button:hover {
+  background: rgba(28, 30, 33, 0.04);
+}
+
+.subagent .chevron {
+  margin-left: auto;
+  color: var(--text-3);
+}
+
+.subagent-body {
+  border-top: 1px solid var(--border);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.subagent-task {
+  margin: 0 0 var(--sp-2);
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+/* Служебные сообщения: поллер ([авто]) и drill-доставка ([drill] — с JSON
+   ответа, поэтому перенос строк и умеренный радиус вместо пилюли) */
+.auto-note {
+  align-self: center;
+  max-width: 80%;
+  font-size: 12px;
+  color: var(--text-2);
+  background: var(--code-bg);
+  border-radius: var(--r-m);
+  padding: var(--sp-1) var(--sp-3);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ---------- Очередь сообщений (double texting: enqueue) ---------- */
+
+.queue {
+  border-top: 1px dashed var(--border-strong);
+  background: var(--surface-subtle);
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-small);
+}
+
+.queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-2);
+  margin-bottom: var(--sp-1);
+}
+
+/* кнопки-ссылки очереди */
+.queue-header button,
+.queue li button {
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.queue-header button:hover,
+.queue li button:hover {
+  text-decoration: underline;
+}
+
+.queue ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.queue li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 2px 0;
+}
+
+.queue-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Markdown-рендер ответов companion ---------- */
+
+.md {
+  line-height: 1.55;
+}
+
+.md > :first-child {
+  margin-top: 0;
+}
+
+.md > :last-child {
+  margin-bottom: 0;
+}
+
+.md h1,
+.md h2,
+.md h3,
+.md h4 {
+  font-size: 1em;
+  font-weight: 650;
+  margin: 0.9em 0 0.35em;
+}
+
+.md p {
+  margin: 0.45em 0;
+}
+
+.md ul,
+.md ol {
+  margin: 0.45em 0;
+  padding-left: 1.35em;
+}
+
+.md li {
+  margin: 0.2em 0;
+}
+
+/* «loose» списки: p внутри li не должен раздувать интервалы */
+.md li > p {
+  margin: 0.15em 0;
+}
+
+.md code {
+  font-family: var(--mono);
+  background: var(--code-bg);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.88em;
+}
+
+.md pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-s);
+  padding: var(--sp-2) var(--sp-3);
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+
+.md pre code {
+  background: none;
+  padding: 0;
+  font-size: 12.5px;
+}
+
+.md blockquote {
+  margin: 0.5em 0;
+  padding-left: 0.9em;
+  border-left: 3px solid var(--border-strong);
+  color: var(--text-2);
+}
+
+.md hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0.9em 0;
+}
+
+.md table {
+  border-collapse: collapse;
+  margin: 0.5em 0;
+  font-size: 0.95em;
+}
+
+.md th,
+.md td {
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  text-align: left;
+}
+
+/* ---------- Тренажёр (drill): панель A2UI-формы кейса в чате ---------- */
+
+.drill {
+  border: 1px solid var(--border);
+  border-radius: var(--r-m);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  margin: var(--sp-1) 0;
+
+  /* Тема A2UI-рендерера: дефолтная тема пакета — только CSS-переменные
+     с нулевой специфичностью (:where), переопределяем их под нашу систему. */
+  --a2ui-color-background: var(--surface);
+  --a2ui-color-on-background: var(--text);
+  --a2ui-color-surface: var(--surface);
+  --a2ui-color-on-surface: var(--text);
+  --a2ui-color-primary: var(--accent);
+  --a2ui-color-primary-hover: var(--accent-hover);
+  --a2ui-color-on-primary: #fff;
+  --a2ui-color-border: var(--border);
+  --a2ui-border-radius: var(--r-s);
+  --a2ui-border: 1px solid var(--border);
+  --a2ui-color-input: var(--surface);
+  --a2ui-color-on-input: var(--text);
+  --a2ui-font-size-2xl: 17px;
+  --a2ui-font-size-xl: 16px;
+  --a2ui-font-size-l: 15px;
+  --a2ui-font-size-m: 14px;
+  --a2ui-font-size-s: 13px;
+  --a2ui-font-size-xs: 12px;
+  --a2ui-line-height-body: 1.55;
+  --a2ui-line-height-headings: 1.3;
+  --a2ui-card-margin: 0;
+  --a2ui-card-padding: var(--sp-4);
+  --a2ui-card-border: 1px solid var(--border);
+  --a2ui-card-box-shadow: none;
+  --a2ui-card-background: var(--surface-subtle);
+  --a2ui-row-gap: var(--sp-3);
+  --a2ui-column-gap: var(--sp-3);
+  --a2ui-list-gap: var(--sp-2);
+  --a2ui-button-margin: 0;
+  --a2ui-checkbox-margin: 0;
+}
+
+.drill-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  font-size: 12px;
+  color: var(--text-2);
+  margin-bottom: var(--sp-3);
+}
+
+.drill-title {
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: var(--fs-micro);
+}
+
+.drill-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drill-surfaces > * + * {
+  margin-top: var(--sp-3);
+}
+
+/* Компоненты A2UI-рендерера: у бандла @a2ui/react пустые маппинги
+   CSS-модулей (классы не проставляются), поэтому стилизуем по факту
+   DOM-структуры — без правок node_modules. */
+
+/* Text: заголовки (variant h1..h4 → <div class="h1"><h1>…) */
+.drill-surfaces :is(h1, h2, h3, h4) {
+  margin: 0;
+  font-weight: 650;
+}
+
+/* Text: markdown-текст (variant body → <div class="body"> с innerHTML) */
+.drill-surfaces .body > :first-child {
+  margin-top: 0;
+}
+
+.drill-surfaces .body > :last-child {
+  margin-bottom: 0;
+}
+
+.drill-surfaces .body p {
+  margin: 0.45em 0;
+}
+
+/* ChoicePicker: хост (strong-вопрос + контейнер опций) */
+.drill-surfaces div:has(> div > label > input[type="radio"]),
+.drill-surfaces div:has(> div > label > input[type="checkbox"]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.drill-surfaces div:has(> div > label > input[type="radio"]) > strong,
+.drill-surfaces div:has(> div > label > input[type="checkbox"]) > strong {
+  display: block;
+  font-size: 14px;
+}
+
+/* ChoicePicker: контейнер опций и сами опции */
+.drill-surfaces div:has(> label > input[type="radio"]),
+.drill-surfaces div:has(> label > input[type="checkbox"]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.drill-surfaces label:has(> input[type="radio"]),
+.drill-surfaces label:has(> input[type="checkbox"]) {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  font-size: 14px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.drill-surfaces input[type="radio"],
+.drill-surfaces input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  margin: 2px 0 0;
+  flex: none;
+  cursor: pointer;
+}
+
+/* TextField: колонка label + поле */
+.drill-surfaces div:has(> textarea),
+.drill-surfaces div:has(> input[type="text"]),
+.drill-surfaces div:has(> input[type="number"]),
+.drill-surfaces div:has(> input[type="password"]) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.drill-surfaces div:has(> textarea) > label,
+.drill-surfaces div:has(> input[type="text"]) > label,
+.drill-surfaces div:has(> input[type="number"]) > label,
+.drill-surfaces div:has(> input[type="password"]) > label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.drill-surfaces textarea,
+.drill-surfaces input[type="text"],
+.drill-surfaces input[type="number"],
+.drill-surfaces input[type="password"] {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-s);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface);
+  font-size: 14px;
+  line-height: 1.45;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.drill-surfaces textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.drill-surfaces :is(textarea, input[type="text"], input[type="number"], input[type="password"]):focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+/* Button (в т.ч. сабмит формы): --_a2ui-text-color — цвет вложенного
+   Text-компонента (инлайн-стиль рендерера читает эту переменную) */
+.drill-surfaces button {
+  --_a2ui-text-color: #fff;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--r-s);
+  padding: 8px 18px;
+  font-weight: 500;
+  transition: background-color 0.15s;
+}
+
+.drill-surfaces button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.drill-surfaces button:active:not(:disabled) {
+  background: var(--accent-active);
+}
+
+.drill-surfaces button:disabled {
+  opacity: 0.55;
+}
+
+/* ChoicePicker в варианте chips — нейтральные пилюли, выбранная — акцент */
+.drill-surfaces button.chip {
+  --_a2ui-text-color: currentColor;
+  background: var(--surface);
+  color: var(--text-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-full);
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.drill-surfaces button.chip.selected {
+  --_a2ui-text-color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}

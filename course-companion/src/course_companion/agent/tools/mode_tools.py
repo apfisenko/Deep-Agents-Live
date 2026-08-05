@@ -54,10 +54,12 @@ def switch_to_homework(
     tool_call_id: Annotated[str, InjectedToolCallId],
 ) -> Command:  # type: ignore[type-arg]
     """Переключить Companion в режим сдачи домашнего задания."""
-    return Command(update={
-        "mode": "homework",
-        "messages": [ToolMessage("Режим переключён на сдачу ДЗ.", tool_call_id=tool_call_id)],
-    })
+    return Command(
+        update={
+            "mode": "homework",
+            "messages": [ToolMessage("Режим переключён на сдачу ДЗ.", tool_call_id=tool_call_id)],
+        }
+    )
 
 
 def complete_homework(
@@ -68,34 +70,42 @@ def complete_homework(
     score_line = _format_score_line(hw_artifacts.score, prefix=f"\n[score]  ")  # noqa: F541
     if score_line:
         score_line += f" (порог {PASS_THRESHOLD})"
-    return Command(update={
-        "mode": "review",
-        "hw_artifacts": hw_artifacts,
-        "messages": [ToolMessage(
-            f"Артефакты проверки зафиксированы.{score_line}",
-            tool_call_id=tool_call_id,
-        )],
-    })
+    return Command(
+        update={
+            "mode": "review",
+            "hw_artifacts": hw_artifacts,
+            "messages": [
+                ToolMessage(
+                    f"Артефакты проверки зафиксированы.{score_line}",
+                    tool_call_id=tool_call_id,
+                )
+            ],
+        }
+    )
 
 
 def return_to_qa(
     tool_call_id: Annotated[str, InjectedToolCallId],
 ) -> Command:  # type: ignore[type-arg]
     """Вернуться в режим вопросов по курсу."""
-    return Command(update={
-        "mode": "qa",
-        "messages": [ToolMessage("Возврат в режим вопросов.", tool_call_id=tool_call_id)],
-    })
+    return Command(
+        update={
+            "mode": "qa",
+            "messages": [ToolMessage("Возврат в режим вопросов.", tool_call_id=tool_call_id)],
+        }
+    )
 
 
 def resubmit_homework(
     tool_call_id: Annotated[str, InjectedToolCallId],
 ) -> Command:  # type: ignore[type-arg]
     """Отправить ДЗ на повторную проверку (из режима review)."""
-    return Command(update={
-        "mode": "homework",
-        "messages": [ToolMessage("Повторная сдача ДЗ.", tool_call_id=tool_call_id)],
-    })
+    return Command(
+        update={
+            "mode": "homework",
+            "messages": [ToolMessage("Повторная сдача ДЗ.", tool_call_id=tool_call_id)],
+        }
+    )
 
 
 def ask_course_qa(question: str) -> str:
@@ -158,9 +168,11 @@ def _extract_hw_metadata(raw: str) -> tuple[str, float | None, list, list]:
 def _invoke_checker(submission_path: str, topic: str) -> tuple[str, float | None, list, list]:
     """Запустить checker-субагент и вернуть (report, score, fix_plan, feedback)."""
     checker = build_homework_checker(submission_path, topic)
-    result = checker.invoke({
-        "messages": [HumanMessage(content=f"submission: {submission_path}\ntopic: {topic}")],
-    })
+    result = checker.invoke(
+        {
+            "messages": [HumanMessage(content=f"submission: {submission_path}\ntopic: {topic}")],
+        }
+    )
     raw = str(result["messages"][-1].content)
     return _extract_hw_metadata(raw)
 
@@ -181,14 +193,18 @@ def run_homework_check(
         score=score,
     )
     score_line = _format_score_line(score)
-    return Command(update={
-        "mode": "review",
-        "hw_artifacts": artifacts,
-        "messages": [ToolMessage(
-            f"Проверка завершена. Отчёт: {review_path}{score_line}\n\n{report[:300]}",
-            tool_call_id=tool_call_id,
-        )],
-    })
+    return Command(
+        update={
+            "mode": "review",
+            "hw_artifacts": artifacts,
+            "messages": [
+                ToolMessage(
+                    f"Проверка завершена. Отчёт: {review_path}{score_line}\n\n{report[:300]}",
+                    tool_call_id=tool_call_id,
+                )
+            ],
+        }
+    )
 
 
 def explain_feedback(

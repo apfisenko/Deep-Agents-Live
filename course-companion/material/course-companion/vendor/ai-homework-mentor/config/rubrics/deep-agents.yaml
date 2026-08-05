@@ -1,0 +1,52 @@
+# DeepAgents / LangGraph mentor rubric
+# rubric_skill: skills/rubrics/deep-agents/SKILL.md
+# aspect_skills: публичные skills из .agents/skills/ по аспекту
+topic: deep-agents
+title: DeepAgents Python mentor
+rubric_skill: rubric-deep-agents
+aspect_skills:
+  orchestration: [deep-agents-orchestration]
+  agent-core: [deep-agents-core]
+  memory-workspace: [deep-agents-memory]
+  context-middleware: [langchain-middleware]
+  code-quality: [modern-python, python-testing-patterns]
+match_keywords:
+  - deep agents
+  - deepagents
+  - deep-agent
+  - homework mentor
+  - homework-mentor
+  - langgraph
+  - orchestrator
+  - create_deep_agent
+aspects:
+  - id: orchestration
+    title: Subagents and delegation
+    criteria:
+      - Reviewer subagents per rubric aspect
+      - Delegation only via task tool
+      - write_todos plan before delegation
+  - id: agent-core
+    title: Agent harness and prompts
+    criteria:
+      - create_deep_agent configuration
+      - External prompts in config/prompts
+      - Harness profile restricts unsafe tools
+  - id: memory-workspace
+    title: Workspace and filesystem
+    criteria:
+      - Clear workspace layout per session
+      - Skills and rubric materialized under /skills/
+      - No secrets committed or copied to workspace
+  - id: context-middleware
+    title: Context engineering
+    criteria:
+      - Summarization middleware configured
+      - Parent vs subagent context separation
+      - Progress and token observability
+  - id: code-quality
+    title: Python quality and tests
+    criteria:
+      - uv + ruff + pytest via make ci
+      - Typed modules, single responsibility
+      - Tests for parse, rubric, synthesis

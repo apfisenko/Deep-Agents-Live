@@ -1,0 +1,66 @@
+# Multi-agent patterns rubric
+# rubric_skill: project SKILL.md (skills/rubrics/multi-agent/SKILL.md)
+# aspect_skills: intentionally explicit empty lists — these aspects need no
+# external skills, and an omitted aspect would silently fall back to the
+# modern-python public skill (see build_skill_plan), which we don't want here.
+topic: multi-agent
+title: Multi-agent patterns
+rubric_skill: rubric-multi-agent
+aspect_skills:
+  pattern-choice: []
+  subagents: []
+  handoffs: []
+  routing: []
+  coordination: []
+  workflow-structure: []
+match_keywords:
+  - multi-agent
+  - multiagent
+  - multi agent
+  - мультиагент
+  - agents patterns
+  - agent patterns
+  - subagent
+  - subagents
+  - handoff
+  - handoffs
+  - router
+  - supervisor
+  - swarm
+aspects:
+  - id: pattern-choice
+    title: Pattern selection and justification
+    criteria:
+      - Chosen patterns (subagents, handoffs, router, skills, custom workflow) match the task
+      - Justification recorded, no agents added without need
+      - Single-agent baseline considered before going multi-agent
+  - id: subagents
+    title: Subagents and context isolation
+    criteria:
+      - Subagent context isolated from parent history
+      - Narrow brief in, condensed report out
+      - Subagent never talks to the user directly
+  - id: handoffs
+    title: Handoffs and state-driven modes
+    criteria:
+      - Mode switching managed through explicit state
+      - Focused toolset and prompt per active state
+      - Transitions between modes are deliberate, not accidental
+  - id: routing
+    title: Router and input classification
+    criteria:
+      - Classification step at a deterministic position in the flow
+      - Router output constrained to known routes
+      - '"No change" / fallthrough case handled explicitly'
+  - id: coordination
+    title: Coordination and observability
+    criteria:
+      - Delegations visible in logs or traces
+      - Subagent failures handled, not silently swallowed
+      - Progress of the overall flow is observable
+  - id: workflow-structure
+    title: Custom workflow structure
+    criteria:
+      - Graph of steps is readable and explicit
+      - Typed state shared between nodes
+      - No hidden control flow inside node bodies

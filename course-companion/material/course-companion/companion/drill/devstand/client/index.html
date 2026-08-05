@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drill A2UI — dev-стенд</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        --font-family-flex: var(--font-family);
+        --font-family-mono: monospace;
+        background: light-dark(#f0f4f8, #0f172a);
+        font-family: var(--font-family);
+        margin: 0;
+        padding: 0;
+        min-height: 100svh;
+        color-scheme: light;
+      }
+      #root {
+        min-height: 100%;
+      }
+      .shell {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 24px 16px;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 12px;
+        color: #92400e;
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 6px;
+        padding: 2px 8px;
+        margin-bottom: 12px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .controls button {
+        padding: 8px 16px;
+        border: 1px solid #94a3b8;
+        border-radius: 8px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .controls button:disabled {
+        opacity: 0.5;
+      }
+      .status {
+        font-size: 13px;
+        color: #475569;
+        margin-bottom: 12px;
+        white-space: pre-wrap;
+      }
+      .error {
+        color: #ba1a1a;
+        margin-bottom: 12px;
+      }
+      .surfaces {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .delivered {
+        margin-top: 20px;
+        font-size: 12px;
+      }
+      .delivered pre {
+        background: #0f172a;
+        color: #a5f3fc;
+        border-radius: 8px;
+        padding: 12px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

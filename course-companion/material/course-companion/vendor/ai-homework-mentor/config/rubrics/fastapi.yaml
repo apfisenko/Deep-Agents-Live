@@ -1,0 +1,31 @@
+# FastAPI REST API rubric
+# rubric_skill: project SKILL.md copied to workspace (skills/rubrics/fastapi/SKILL.md)
+# aspect_skills: public skills from .agents/skills/ assigned per reviewer subagent
+topic: fastapi
+title: FastAPI REST API
+rubric_skill: rubric-fastapi
+aspect_skills:
+  structure: [modern-python]       # reviewer-structure
+  api-design: [fastapi-templates]  # reviewer-api-design
+  code-quality: [modern-python]    # reviewer-code-quality
+match_keywords:
+  - fastapi
+  - rest
+  - api
+aspects:
+  - id: structure
+    title: Project structure
+    criteria:
+      - Clear module layout (routers, services, models)
+      - Entry point and configuration separated
+  - id: api-design
+    title: API design
+    criteria:
+      - RESTful routes and HTTP methods
+      - Request/response schemas with Pydantic
+      - Proper status codes
+  - id: code-quality
+    title: Python code quality
+    criteria:
+      - Type hints and readable naming
+      - Error handling, no bare except
